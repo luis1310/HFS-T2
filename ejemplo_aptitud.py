@@ -7,5 +7,5 @@ cromosoma = [
     [3, 5, 6, 9, 11]
 ]
 
-print("Tiempo total:", 1/calcular_tiempo_total(cromosoma))
-print("Fitness:", calcular_tiempo_total(cromosoma))
+print("Tiempo total:", 1/fitness(cromosoma))
+print("Fitness:", fitness(cromosoma))

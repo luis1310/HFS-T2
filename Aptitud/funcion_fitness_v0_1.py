@@ -1,7 +1,6 @@
-import random
 from Parametros.Parametros_tot import *
 
-def calcular_tiempo_total(cromosoma):
+def fitness(cromosoma):
     tiempos_actuales = maquinas_tiempos_iniciales[:]
     tiempos_fin_maquinas = [0] * len(maquinas_tiempos_iniciales)
 
