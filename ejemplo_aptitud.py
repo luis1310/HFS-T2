@@ -1,4 +1,4 @@
-from Aptitud.funcion_fitness_v0_1 import *
+from Aptitud.funcion_fitness import *
 
 # Ejemplo de cromosoma para 3 pedidos
 cromosoma = [

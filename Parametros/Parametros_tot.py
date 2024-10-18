@@ -15,6 +15,7 @@ limite_enfriamiento = 1.30
 factor_enfriamiento = 0.85
 tiempo_enfriamiento = 6
 # Parámetros del algoritmo
-num_pedidos = 40
+num_pedidos = 3
 poblacion_size = 50
-num_generaciones = 100
+num_generaciones = 500
+

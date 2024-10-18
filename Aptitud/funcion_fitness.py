@@ -1,5 +1,6 @@
 from Parametros.Parametros_tot import *
 
+# Función fitness v0.2
 def fitness(cromosoma, tiempos_iniciales, incrementos):
     tiempos_actuales = []
     # Inicializar los tiempos de disponibilidad de cada máquina
