@@ -6,10 +6,7 @@ from Poblacion.poblacion_v0_1 import *
 from Seleccion.seleccion1_v_0_1 import *
 
 ##Algoritmo evolutivo
-def algoritmo_evolutivo():
-    poblacion_size = 50
-    num_generaciones = 100
-    poblacion = inicializar_poblacion(poblacion_size, num_pedidos)
+def algoritmo_evolutivo(num_generaciones, poblacion):
 
     for generacion in range(num_generaciones):
         aptitudes = [fitness(c) for c in poblacion]
@@ -26,7 +23,5 @@ def algoritmo_evolutivo():
 
     mejor_cromosoma = max(poblacion, key=fitness)
     print("Mejor orden de pedidos:", mejor_cromosoma)
-    print("Tiempo total:", fitness(mejor_cromosoma))
+    print("Tiempo del mejor orden de pedidos:", fitness(mejor_cromosoma))
 
-# Ejecutar el algoritmo
-algoritmo_evolutivo()
