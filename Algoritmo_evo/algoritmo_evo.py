@@ -31,7 +31,7 @@ def algoritmo_evolutivo(poblacion, poblacion_size, tiempos_iniciales, incremento
         print(f"Generación {generacion + 1}: Mejor fitness = {fitness_max:.16f}")
 
         # Seleccionar padres usando la seleccion por torneo
-        poblacion = seleccion_por_torneo(poblacion, k)
+        poblacion = seleccion_por_torneo(poblacion, fitness_values, k)
 
         #Crear nueva población por cruce y mutación
         poblacion = cruce(poblacion)

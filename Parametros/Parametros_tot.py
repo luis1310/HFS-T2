@@ -27,7 +27,7 @@ tiempo_enfriamiento = 6
 
 # Parámetros del algoritmo
 num_pedidos = 3
-poblacion_size = 50
+tamano_poblacion = 50
 num_generaciones = 1000
 tasa_mutacion = 0.1
 k=3

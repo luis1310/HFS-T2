@@ -1,6 +1,6 @@
 from Parametros.Parametros_tot import *
 # Modificación de la funcion de cruce, se extrae todo el métdo para que cruce una población completa
-#Cruce v0.1
+#Cruce v0.2
 def cruce(poblacion):
     nueva_poblacion = []
     for i in range(0, len(poblacion), 2):
