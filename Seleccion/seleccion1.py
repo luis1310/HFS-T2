@@ -2,7 +2,7 @@ from Parametros.Parametros_tot import *
 from Aptitud.funcion_fitness import *
 
 #Seleccion 1 v0.1
-def seleccion_por_torneo(poblacion, k=3):
+def seleccion_por_torneo(poblacion, k):
     seleccionados = []
     
     for _ in range(len(poblacion)):

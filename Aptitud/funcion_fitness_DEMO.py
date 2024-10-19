@@ -1,7 +1,7 @@
 from Parametros.Parametros_tot import *
 
 # Función fitness v0.2
-def fitness(cromosoma, tiempos_iniciales, incrementos):
+def fitness_DEMO(cromosoma, tiempos_iniciales, incrementos):
     tiempos_actuales = []
     # Inicializar los tiempos de disponibilidad de cada máquina
     disponibilidad_maquinas = {i: 0 for i in range(1, 12)}  # máquinas 1 a 11
@@ -13,15 +13,15 @@ def fitness(cromosoma, tiempos_iniciales, incrementos):
     for pedido_idx, pedido in enumerate(cromosoma):
         tiempo_pedido = 0
         # Imprimir el paso de un pedido a traves de las maquinas:
-        #print(f"\nPedido {pedido_idx + 1} pasando por las máquinas:")
+        print(f"\nPedido {pedido_idx + 1} pasando por las máquinas:")
 
         for etapa, maquina in enumerate(pedido):
             # Verificar el tiempo disponible de la máquina asignada
             # Tiempo que esta máquina terminará de procesar este pedido
             tiempo_inicio = max(disponibilidad_maquinas[maquina], tiempo_pedido)
             # Imprimir Estado "En cola" de un pedido en una maquina
-            #if tiempo_inicio > tiempo_pedido:
-            #    print(f"Pedido {pedido_idx + 1} en espera en la etapa {etapa + 1} (cola) en máquina {maquina}")
+            if tiempo_inicio > tiempo_pedido:
+                print(f"Pedido {pedido_idx + 1} en espera en la etapa {etapa + 1} (cola) en máquina {maquina}")
             
             # Calcular el tiempo de trabajo de la máquina actual
             tiempo_trabajo = tiempos_actuales[maquina - 1]
@@ -45,7 +45,7 @@ def fitness(cromosoma, tiempos_iniciales, incrementos):
             tiempo_pedido = tiempo_inicio + tiempo_trabajo_real
 
             #Imprimir estado delpedido al pasar de una maquina a otra:
-            #print(f"Pedido {pedido_idx + 1} pasa por máquina {maquina} en etapa {etapa + 1} (tiempo: {tiempo_trabajo:.2f} s)")
+            print(f"Pedido {pedido_idx + 1} pasa por máquina {maquina} en etapa {etapa + 1} (tiempo: {tiempo_trabajo:.2f} s)")
 
         # El tiempo total será el mayor tiempo entre todos los pedidos
         tiempo_total = max(tiempo_total, tiempo_pedido)
