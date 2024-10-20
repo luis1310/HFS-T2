@@ -68,9 +68,9 @@ def algoritmo_evolutivo(poblacion, tamano_poblacion, tiempos_iniciales, incremen
     print(f"Fitness del mejor individuo: {fitness_mejor_individuo:.16f}")
 
     if mejor_fitness != fitness_mejor_individuo:
-        print("¡Advertencia! El mejor fitness encontrado y el fitness del mejor individuo no coinciden.")
+        print("El mejor fitness encontrado y el fitness del mejor individuo no coinciden.")
     else:
-        print("El mejor fitness encontrado y el fitness del mejor individuo coinciden correctamente.")
+        print("El mejor fitness encontrado y el fitness del mejor individuo si coinciden.")
 
     
     print(f"\nMejor fitness encontrado en la generación {mejor_generacion + 1}: {mejor_fitness:.16f}")

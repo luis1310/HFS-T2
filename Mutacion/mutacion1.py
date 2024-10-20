@@ -1,5 +1,5 @@
 from Parametros.Parametros_tot import *
-## Modificaci´n de la funcion de mutación, las maquinas por etapa son añadidas a los parametros
+## Modificacion de la funcion de mutación, las maquinas por etapa son añadidas a los parametros
 # Se actualiza la funcion de mutación
 # Mutación1 v0.4
 def mutacion1(poblacion, maquinas_por_etapa, tasa_mutacion):
