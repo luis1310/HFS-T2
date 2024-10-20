@@ -1,6 +1,6 @@
 from Parametros.Parametros_tot import *
 
-## Población v0.2
+# Población v0.2
 
 def inicializar_poblacion(tamano_poblacion, maquinas_por_etapa, num_pedidos):
     poblacion = [

@@ -44,7 +44,7 @@ def fitness_DEMO(cromosoma, tiempos_iniciales, incrementos):
             # Actualizar el tiempo total del pedido (se suma el tiempo en esta etapa)
             tiempo_pedido = tiempo_inicio + tiempo_trabajo_real
 
-            #Imprimir estado delpedido al pasar de una maquina a otra:
+            # Imprimir estado delpedido al pasar de una maquina a otra:
             print(f"Pedido {pedido_idx + 1} pasa por máquina {maquina} en etapa {etapa + 1} (tiempo: {tiempo_trabajo:.2f} s)")
 
         # El tiempo total será el mayor tiempo entre todos los pedidos

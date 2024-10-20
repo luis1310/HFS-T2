@@ -29,14 +29,13 @@ def fitness(cromosoma, tiempos_iniciales, incrementos):
                 tiempo_trabajo *= factor_enfriamiento   # Reducir el tiempo posterior al enfriamiento
             
             # Actualizar tiempo de trabajo de la máquina, los incrementos estarán precalculados en la sección de parametros
-            tiempo_trabajo_real = tiempo_trabajo
             tiempos_actuales[maquina - 1] *= (1 + incrementos[maquina - 1])
 
             # Actualizar tiempo de finalización de la máquina, para verificar su disponibilidad
-            disponibilidad_maquinas[maquina] = tiempo_inicio + tiempo_trabajo_real
+            disponibilidad_maquinas[maquina] = tiempo_inicio + tiempo_trabajo
 
             # Actualizar el tiempo total del pedido (se suma el tiempo en esta etapa)
-            tiempo_pedido = tiempo_inicio + tiempo_trabajo_real
+            tiempo_pedido = tiempo_inicio + tiempo_trabajo
 
         # El tiempo total será el mayor tiempo entre todos los pedidos
         tiempo_total = max(tiempo_total, tiempo_pedido)

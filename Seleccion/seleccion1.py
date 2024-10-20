@@ -1,7 +1,7 @@
 from Parametros.Parametros_tot import *
 from Aptitud.funcion_fitness import *
-
-#Seleccion 1 v0.1
+# Se añadio el parametro fitness_values para no calcularlo en la función de selección misma
+# Seleccion 1 v0.3
 def seleccion_por_torneo(poblacion, fitness_values, k):
     seleccionados = []
     
