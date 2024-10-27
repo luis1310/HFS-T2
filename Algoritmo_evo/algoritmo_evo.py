@@ -4,14 +4,19 @@ from Mutacion.mutacion1 import *
 from Parametros.Parametros_tot import *
 from Poblacion.Fun_poblacion import *
 from Seleccion.seleccion1 import *
-# Modificacion del algortimo evolutivo (v.04)
-# Añadidos otros parametros
-# Cambios en nombres de variables
-# Modificación del algoritmo evolutiv (v0.5)
-# Añadida la libreria copy para realizar copia profunda y garantizar que el mejor individuo sea guardado
-# de esta forma se busca que el mejor fitness encontrado sea del mejor individuo
-# Algoritmo evolutivo v0.4
-def algoritmo_evolutivo(poblacion, tamano_poblacion, tiempos_iniciales, incrementos, maquinas_por_etapa, num_generaciones, k, tasa_mutacion, prop_elitismo):
+""""
+# Modificacion del algortimo evolutivo (v0.4)
+Añadidos otros parametros
+Cambios en nombres de variables
+# Modificación del algoritmo evolutivo (v0.5)
+Añadida la libreria copy para realizar copia profunda y garantizar que el mejor individuo sea guardado
+de esta forma se busca que el mejor fitness encontrado sea del mejor individuo
+# Modificación del algoritmo evolutivo (v0.6)
+Ahora la función tambien retorna los mejores fitness por generación para plotearlos en una grafica  
+"""
+# Algoritmo evolutivo v0.6
+def algoritmo_evolutivo(poblacion, tamano_poblacion, tiempos_iniciales, incrementos,
+                        maquinas_por_etapa, num_generaciones, k, tasa_mutacion, prop_elitismo):
     mejor_fitness = 0
     mejor_generacion = 0
     mejor_individuo = None
@@ -46,7 +51,7 @@ def algoritmo_evolutivo(poblacion, tamano_poblacion, tiempos_iniciales, incremen
             mejor_generacion = generacion
             mejor_individuo = copy.deepcopy(individuo_actual)  # Copia profunda del mejor individuo correctamente
         # Mostrar la generación y el mejor fitness de la misma 
-        print(f"Generación {generacion + 1}: Mejor fitness = {fitness_max:.16f}")
+        print(f"Generación {generacion + 1}: Mejor fitness = {fitness_max:.16f}, Fitness promedio = {fitness_promedio:.16f}, Peor fitness = {fitness_min:.16f}")
 
         # Modificación: se añade una proporción de elitismo
         # Guardar mejores resultados (Elitismo)
@@ -77,5 +82,5 @@ def algoritmo_evolutivo(poblacion, tamano_poblacion, tiempos_iniciales, incremen
     print(f"Mejor tiempo encontrado en la generación {mejor_generacion + 1}: {1/mejor_fitness:.16f}")
     print(f"Mejor orden de pedidos: {mejor_individuo}")
     
-    return mejor_individuo, mejor_fitness, mejor_generacion
+    return mejor_individuo, mejor_fitness, mejor_generacion, mejores_fitness_por_generacion
 

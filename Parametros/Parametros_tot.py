@@ -1,6 +1,7 @@
 import random
 import time
 import copy # Garantizaremos la copia de solo los mejores resultados por medio de copia profunda
+import matplotlib.pyplot as plt # Libreria para graficas
 
 # Parámetros del problema
 tiempos_iniciales = [55, 53, 56, 42, 41, 30, 34, 35, 28, 26, 20]
