@@ -18,7 +18,7 @@ print("Mejor generación:", mejor_generacion)
 
 
 # Cálculo de mejores tiempos por generacion
-generacion = [i for i in range(1000)]
+generacion = [i for i in range(num_generaciones)]
 mejores_tiempos = [1 / fitness if fitness != 0 else 0 for fitness in mejores_fitness_por_generacion]
 
 # Crear subplots

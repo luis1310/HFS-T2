@@ -29,9 +29,9 @@ factor_enfriamiento = 0.85
 tiempo_enfriamiento = 6
 
 # Parámetros del algoritmo
-num_pedidos = 100
-tamano_poblacion = 50
-num_generaciones = 1000
+num_pedidos = 40
+tamano_poblacion = 100
+num_generaciones = 250
 tasa_mutacion = 0.9
 k=3
 prop_elitismo = 0.05 # proporción de elite (cantidad de mejores fitnes a guardar y añadir a la población)

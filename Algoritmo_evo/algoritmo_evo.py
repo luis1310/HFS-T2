@@ -1,9 +1,9 @@
 from Aptitud.funcion_fitness import *
-from Cruce.cruce1 import *
+from Cruce.cruce_funciones import *
 from Mutacion.mutacion1 import *
 from Parametros.Parametros_tot import *
 from Poblacion.Fun_poblacion import *
-from Seleccion.seleccion1 import *
+from Seleccion.seleccion_funciones import *
 """"
 # Modificacion del algortimo evolutivo (v0.4)
 Añadidos otros parametros
@@ -57,11 +57,23 @@ def algoritmo_evolutivo(poblacion, tamano_poblacion, tiempos_iniciales, incremen
         # Guardar mejores resultados (Elitismo)
         elite = [copy.deepcopy(poblacion[i]) for i in sorted(range(len(fitness_values)), key=lambda x: fitness_values[x], reverse=True)[:num_elite]]
 
-        # Seleccionar padres usando la seleccion por torneo
-        poblacion = seleccion_por_torneo(poblacion, fitness_values, k)
+        # Selección por torneo
+        #poblacion = seleccion_por_torneo(poblacion, fitness_values, k)
 
-        # Crear nueva población por cruce y mutación
-        poblacion = cruce(poblacion)
+        #Selección por ranking
+        poblacion = seleccion_por_ranking(poblacion, fitness_values)
+
+        #Selección por ruleta
+        #poblacion = seleccion_por_ruleta(poblacion, fitness_values)
+
+        # Cruce
+        # Cruce en 1 punto
+        #poblacion = cruce(poblacion)
+
+        # Cruce en 2 puntos
+        poblacion = cruce2(poblacion)
+
+        # Generación de una nueva población por mutación
         poblacion = mutacion1(poblacion, maquinas_por_etapa, tasa_mutacion)
 
         # Añadir resultados guardados (Elite) a la lista:
