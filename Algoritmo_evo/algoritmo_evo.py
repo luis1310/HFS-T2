@@ -13,7 +13,7 @@ from Seleccion.seleccion_funciones import *
 de esta forma se busca que el mejor fitness encontrado sea del mejor individuo
 # Modificación del algoritmo evolutivo (v0.6)
 - Ahora la función tambien retorna los mejores fitness por generación para plotearlos en una grafica
-# Modificación del algoritmo evolutivo (v0.7)
+# Modificación del algoritmo evolutivo (v0.7.1)
 - Correccion del proceso de seleccion y cruzamiento
 - Mejora y limpieza del codigo
 """
