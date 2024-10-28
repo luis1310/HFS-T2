@@ -1,10 +1,10 @@
 from Parametros.Parametros_tot import *
 
 # Función fitness v0.2
-def fitness_DEMO(cromosoma, tiempos_iniciales, incrementos):
+def fitness_DEMO(cromosoma, tiempos_iniciales=tiempos_iniciales, incrementos=incrementos):
     tiempos_actuales = []
     # Inicializar los tiempos de disponibilidad de cada máquina
-    disponibilidad_maquinas = {i: 0 for i in range(1, 12)}  # máquinas 1 a 11
+    disponibilidad_maquinas = {i: 0 for i in range(1, num_maquinas+1)}  # máquinas 1 a 11
     tiempos_actuales = tiempos_iniciales[:]
     
     # Variable para almacenar el tiempo total

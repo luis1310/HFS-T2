@@ -23,6 +23,9 @@ maquinas_por_etapa = [
     [11],         # Etapa 5
 ]
 
+# Numero de máquinas
+num_maquinas = len(maquinas_por_etapa[0])+len(maquinas_por_etapa[1])+len(maquinas_por_etapa[2])+len(maquinas_por_etapa[3])+len(maquinas_por_etapa[4])
+
 # Parámetros del enfriamiento (Tiempo de enfriamiento en segundos)
 limite_enfriamiento = 1.30
 factor_enfriamiento = 0.85
@@ -32,6 +35,7 @@ tiempo_enfriamiento = 6
 num_pedidos = 40
 tamano_poblacion = 100
 num_generaciones = 250
-tasa_mutacion = 0.9
+tasa_mutacion = 0.3
+tasa_cruzamiento = 0.95
 k=3
 prop_elitismo = 0.05 # proporción de elite (cantidad de mejores fitnes a guardar y añadir a la población)

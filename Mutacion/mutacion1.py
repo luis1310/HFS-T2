@@ -2,7 +2,7 @@ from Parametros.Parametros_tot import *
 ## Modificacion de la funcion de mutación, las maquinas por etapa son añadidas a los parametros
 # Se actualiza la funcion de mutación
 # Mutación1 v0.4
-def mutacion1(poblacion, maquinas_por_etapa, tasa_mutacion):
+def mutacion1(poblacion, maquinas_por_etapa=maquinas_por_etapa, tasa_mutacion=tasa_mutacion):
     for individuo in poblacion:
         if random.random() < tasa_mutacion:
             # Modificado forma en que se calcula la mutación para que se ganarantice que en cada pedido
