@@ -7,6 +7,9 @@ mejor_individuo, mejor_fitness, mejor_generacion, mejores_fitness_por_generacion
     poblacion
     )
 fin = time.time()
+print(f"\nMejor fitness encontrado en la generación {mejor_generacion + 1}: {mejor_fitness:.16f}")
+print(f"Mejor tiempo encontrado en la generación {mejor_generacion + 1}: {1/mejor_fitness:.16f}")
+print(f"Mejor orden de pedidos: {mejor_individuo}")
 print("\n########################################################\n")
 print('Tiempo de ejecución: ')
 print(fin - inicio)

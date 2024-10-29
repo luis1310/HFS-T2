@@ -2,6 +2,8 @@ import random
 import time
 import copy # Garantizaremos la copia de solo los mejores resultados por medio de copia profunda
 import matplotlib.pyplot as plt # Libreria para graficas
+import os
+import numpy as np
 
 # Parámetros del problema
 tiempos_iniciales = [55, 53, 56, 42, 41, 30, 34, 35, 28, 26, 20]
@@ -37,5 +39,5 @@ tamano_poblacion = 100
 num_generaciones = 250
 tasa_mutacion = 0.3
 tasa_cruzamiento = 0.95
-k=3
+k=5
 prop_elitismo = 0.05 # proporción de elite (cantidad de mejores fitnes a guardar y añadir a la población)

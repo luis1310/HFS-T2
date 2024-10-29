@@ -16,6 +16,8 @@ de esta forma se busca que el mejor fitness encontrado sea del mejor individuo
 # Modificación del algoritmo evolutivo (v0.7.1)
 - Correccion del proceso de seleccion y cruzamiento
 - Mejora y limpieza del codigo
+# Modificación del algoritmo evolutivo v0.8
+- Eliminación de prints innecesarios
 """
 # Algoritmo evolutivo v0.6
 def algoritmo_evolutivo(poblacion, tamano_poblacion=tamano_poblacion,num_generaciones=num_generaciones, prop_elitismo=prop_elitismo):
@@ -42,12 +44,7 @@ def algoritmo_evolutivo(poblacion, tamano_poblacion=tamano_poblacion,num_generac
 
         # Guardar una copia profunda del mejor individuo
         individuo_actual = copy.deepcopy(poblacion[mejor_idx])  # Copia profunda del mejor individuo
-
-         # Rastreo de cambios en el mejor individuo
-        if mejor_individuo:
-            fitness_mejor_guardado = fitness(mejor_individuo)
-            print(f"Generación {generacion}: Fitness del mejor guardado = {fitness_mejor_guardado:.16f}")
-
+        
         # Actualizar el mejor individuo, mejor generación y mejor fitness
         if fitness_max > mejor_fitness:
             mejor_fitness = fitness_max
@@ -60,18 +57,15 @@ def algoritmo_evolutivo(poblacion, tamano_poblacion=tamano_poblacion,num_generac
         # Guardar mejores resultados (Elitismo)
         elite = [copy.deepcopy(poblacion[i]) for i in sorted(range(len(fitness_values)), key=lambda x: fitness_values[x], reverse=True)[:num_elite]]
 
-        ################################## Modificacion v0.7 ##################################
         ### Seleccion y cruzamiento ###
         while len(nueva_poblacion) < tamano_poblacion:
             #padre1, padre2 = seleccion_por_ranking(poblacion, fitness_values)
-            #padre1, padre2 = seleccion_por_ruleta(poblacion, fitness_values)
-            #padre1, padre2 = seleccion_por_truncamiento(poblacion, fitness_values, 0.5)
-            padre1, padre2 = seleccion_por_torneo(poblacion, fitness_values)
+            padre1, padre2 = seleccion_por_ruleta(poblacion, fitness_values)
+            #padre1, padre2 = seleccion_por_torneo(poblacion, fitness_values)
             hijo1, hijo2 = cruce(padre1, padre2)
             nueva_poblacion.append(hijo1)
             nueva_poblacion.append(hijo2)
         poblacion = nueva_poblacion
-        ################################## Modificacion v0.7 ##################################
 
         # Generación de una nueva población por mutación
         poblacion = mutacion1(poblacion)
@@ -79,9 +73,4 @@ def algoritmo_evolutivo(poblacion, tamano_poblacion=tamano_poblacion,num_generac
         # Añadir resultados guardados (Elite) a la lista:
         poblacion[:num_elite] = elite
     
-    print(f"\nMejor fitness encontrado en la generación {mejor_generacion + 1}: {mejor_fitness:.16f}")
-    print(f"Mejor tiempo encontrado en la generación {mejor_generacion + 1}: {1/mejor_fitness:.16f}")
-    print(f"Mejor orden de pedidos: {mejor_individuo}")
-    
     return mejor_individuo, mejor_fitness, mejor_generacion+1, mejores_fitness_por_generacion
-

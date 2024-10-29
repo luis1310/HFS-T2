@@ -1,14 +1,26 @@
 from Parametros.Parametros_tot import *
-## Modificacion de la funcion de mutación, las maquinas por etapa son añadidas a los parametros
+"""
+# Modificacion de la funcion de mutación, las maquinas por etapa son añadidas a los parametros
 # Se actualiza la funcion de mutación
-# Mutación1 v0.4
+
+# Modificacion v0.8
+Modificación de la función de mutación, muta a una maquina de un pedido a otra distinta (de haber una disponible)
+"""
+# Mutación1 v0.6
 def mutacion1(poblacion, maquinas_por_etapa=maquinas_por_etapa, tasa_mutacion=tasa_mutacion):
     for individuo in poblacion:
         if random.random() < tasa_mutacion:
-            # Modificado forma en que se calcula la mutación para que se ganarantice que en cada pedido
-            # en el individuo (cromosoma) sea posible que se de la mutación
             for pedido in individuo:
-                punto_mutacion = random.randint(0, len(individuo[0]) - 1)
-                nueva_maquina = random.choice(maquinas_por_etapa[punto_mutacion])
-                pedido[punto_mutacion] = nueva_maquina
+                # Seleccionar el punto de mutación
+                punto_mutacion = random.randint(0, len(pedido) - 2)
+                maquina_actual = pedido[punto_mutacion]
+
+                # Filtrar para evitar que se seleccione la misma máquina
+                opciones_mutacion = [m for m in maquinas_por_etapa[punto_mutacion] if m != maquina_actual]
+
+                # Solo mutar si hay una opción diferente disponible
+                if opciones_mutacion:
+                    nueva_maquina = random.choice(opciones_mutacion)
+                    pedido[punto_mutacion] = nueva_maquina
+
     return poblacion
