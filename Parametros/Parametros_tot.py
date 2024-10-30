@@ -34,8 +34,8 @@ factor_enfriamiento = 0.85
 tiempo_enfriamiento = 6
 
 # Parámetros del algoritmo
-num_pedidos = 40
-tamano_poblacion = 100
+num_pedidos = 3
+tamano_poblacion = 50
 num_generaciones = 250
 tasa_mutacion = 0.3
 tasa_cruzamiento = 0.95

@@ -10,43 +10,38 @@ Se modifica los metodos de cruzamiento para que solo tomen los padres
 
 # Modificación v0.8
 Ahora la funcion de cruce añade el hijo/padre que tenga mejor fitness
+
+# Modificación v0.9
+Ahora la funcion de cruce toma los dos mejores individuos entre los padres y los hijos producto del cruzamiento
 """
-##################################### modificación v0.8 ####################################
 # Cruce en 1 punto:
-def cruce(padre1, padre2, pc=tasa_cruzamiento, fitness=fitness):
-    # Calcular el fitness de los padres
-    fitness_padre1 = fitness(padre1)
-    fitness_padre2 = fitness(padre2)
+##################################### modificación v0.9 ####################################
+def cruce_1_punto(padre1, padre2, pc=tasa_cruzamiento, fitness=fitness):
     hijos = []
-    test = []
+    # Realizar el cruce si pasa el umbral de probabilidad pc
     if random.random() < pc:
-        # Realizar cruce si pasa el umbral de probabilidad pc
         punto_cruce = random.randint(1, len(padre1) - 1)
         hijo1 = padre1[:punto_cruce] + padre2[punto_cruce:]
         hijo2 = padre2[:punto_cruce] + padre1[punto_cruce:]
 
-        # Calcular el fitness de los hijos
-        fitness_hijo1 = fitness(hijo1)
-        fitness_hijo2 = fitness(hijo2)
+        # Calcular fitness para todos los individuos (padres e hijos)
+        individuos = [(padre1, fitness(padre1)),
+                      (padre2, fitness(padre2)),
+                      (hijo1, fitness(hijo1)),
+                      (hijo2, fitness(hijo2))]
 
-        # Comparar fitness de los hijos y padres
-        if fitness_hijo1 >= fitness_padre1:
-            hijos.append(hijo1)
-        else:
-            hijos.append(padre1)  # Mantener al padre1 si hijo1 es peor
+        # Ordenar por fitness y seleccionar los dos mejores
+        individuos.sort(key=lambda x: x[1], reverse=True)
+        # Solo devolver los mejores individuos
+        hijos.append(individuos[0][0])
+        hijos.append(individuos[1][0])
 
-        if fitness_hijo2 >= fitness_padre2:
-            hijos.append(hijo2)
-        else:
-            hijos.append(padre2)  # Mantener al padre2 si hijo2 es peor
     else:
         # No se realiza cruce, los hijos son iguales a los padres
         hijos.append(padre1)
         hijos.append(padre2)
-
     return hijos
-
-
+    
 ##################################### modificación v0.7 ####################################
 
 # Cruce en 2 puntos:

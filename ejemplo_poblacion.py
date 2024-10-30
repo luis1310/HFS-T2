@@ -1,5 +1,5 @@
 from Poblacion.Fun_poblacion import *
 
-poblacion_prueba = inicializar_poblacion (10, 3)
+poblacion_prueba = inicializar_poblacion()
 
 print (poblacion_prueba)

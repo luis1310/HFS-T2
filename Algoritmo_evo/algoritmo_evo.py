@@ -1,6 +1,6 @@
 from Aptitud.funcion_fitness import *
 from Cruce.cruce_funciones import *
-from Mutacion.mutacion1 import *
+from Mutacion.mutacion_funciones import *
 from Parametros.Parametros_tot import *
 from Poblacion.Fun_poblacion import *
 from Seleccion.seleccion_funciones import *
@@ -62,13 +62,13 @@ def algoritmo_evolutivo(poblacion, tamano_poblacion=tamano_poblacion,num_generac
             #padre1, padre2 = seleccion_por_ranking(poblacion, fitness_values)
             padre1, padre2 = seleccion_por_ruleta(poblacion, fitness_values)
             #padre1, padre2 = seleccion_por_torneo(poblacion, fitness_values)
-            hijo1, hijo2 = cruce(padre1, padre2)
+            hijo1, hijo2 = cruce_1_punto(padre1, padre2)
             nueva_poblacion.append(hijo1)
             nueva_poblacion.append(hijo2)
         poblacion = nueva_poblacion
 
         # Generación de una nueva población por mutación
-        poblacion = mutacion1(poblacion)
+        poblacion = mutacion_aleatoria(poblacion)
 
         # Añadir resultados guardados (Elite) a la lista:
         poblacion[:num_elite] = elite
