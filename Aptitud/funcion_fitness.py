@@ -1,11 +1,14 @@
 from Parametros.Parametros_tot import *
 
+
 # Función fitness v0.2
 def fitness(cromosoma, tiempos_iniciales=tiempos_iniciales, incrementos=incrementos):
     # Inicializar los tiempos de disponibilidad de cada máquina
-    disponibilidad_maquinas = {i: 0 for i in range(1, num_maquinas+1)}  # máquinas 1 a 11
+    disponibilidad_maquinas = {
+        i: 0 for i in range(1, num_maquinas + 1)
+    }  # máquinas 1 a 11
     tiempos_actuales = tiempos_iniciales[:]
-    
+
     # Variable para almacenar el tiempo total
     tiempo_total = 0
 
@@ -25,11 +28,15 @@ def fitness(cromosoma, tiempos_iniciales=tiempos_iniciales, incrementos=incremen
 
             # Verificar si el tiempo de la máquina excede el límite de enfriamiento
             if tiempo_trabajo >= tiempos_iniciales[maquina - 1] * limite_enfriamiento:
-                tiempo_trabajo += tiempo_enfriamiento   # Añadir el tiempo de enfriamiento
-                tiempo_trabajo *= factor_enfriamiento   # Reducir el tiempo posterior al enfriamiento
-            
+                tiempo_trabajo += (
+                    tiempo_enfriamiento  # Añadir el tiempo de enfriamiento
+                )
+                tiempo_trabajo *= (
+                    factor_enfriamiento  # Reducir el tiempo posterior al enfriamiento
+                )
+
             # Actualizar tiempo de trabajo de la máquina, los incrementos estarán precalculados en la sección de parametros
-            tiempos_actuales[maquina - 1] *= (1 + incrementos[maquina - 1])
+            tiempos_actuales[maquina - 1] *= 1 + incrementos[maquina - 1]
 
             # Actualizar tiempo de finalización de la máquina, para verificar su disponibilidad
             disponibilidad_maquinas[maquina] = tiempo_inicio + tiempo_trabajo
@@ -40,4 +47,4 @@ def fitness(cromosoma, tiempos_iniciales=tiempos_iniciales, incrementos=incremen
         # El tiempo total será el mayor tiempo entre todos los pedidos
         tiempo_total = max(tiempo_total, tiempo_pedido)
 
-    return 1/tiempo_total
+    return 1 / tiempo_total

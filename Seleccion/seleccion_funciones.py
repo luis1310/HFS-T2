@@ -1,5 +1,6 @@
 from Parametros.Parametros_tot import *
 from Aptitud.funcion_fitness import *
+
 """
 # Se añadio el parametro fitness_values para no calcularlo en la función de selección misma
 # Modificación v0.7
@@ -7,6 +8,8 @@ Se añaden las funciones de seleccion por ranking y por ruleta
 # Modificación v0.7.1
 Modificación y corrección de las funciones de selección
 """
+
+
 # Seleccion 1: Seleccion por torneo
 def seleccion_por_torneo(poblacion, fitness_values, k=k):
     padres = []
@@ -15,6 +18,7 @@ def seleccion_por_torneo(poblacion, fitness_values, k=k):
         mejor_idx = max(torneo, key=lambda idx: fitness_values[idx])
         padres.append(poblacion[mejor_idx])
     return padres
+
 
 # Seleccion 2: Selección por Ruleta
 def seleccion_por_ruleta(poblacion, fitness_values):
@@ -31,10 +35,13 @@ def seleccion_por_ruleta(poblacion, fitness_values):
 
     return padres
 
+
 # Seleccion 3: Selección Basada en Ranking
 def seleccion_por_ranking(poblacion, fitness_values):
     # Ordenar la población en función del fitness
-    indices_ordenados = sorted(range(len(fitness_values)), key=lambda i: fitness_values[i])
+    indices_ordenados = sorted(
+        range(len(fitness_values)), key=lambda i: fitness_values[i]
+    )
 
     # Asignar probabilidades basadas en el ranking (el mejor tiene el mayor índice)
     ranks = [i + 1 for i in range(len(fitness_values))]

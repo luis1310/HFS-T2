@@ -1,4 +1,5 @@
 from Parametros.Parametros_tot import *
+
 """
 # Modificacion de la funcion de mutación, las maquinas por etapa son añadidas a los parametros
 # Se actualiza la funcion de mutación
@@ -9,8 +10,12 @@ Modificación de la función de mutación, muta a una maquina de un pedido a otr
 # Modificacion v0.9
 Añadida funcion de mutacion #2: mutacion de intercambio por etapa
 """
+
+
 # Mutación aleatoria v0.8
-def mutacion_aleatoria(poblacion, maquinas_por_etapa=maquinas_por_etapa, tasa_mutacion=tasa_mutacion):
+def mutacion_aleatoria(
+    poblacion, maquinas_por_etapa=maquinas_por_etapa, tasa_mutacion=tasa_mutacion
+):
     for individuo in poblacion:
         if random.random() < tasa_mutacion:
             for pedido in individuo:
@@ -19,7 +24,9 @@ def mutacion_aleatoria(poblacion, maquinas_por_etapa=maquinas_por_etapa, tasa_mu
                 maquina_actual = pedido[punto_mutacion]
 
                 # Filtrar para evitar que se seleccione la misma máquina
-                opciones_mutacion = [m for m in maquinas_por_etapa[punto_mutacion] if m != maquina_actual]
+                opciones_mutacion = [
+                    m for m in maquinas_por_etapa[punto_mutacion] if m != maquina_actual
+                ]
 
                 # Solo mutar si hay una opción diferente disponible
                 if opciones_mutacion:
@@ -28,10 +35,14 @@ def mutacion_aleatoria(poblacion, maquinas_por_etapa=maquinas_por_etapa, tasa_mu
 
     return poblacion
 
+
 ########################## modificacion v0.9 ##########################
 
+
 ## Mutación de intercambio por etapa
-def mutacion_intercambio_por_etapa(poblacion, maquinas_por_etapa=maquinas_por_etapa, tasa_mutacion=tasa_mutacion):
+def mutacion_intercambio_por_etapa(
+    poblacion, maquinas_por_etapa=maquinas_por_etapa, tasa_mutacion=tasa_mutacion
+):
     for individuo in poblacion:
         if random.random() < tasa_mutacion:
             for etapa in range(len(maquinas_por_etapa)):
@@ -43,6 +54,9 @@ def mutacion_intercambio_por_etapa(poblacion, maquinas_por_etapa=maquinas_por_et
                 maquina2 = individuo[pedidos_a_intercambiar[1]][etapa]
 
                 # Intercambiar las máquinas de los dos pedidos seleccionados en la misma etapa
-                individuo[pedidos_a_intercambiar[0]][etapa], individuo[pedidos_a_intercambiar[1]][etapa] = maquina2, maquina1
+                (
+                    individuo[pedidos_a_intercambiar[0]][etapa],
+                    individuo[pedidos_a_intercambiar[1]][etapa],
+                ) = (maquina2, maquina1)
 
     return poblacion
