@@ -44,16 +44,30 @@ def cruce_1_punto(padre1, padre2, pc=tasa_cruzamiento, fitness=fitness):
     
 ##################################### modificación v0.7 ####################################
 
-# Cruce en 2 puntos:
-def cruce2(padre1, padre2, pc=tasa_cruzamiento):
+##################################### modificación v0.9.1 ####################################
+# Cruce en 2 puntos v0.1
+def cruce_2_puntos(padre1, padre2, pc=tasa_cruzamiento, fitness=fitness):
     hijos = []
-    if random.random() < pc:  
+    if random.random() < pc:
+        # Realizar el cruce si pasa el umbral de probabilidad pc
         punto_cruce1 = random.randint(1, len(padre1) - 2)
         punto_cruce2 = random.randint(punto_cruce1 + 1, len(padre1))
         hijo1 = padre1[:punto_cruce1] + padre2[punto_cruce1:punto_cruce2] + padre1[punto_cruce2:]
         hijo2 = padre2[:punto_cruce1] + padre1[punto_cruce1:punto_cruce2] + padre2[punto_cruce2:]
+
+        # Calcular fitness para todos los individuos (padres e hijos)
+        individuos = [(padre1, fitness(padre1)),
+                      (padre2, fitness(padre2)),
+                      (hijo1, fitness(hijo1)),
+                      (hijo2, fitness(hijo2))]
+
+        # Ordenar por fitness y seleccionar los dos mejores
+        individuos.sort(key=lambda x: x[1], reverse=True)
+
+        # Solo devolver los mejores individuos
         hijos.append(hijo1)
         hijos.append(hijo2)
+
     else:
         # No se realiza cruce, los hijos son iguales a los padres
         hijos.append(padre1)
@@ -61,3 +75,4 @@ def cruce2(padre1, padre2, pc=tasa_cruzamiento):
 
     return hijos
 
+##################################### modificación v0.9.1 ####################################

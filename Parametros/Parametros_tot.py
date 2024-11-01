@@ -4,6 +4,8 @@ import copy # Garantizaremos la copia de solo los mejores resultados por medio d
 import matplotlib.pyplot as plt # Libreria para graficas
 import os
 import numpy as np
+import pandas as pd
+import csv
 
 # Parámetros del problema
 tiempos_iniciales = [55, 53, 56, 42, 41, 30, 34, 35, 28, 26, 20]
