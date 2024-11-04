@@ -1,11 +1,6 @@
 from Algoritmo_evo.algoritmo_evo import *
 
 
-# Asegurar que exista un directorio para guardar los gráficos
-if not os.path.exists("modelos_graficos"):
-    os.makedirs("modelos_graficos")
-
-
 # Definir listas de funciones para cada operador
 metodos_seleccion = [seleccion_por_torneo, seleccion_por_ranking, seleccion_por_ruleta]
 # metodos_seleccion = [seleccion_por_ruleta]
@@ -14,7 +9,7 @@ metodos_cruzamiento = [cruce_1_punto, cruce_2_puntos]
 metodos_mutacion = [mutacion_intercambio_por_etapa, mutacion_aleatoria]
 # metodos_mutacion = [mutacion_intercambio_por_etapa, mutacion_aleatoria]
 
-iteraciones_mod = 50
+iteraciones_mod = 5 
 
 indice_de_mod = 0
 
@@ -81,15 +76,7 @@ for seleccion in metodos_seleccion:
                 print(
                     "#####################################################################"
                 )
-                resultados.append(
-                    [
-                        iteracion + 1,
-                        seleccion.__name__,
-                        cruce.__name__,
-                        mutacion.__name__,
-                        mejor_fitness,
-                    ]
-                )
+                resultados.append([iteracion + 1, seleccion.__name__, cruce.__name__, mutacion.__name__, mejor_fitness])
                 # Guardar los resultados de cada ejecución en el CSV
                 guardar_datos_csv(resultados)
             print("\n\n")

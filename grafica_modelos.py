@@ -1,7 +1,7 @@
 from Parametros.Parametros_tot import *
 
 # Leer el archivo CSV con pandas
-df = pd.read_csv("resultados_algoritmo.csv")
+df = pd.read_csv("resultados_algoritmo_renumerado.csv")
 
 # Definir los umbrales de color
 umbral_fitness_bajo = 0.00063695  # Tiempo de 1569.982 (aprox)
