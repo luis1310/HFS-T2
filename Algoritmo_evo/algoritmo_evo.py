@@ -64,10 +64,11 @@ def algoritmo_evolutivo(
                 individuo_actual
             )  # Copia profunda del mejor individuo correctamente
         # Mostrar la generación y el mejor fitness de la misma
+        """
         print(
             f"Generación {generacion + 1}: Mejor fitness = {fitness_max:.16f}, Fitness promedio = {fitness_promedio:.16f}, Peor fitness = {fitness_min:.16f}"
         )
-
+        """
         # Modificación: se añade una proporción de elitismo
         # Guardar mejores resultados (Elitismo)
         elite = [
@@ -94,6 +95,7 @@ def algoritmo_evolutivo(
 
         # Añadir resultados guardados (Elite) a la lista:
         poblacion[:num_elite] = elite
+    print(f"Mejor tiempo encontrado: {1/mejor_fitness:.16f}")
 
     return (
         mejor_individuo,
