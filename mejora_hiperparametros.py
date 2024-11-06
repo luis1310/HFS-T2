@@ -1,5 +1,5 @@
 from Algoritmo_evo.algoritmo_evo import *
-
+from reenumeración_de_iteraciones import *
 
 # Definir listas de funciones para cada operador
 metodos_seleccion = [seleccion_por_torneo, seleccion_por_ranking, seleccion_por_ruleta]
@@ -9,7 +9,7 @@ metodos_cruzamiento = [cruce_1_punto, cruce_2_puntos]
 metodos_mutacion = [mutacion_intercambio_por_etapa, mutacion_aleatoria]
 # metodos_mutacion = [mutacion_intercambio_por_etapa, mutacion_aleatoria]
 
-iteraciones_mod = 5 
+iteraciones_mod = 5
 
 indice_de_mod = 0
 
@@ -21,6 +21,7 @@ umbral_fitness_bajo = 0.00063695  # Tiempo de 1569.982 (aprox)
 resultados = []
 
 archivo_csv = "resultados_algoritmo.csv"
+archivo_salida = "resultados_algoritmo_renumerado.csv"
 
 
 # Verificar si el archivo existe y, si no, crearlo con el encabezado
@@ -76,7 +77,15 @@ for seleccion in metodos_seleccion:
                 print(
                     "#####################################################################"
                 )
-                resultados.append([iteracion + 1, seleccion.__name__, cruce.__name__, mutacion.__name__, mejor_fitness])
+                resultados.append(
+                    [
+                        iteracion + 1,
+                        seleccion.__name__,
+                        cruce.__name__,
+                        mutacion.__name__,
+                        mejor_fitness,
+                    ]
+                )
                 # Guardar los resultados de cada ejecución en el CSV
                 guardar_datos_csv(resultados)
             print("\n\n")
@@ -84,5 +93,5 @@ for seleccion in metodos_seleccion:
             indice_de_mod += 1
 
             # """
-
+renumerar_iteraciones(archivo_csv, archivo_salida)
 indice_de_mod = 0

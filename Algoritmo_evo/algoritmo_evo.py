@@ -83,15 +83,16 @@ def algoritmo_evolutivo(
         ### Seleccion y cruzamiento ###
         while len(nueva_poblacion) < tamano_poblacion:
             # padre1, padre2 = seleccion_por_ranking(poblacion, fitness_values)
-            padre1, padre2 = seleccion_por_ruleta(poblacion, fitness_values)
-            # padre1, padre2 = seleccion_por_torneo(poblacion, fitness_values)
+            # padre1, padre2 = seleccion_por_ruleta(poblacion, fitness_values)
+            padre1, padre2 = seleccion_por_torneo(poblacion, fitness_values)
             hijo1, hijo2 = cruce_1_punto(padre1, padre2)
             nueva_poblacion.append(hijo1)
             nueva_poblacion.append(hijo2)
         poblacion = nueva_poblacion
 
         # Generación de una nueva población por mutación
-        poblacion = mutacion_aleatoria(poblacion)
+        # poblacion = mutacion_aleatoria(poblacion)
+        poblacion = mutacion_intercambio_por_etapa(poblacion)
 
         # Añadir resultados guardados (Elite) a la lista:
         poblacion[:num_elite] = elite

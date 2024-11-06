@@ -4,9 +4,10 @@ from Parametros.Parametros_tot import *
 df = pd.read_csv("resultados_algoritmo_renumerado.csv")
 
 # Definir los umbrales de color
+umbral_fitness_minimo = 0.00063291 # Tiempo de 1580.003 (aprox)
 umbral_fitness_bajo = 0.00063695  # Tiempo de 1569.982 (aprox)
 umbral_fitness_alto = 0.00063952  # Tiempo de 1563.673 (aprox)
-
+umbral_fitness_superior = 0.00064155 # Tiempo de 1558.725 (aprox)
 # Agrupar por combinación de métodos para graficar cada modelo individualmente
 modelos = df.groupby(["Metodo_Seleccion", "Metodo_Cruce", "Metodo_Mutacion"])
 
@@ -14,6 +15,8 @@ for (seleccion, cruce, mutacion), data_modelo in modelos:
     plt.figure(figsize=(15, 9))
 
     # Scatter plot con coloración basada en umbrales
+    """
+
     colores = [
         (
             "blue"
@@ -22,6 +25,24 @@ for (seleccion, cruce, mutacion), data_modelo in modelos:
         )
         for x in data_modelo["Mejor_Fitness"]
     ]
+
+    """
+
+    #"""
+
+    colores = [
+        (
+            "orange" if x < umbral_fitness_minimo
+            else "purple" if x < umbral_fitness_bajo
+            else "blue" if x < umbral_fitness_alto
+            else "green" if x < umbral_fitness_superior
+            else "red"
+        )
+        for x in data_modelo["Mejor_Fitness"]
+    ]
+    
+    #"""
+    
     plt.scatter(
         data_modelo["Iteracion"],
         data_modelo["Mejor_Fitness"],
@@ -44,13 +65,14 @@ for (seleccion, cruce, mutacion), data_modelo in modelos:
     plt.xlabel("Iteración")
     plt.ylabel("Mejor Fitness")
     # Calcular y mostrar el conteo de puntos por cada rango de umbral
-    conteo_bajo = sum(1 for fit in y if fit <= umbral_fitness_bajo)
-    conteo_medio = sum(
-        1 for fit in y if umbral_fitness_bajo < fit <= umbral_fitness_alto
-    )
-    conteo_alto = sum(1 for fit in y if fit > umbral_fitness_alto)
+    conteo_minimo = sum(1 for fit in y if fit < umbral_fitness_minimo)  # Región azul
+    conteo_bajo = sum(1 for fit in y if umbral_fitness_minimo <= fit < umbral_fitness_bajo)  # Región naranja
+    conteo_medio = sum(1 for fit in y if umbral_fitness_bajo <= fit < umbral_fitness_alto)  # Región amarilla
+    conteo_alto = sum(1 for fit in y if umbral_fitness_alto <= fit < umbral_fitness_superior)  # Región púrpura
+    conteo_superior = sum(1 for fit in y if fit >= umbral_fitness_superior)  # Región verde
+
     plt.legend(
-        title=f"Puntos: Bajo={conteo_bajo}, Medio={conteo_medio}, Alto={conteo_alto}"
+        title=f"Puntos:\nMínimo={conteo_minimo},\nBajo={conteo_bajo},\nMedio={conteo_medio},\nAlto={conteo_alto},\nSuperior={conteo_superior}"
     )
     plt.tight_layout()
 
