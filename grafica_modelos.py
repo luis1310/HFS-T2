@@ -4,7 +4,7 @@ from Parametros.Parametros_tot import *
 df = pd.read_csv("resultados_algoritmo_renumerado.csv")
 
 # Definir los umbrales de color
-umbral_fitness_minimo = 0.00063291 # Tiempo de 1580.003 (aprox)
+umbral_fitness_minimo = 0.00063452 # Tiempo de 1575.99 (aprox)
 umbral_fitness_bajo = 0.00063695  # Tiempo de 1569.982 (aprox)
 umbral_fitness_alto = 0.00063952  # Tiempo de 1563.673 (aprox)
 umbral_fitness_superior = 0.00064155 # Tiempo de 1558.725 (aprox)
