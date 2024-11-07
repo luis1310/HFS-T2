@@ -9,7 +9,7 @@ metodos_cruzamiento = [cruce_1_punto, cruce_2_puntos]
 metodos_mutacion = [mutacion_intercambio_por_etapa, mutacion_aleatoria]
 # metodos_mutacion = [mutacion_intercambio_por_etapa, mutacion_aleatoria]
 
-iteraciones_mod = 25
+iteraciones_mod = 40
 
 indice_de_mod = 0
 

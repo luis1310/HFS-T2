@@ -72,7 +72,7 @@ for (seleccion, cruce, mutacion), data_modelo in modelos:
     conteo_superior = sum(1 for fit in y if fit >= umbral_fitness_superior)  # Región verde
 
     plt.legend(
-        title=f"Puntos:\nMínimo={conteo_minimo},\nBajo={conteo_bajo},\nMedio={conteo_medio},\nAlto={conteo_alto},\nSuperior={conteo_superior}"
+        title=f"Puntos:\nSuperior={conteo_superior},\nAlto={conteo_alto},\nMedio={conteo_medio},\nBajo={conteo_bajo},\nMínimo={conteo_minimo}"
     )
     plt.tight_layout()
 
