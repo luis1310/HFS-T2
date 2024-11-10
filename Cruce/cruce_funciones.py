@@ -82,9 +82,9 @@ def cruce_2_puntos(padre1, padre2, pc=tasa_cruzamiento, fitness=fitness):
         individuos.sort(key=lambda x: x[1], reverse=True)
 
         # Solo devolver los mejores individuos
-        hijos.append(hijo1)
-        hijos.append(hijo2)
-
+        hijos.append(individuos[0][0])
+        hijos.append(individuos[1][0])
+        
     else:
         # No se realiza cruce, los hijos son iguales a los padres
         hijos.append(padre1)
