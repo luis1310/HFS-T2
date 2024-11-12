@@ -9,13 +9,9 @@ metodos_cruzamiento = [cruce_1_punto, cruce_2_puntos]
 metodos_mutacion = [mutacion_intercambio_por_etapa, mutacion_aleatoria]
 # metodos_mutacion = [mutacion_intercambio_por_etapa, mutacion_aleatoria]
 
-iteraciones_mod = 40
+iteraciones_mod = 100
 
 indice_de_mod = 0
-
-umbral_fitness_alto = 0.00063952  # Tiempo de 1563.673 (aprox)
-
-umbral_fitness_bajo = 0.00063695  # Tiempo de 1569.982 (aprox)
 
 # Almacenar resultados
 resultados = []
