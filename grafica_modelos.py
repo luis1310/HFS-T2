@@ -12,7 +12,7 @@ umbral_fitness_superior = 0.00064155 # Tiempo de 1558.725 (aprox)
 modelos = df.groupby(["Metodo_Seleccion", "Metodo_Cruce", "Metodo_Mutacion"])
 
 for (seleccion, cruce, mutacion), data_modelo in modelos:
-    plt.figure(figsize=(15, 9))
+    plt.figure(figsize=(25, 12))
 
     # Scatter plot con coloración basada en umbrales
     """
