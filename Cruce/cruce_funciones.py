@@ -57,7 +57,7 @@ def cruce_2_puntos(padre1, padre2, pc=tasa_cruzamiento, fitness=fitness):
     hijos = []
     if random.random() < pc:
         # Realizar el cruce si pasa el umbral de probabilidad pc
-        punto_cruce1 = random.randint(1, len(padre1) - 2)
+        punto_cruce1 = random.randint(1, len(padre1) - 1)
         punto_cruce2 = random.randint(punto_cruce1 + 1, len(padre1))
         hijo1 = (
             padre1[:punto_cruce1]

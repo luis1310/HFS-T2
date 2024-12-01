@@ -6,7 +6,8 @@ cromosoma = [[1, 4, 6, 10, 11], [2, 5, 8, 9, 11], [3, 5, 6, 10, 11]]
 
 cromosoma2 = [[2, 4, 7, 10, 11], [2, 5, 7, 10, 11], [2, 4, 7, 9, 11]]
 
-cromosoma3 = [[2, 5, 6, 10, 11], [3, 4, 7, 9, 11], [1, 5, 6, 10, 11]]
+# Ejemplo para 4 pedidos
+cromosoma3 = [[1, 4, 6, 10, 11], [2, 5, 8, 9, 11], [3, 5, 6, 10, 11], [2, 4, 7, 9, 11]]
 
 print(cromosoma)
 fit = fitness_DEMO(cromosoma, tiempos_iniciales, incrementos)

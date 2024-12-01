@@ -14,7 +14,7 @@ Añadida funcion de mutacion #2: mutacion de intercambio por etapa
 
 # Mutación aleatoria v0.8
 def mutacion_aleatoria(
-    poblacion, maquinas_por_etapa=maquinas_por_etapa, tasa_mutacion=tasa_mutacion
+    poblacion, tasa_mutacion=tasa_mutacion, maquinas_por_etapa=maquinas_por_etapa
 ):
     for individuo in poblacion:
         if random.random() < tasa_mutacion:
@@ -41,7 +41,7 @@ def mutacion_aleatoria(
 
 ## Mutación de intercambio por etapa
 def mutacion_intercambio_por_etapa(
-    poblacion, maquinas_por_etapa=maquinas_por_etapa, tasa_mutacion=tasa_mutacion
+    poblacion, tasa_mutacion=tasa_mutacion, maquinas_por_etapa=maquinas_por_etapa
 ):
     for individuo in poblacion:
         if random.random() < tasa_mutacion:

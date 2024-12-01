@@ -10,8 +10,13 @@ import csv
 # Parámetros del problema
 tiempos_iniciales = [55, 53, 56, 42, 41, 30, 34, 35, 28, 26, 20]
 
+"""
+
 incremento_min = 0.02
 incremento_max = 0.04
+
+"""
+
 # incrementos = [random.uniform(incremento_min, incremento_max) for _ in tiempos_iniciales]  # Incremento entre 2 y 4%
 
 # Incrementos para comparación con el colab versión v0.3 y posteriores
@@ -54,16 +59,24 @@ factor_enfriamiento = 0.85
 tiempo_enfriamiento = 6
 
 # Parámetros del algoritmo
-num_pedidos = 40
+# Hiperparametros numéricos
+#"""
 tamano_poblacion = 50
-num_generaciones = 200
 tasa_mutacion = 0.3
 tasa_cruzamiento = 0.95
+
+#"""
+
+
+# Parametros fijos
+num_pedidos = 40
+num_generaciones = 300
 k = 5
 prop_elitismo = 0.05  # proporción de elite (cantidad de mejores fitnes a guardar y añadir a la población)
 
+"""
 
-# Población para pruebas
+# Población para pruebas (40 PEDIDOS)
 poblacion_init = [
     [
         [2, 5, 6, 10, 11],
@@ -2166,3 +2179,6 @@ poblacion_init = [
         [2, 4, 8, 9, 11],
     ],
 ]
+
+
+"""

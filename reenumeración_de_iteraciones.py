@@ -7,7 +7,9 @@ def renumerar_iteraciones(archivo_entrada, archivo_salida):
 
     # Agrupar por modelo (selección, cruce, mutación) y renumerar las iteraciones
     df["Iteracion"] = (
-        df.groupby(["Metodo_Seleccion", "Metodo_Cruce", "Metodo_Mutacion"]).cumcount()
+        df.groupby(
+            ["Configuracion", "Metodo_Seleccion", "Metodo_Cruce", "Metodo_Mutacion"]
+        ).cumcount()
         + 1
     )
 
@@ -16,7 +18,10 @@ def renumerar_iteraciones(archivo_entrada, archivo_salida):
     print(f"Archivo renumerado guardado en {archivo_salida}")
 
 
+"""
 # Ejecución:
-archivo_entrada = "resultados_algoritmo.csv"
-archivo_salida = "resultados_algoritmo_renumerado.csv"
+archivo_entrada = "resultados_META_algoritmo.csv"
+archivo_salida = "resultados_META_algoritmo_renumerado.csv"
 renumerar_iteraciones(archivo_entrada, archivo_salida)
+
+"""

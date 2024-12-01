@@ -1,7 +1,7 @@
 from Parametros.Parametros_tot import *
 
 # Leer el archivo CSV con pandas
-df = pd.read_csv("resultados_algoritmo_renumerado.csv")
+df = pd.read_csv("resultados_META_algoritmo_renumerado.csv")
 
 # Definir los umbrales de color
 umbral_fitness_minimo = 0.00063452 # Tiempo de 1575.99 (aprox)
@@ -9,9 +9,9 @@ umbral_fitness_bajo = 0.00063695  # Tiempo de 1569.982 (aprox)
 umbral_fitness_alto = 0.00063952  # Tiempo de 1563.673 (aprox)
 umbral_fitness_superior = 0.00064155 # Tiempo de 1558.725 (aprox)
 # Agrupar por combinación de métodos para graficar cada modelo individualmente
-modelos = df.groupby(["Metodo_Seleccion", "Metodo_Cruce", "Metodo_Mutacion"])
+modelos = df.groupby(["Configuracion", "Metodo_Seleccion", "Metodo_Cruce", "Metodo_Mutacion"])
 
-for (seleccion, cruce, mutacion), data_modelo in modelos:
+for (configuracion, seleccion, cruce, mutacion), data_modelo in modelos:
     plt.figure(figsize=(25, 12))
 
     # Scatter plot con coloración basada en umbrales
@@ -61,7 +61,7 @@ for (seleccion, cruce, mutacion), data_modelo in modelos:
     )
 
     # Configuración del gráfico
-    plt.title(f"Dispersión del Mejor Fitness - {seleccion} | {cruce} | {mutacion}")
+    plt.title(f"Dispersión del Mejor Fitness - {seleccion} | {cruce} | {mutacion}\nConfiguracion {configuracion}")
     plt.xlabel("Iteración")
     plt.ylabel("Mejor Fitness")
     # Calcular y mostrar el conteo de puntos por cada rango de umbral
@@ -78,7 +78,7 @@ for (seleccion, cruce, mutacion), data_modelo in modelos:
 
     # Guardar el gráfico con línea de tendencia
     nombre_grafico = (
-        f"modelos_graficos/grafico_con_tendencia_{seleccion}_{cruce}_{mutacion}.png"
+        f"modelos_graficos_v2/grafico_META_ALG_{seleccion}_{cruce}_{mutacion}_{configuracion}.png"
     )
     plt.savefig(nombre_grafico)
     print(f"Gráfico con línea de tendencia guardado: {nombre_grafico}")

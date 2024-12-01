@@ -42,19 +42,22 @@ def seleccion_por_ranking(poblacion, fitness_values):
     indices_ordenados = sorted(
         range(len(fitness_values)), key=lambda i: fitness_values[i]
     )
+    poblacion_ordenada = [poblacion[i] for i in indices_ordenados]
+    fitness_ordenado = [fitness_values[i] for i in indices_ordenados]
 
     # Asignar probabilidades basadas en el ranking (el mejor tiene el mayor índice)
-    ranks = [i + 1 for i in range(len(fitness_values))]
+    ranks = [i + 1 for i in range(len(fitness_ordenado))]
     total_rank = sum(ranks)
     probabilidades = [rank / total_rank for rank in ranks]
 
     # Invertir el orden para que el mejor tenga mayor probabilidad
     probabilidades = probabilidades[::-1]
+    poblacion_ordenada = poblacion_ordenada[::-1]  # Alinear con las probabilidades
 
     # Seleccionar padres con base en la probabilidad de los rankings
     padres = []
     for _ in range(2):
-        seleccionado = random.choices(poblacion, weights=probabilidades, k=1)[0]
+        seleccionado = random.choices(poblacion_ordenada, weights=probabilidades, k=1)[0]
         padres.append(seleccionado)
 
     return padres
