@@ -6,6 +6,8 @@ import os
 import numpy as np
 import pandas as pd
 import csv
+import seaborn as sns
+
 
 # Parámetros del problema
 tiempos_iniciales = [55, 53, 56, 42, 41, 30, 34, 35, 28, 26, 20]

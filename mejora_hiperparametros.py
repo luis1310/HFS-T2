@@ -2,25 +2,23 @@ from Algoritmo_evo.algoritmo_evo import *
 from reenumeración_de_iteraciones import *
 from Algoritmo_evo.META_alg_evo import *
 
-# Aplicación del meta algoritmo v1.1
-
-# Definir listas de funciones para cada operador
-metodos_seleccion = [seleccion_por_torneo, seleccion_por_ranking, seleccion_por_ruleta]
-# metodos_seleccion = [seleccion_por_ruleta]
-metodos_cruzamiento = [cruce_1_punto, cruce_2_puntos]
-# metodos_cruzamiento = [cruce_1_punto, cruce_2_puntos]
-metodos_mutacion = [mutacion_intercambio_por_etapa, mutacion_aleatoria]
-# metodos_mutacion = [mutacion_intercambio_por_etapa, mutacion_aleatoria]
-
-# Configuraciones de hiperparametros numericos para el ejercicio
-
-num_config = 10
 """
 tamano_poblacion_arr = [random.randint(49, 151) for _ in range(num_config)]
 tasa_mutacion_arr = [random.uniform(0.1, 0.5) for _ in range(num_config)]
 tasa_cruzamiento_arr = [random.uniform(0.5, 0.99) for _ in range(num_config)]
 """
-# Resultados:
+
+# Aplicación del meta algoritmo v1.1
+
+# Definir listas de funciones para cada operador
+metodos_seleccion = [seleccion_por_torneo, seleccion_por_ranking, seleccion_por_ruleta]
+metodos_cruzamiento = [cruce_1_punto, cruce_2_puntos]
+metodos_mutacion = [mutacion_intercambio_por_etapa, mutacion_aleatoria]
+
+# Configuraciones de hiperparametros numericos para el ejercicio
+
+num_config = 10
+
 tamano_poblacion_arr = [70, 210, 240, 90, 240, 170, 90, 70, 190, 180]
 tasa_mutacion_arr = [
     0.4263064349527299,
@@ -49,7 +47,8 @@ tasa_cruzamiento_arr = [
 
 
 # Indices:
-iteraciones_mod = 10
+iteraciones_mod = 1
+ite_ind = 10  # 0 cuando va de 1 a 10, 10 cuando va de 11 a 20, 20 cuando va de 21 a 30, y así sucesivamente
 indice_de_mod = 0
 indice_de_config = 0
 
@@ -77,6 +76,7 @@ except FileNotFoundError:
                 "Metodo_Cruce",
                 "Metodo_Mutacion",
                 "Mejor_Fitness",
+                "Mejor_generacion",
             ]
         )
 
@@ -113,7 +113,7 @@ for seleccion in metodos_seleccion:
                     "\n#####################################################################"
                 )
                 print(
-                    f"########################## Iteración {iteracion + 1} ##############################"
+                    f"########################## Iteración {iteracion + 1 + ite_ind} ##############################"
                 )
                 print(
                     "#####################################################################\n"
@@ -156,12 +156,13 @@ for seleccion in metodos_seleccion:
 
                     resultados.append(
                         [
-                            iteracion + 1,
+                            iteracion + 1 + ite_ind,
                             indice_de_config + 1,
                             seleccion.__name__,
                             cruce.__name__,
                             mutacion.__name__,
                             mejor_fitness,
+                            mejor_generacion,
                         ]
                     )
                     # Guardar los resultados de cada ejecución en el CSV
@@ -173,44 +174,53 @@ for seleccion in metodos_seleccion:
                 plt.xlabel("Generación")
                 plt.ylabel("Fitness")
                 plt.title(
-                    f"Evolución del Fitness por Configuracion\nModelo {indice_de_mod +1}:\n{seleccion.__name__}, {cruce.__name__}, {mutacion.__name__}\nIteración: {iteracion+1}"
+                    f"Evolución del Fitness por Configuracion\nModelo {indice_de_mod +1}:\n{seleccion.__name__}, {cruce.__name__}, {mutacion.__name__}\nIteración: {iteracion+1+ite_ind}"
                 )
                 plt.legend(fontsize="x-large")
                 # Guardar el gráfico
-                nombre_grafico = f"graf_config/modelo{indice_de_mod +1}/META_ALG_{seleccion.__name__}_{cruce.__name__}_{mutacion.__name__}_iteracion{iteracion+1}.png"
+                nombre_grafico = f"graf_config/modelo{indice_de_mod +1}/META_ALG_{seleccion.__name__}_{cruce.__name__}_{mutacion.__name__}_iteracion{iteracion+1+ite_ind}.png"
                 plt.savefig(nombre_grafico)
                 print(f"Gráfico de evolucion de fitness guardado: {nombre_grafico}")
 
                 # Grafica de los promedios de los fitness de cada iteracion
                 promedios = [np.mean(arr) for arr in coleccion_array_fit]
-                eje_x = [f'Configuracion {i+1}' for i in range(len(coleccion_array_fit))]
+                eje_x = [
+                    f"Configuracion {i+1}" for i in range(len(coleccion_array_fit))
+                ]
                 # Graficar la dispersión
                 plt.figure(figsize=(10, 12))
-                plt.scatter(eje_x, promedios, color='blue', label='Promedios')
-                plt.plot(eje_x, promedios, linestyle='--', color='gray', alpha=0.5)
+                plt.scatter(eje_x, promedios, color="blue", label="Promedios")
+                plt.plot(eje_x, promedios, linestyle="--", color="gray", alpha=0.5)
 
                 # Añadir etiquetas a cada punto
                 for i, promedio in enumerate(promedios):
-                    plt.text(i, promedio, f'{promedio:.8f}', ha='center', va='bottom', fontsize=8, color='black')
+                    plt.text(
+                        i,
+                        promedio,
+                        f"{promedio:.8f}",
+                        ha="center",
+                        va="bottom",
+                        fontsize=8,
+                        color="black",
+                    )
 
-                plt.title(f'Promedios de las configuraciones\nIteracion {iteracion+1}\nModelo {indice_de_mod +1}: {seleccion.__name__}, {cruce.__name__}, {mutacion.__name__}')
-                plt.xlabel('Configuraciones')
-                plt.ylabel('Promedios de fitness')
+                plt.title(
+                    f"Promedios de las configuraciones\nIteracion {iteracion+1+ite_ind}\nModelo {indice_de_mod +1}: {seleccion.__name__}, {cruce.__name__}, {mutacion.__name__}"
+                )
+                plt.xlabel("Configuraciones")
+                plt.ylabel("Promedios de fitness")
                 plt.xticks(rotation=45)
-                plt.grid(True, linestyle='--', alpha=0.6)
+                plt.grid(True, linestyle="--", alpha=0.6)
                 plt.legend()
                 plt.tight_layout()
                 # Guardar el gráfico
-                nombre_grafico2 = f"graf_config/modelo{indice_de_mod +1}/Prom_META_ALG_{seleccion.__name__}_{cruce.__name__}_{mutacion.__name__}_iteracion{iteracion+1}.png"
+                nombre_grafico2 = f"graf_config/modelo{indice_de_mod +1}/Prom_META_ALG_{seleccion.__name__}_{cruce.__name__}_{mutacion.__name__}_iteracion{iteracion+1+ite_ind}.png"
                 plt.savefig(nombre_grafico2)
-                print(f"Gráfico de evolucion de fitness guardado: {nombre_grafico2}\n\n")
-
-                
+                print(
+                    f"Gráfico de evolucion de fitness guardado: {nombre_grafico2}\n\n"
+                )
 
             print("\n\n")
 
             indice_de_mod += 1
             # """
-
-# renumerar_iteraciones(archivo_csv, archivo_salida)
-indice_de_mod = 0

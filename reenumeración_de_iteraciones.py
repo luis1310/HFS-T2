@@ -18,10 +18,10 @@ def renumerar_iteraciones(archivo_entrada, archivo_salida):
     print(f"Archivo renumerado guardado en {archivo_salida}")
 
 
-"""
+#"""
 # Ejecución:
 archivo_entrada = "resultados_META_algoritmo.csv"
 archivo_salida = "resultados_META_algoritmo_renumerado.csv"
 renumerar_iteraciones(archivo_entrada, archivo_salida)
 
-"""
+#"""
