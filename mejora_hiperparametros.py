@@ -47,8 +47,8 @@ tasa_cruzamiento_arr = [
 
 
 # Indices:
-iteraciones_mod = 1
-ite_ind = 10  # 0 cuando va de 1 a 10, 10 cuando va de 11 a 20, 20 cuando va de 21 a 30, y así sucesivamente
+iteraciones_mod = 8
+ite_ind = 22  # ultimo valor de iteracion
 indice_de_mod = 0
 indice_de_config = 0
 
@@ -56,6 +56,7 @@ indice_de_config = 0
 resultados = []
 coleccion_mejores_resultados = []
 coleccion_array_fit = []
+coleccion_promedio_promedios = []
 
 archivo_csv = "resultados_META_algoritmo.csv"
 archivo_salida = "resultados_META_algoritmo_renumerado.csv"
@@ -77,6 +78,7 @@ except FileNotFoundError:
                 "Metodo_Mutacion",
                 "Mejor_Fitness",
                 "Mejor_generacion",
+                "Promedio_promedios",
             ]
         )
 
@@ -163,6 +165,7 @@ for seleccion in metodos_seleccion:
                             mutacion.__name__,
                             mejor_fitness,
                             mejor_generacion,
+                            np.mean(mejores_20p_fit),
                         ]
                     )
                     # Guardar los resultados de cada ejecución en el CSV

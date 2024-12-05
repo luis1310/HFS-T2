@@ -38,76 +38,65 @@ def calcular_estadisticas(archivo=archivo, output_file="estadisticas_modelos.csv
 estadisticas_p_modelos = calcular_estadisticas()
 
 
-def graficar_modelos_por_grupos(data, num_filas=2, num_columnas=2):
+
+
+def graficar_promedios_scatter(df, metodos, columna_fitness="Promedio_Mejor_Fitness"):
     """
-    Genera gráficos agrupados por Método_Seleccion, Método_Cruce y Método_Mutacion,
-    mostrando las configuraciones en el eje X con etiquetas de valor en las barras.
+    Generar gráficos de puntos con etiquetas descriptivas en el eje X (e.g., "Configuración 1").
+    Agrupa por "Metodo_Seleccion", "Metodo_Cruce" y "Metodo_Mutacion".
 
-    Parámetros:
-    - data: DataFrame con los datos.
-    - num_filas: int, número de filas en cada figura.
-    - num_columnas: int, número de columnas en cada figura.
+    Args:
+        df (pd.DataFrame): DataFrame con las estadísticas de los modelos.
+        metodos (list): Lista de combinaciones de métodos a graficar.
+        columna_generacion (str): Columna con el promedio de generación (se invertirá para mostrar tiempos).
     """
-    # Crear una columna para identificar cada combinación única de métodos
-    data["Metodo_Grupo"] = (
-        data["Metodo_Seleccion"].astype(str)
-        + " | "
-        + data["Metodo_Cruce"].astype(str)
-        + " | "
-        + data["Metodo_Mutacion"].astype(str)
-    )
+    for i, metodo in enumerate(metodos):
+        subset = df[
+            (df["Metodo_Seleccion"] == metodo[0]) &
+            (df["Metodo_Cruce"] == metodo[1]) &
+            (df["Metodo_Mutacion"] == metodo[2])
+        ]
+        
+        if subset.empty:
+            print(f"No hay datos para el método {metodo}")
+            continue
+        
+        # Calcular los valores invertidos para mostrar como tiempos
+        subset["Tiempo_Promedio"] = 1 / subset[columna_fitness]
+        
+        # Crear el gráfico scatter
+        plt.figure(figsize=(12, 8))
+        plt.scatter(range(len(subset)), subset["Tiempo_Promedio"], color="blue", label="Makespan promedio por configuración")
 
-    grupos = data["Metodo_Grupo"].unique()  # Obtener combinaciones únicas de métodos
-    num_grupos = len(grupos)
-    graficos_por_figura = num_filas * num_columnas
-    num_figuras = (
-        num_grupos + graficos_por_figura - 1
-    ) // graficos_por_figura  # Total de figuras
-
-    for fig_idx in range(num_figuras):
-        fig, axes = plt.subplots(num_filas, num_columnas, figsize=(16, 10))
-        axes = axes.flatten()  # Aplanar los ejes para acceder fácilmente
-
-        for ax_idx in range(graficos_por_figura):
-            grupo_idx = fig_idx * graficos_por_figura + ax_idx
-            if grupo_idx >= num_grupos:
-                axes[ax_idx].axis("off")  # Apagar ejes vacíos
-                continue
-
-            grupo = grupos[grupo_idx]
-            subset = data[data["Metodo_Grupo"] == grupo]
-
-            # Crear gráfico de barras
-            barplot = sns.barplot(
-                data=subset,
-                x="Configuracion",
-                y="Promedio_Mejor_Fitness",
-                hue="Configuracion",  # Diferenciar configuraciones por color
-                dodge=False,
-                ax=axes[ax_idx],
-            )
-            # Agregar etiquetas con el valor en cada barra
-            for container in barplot.containers:
-                barplot.bar_label(container, fmt="%.8f", fontsize=9, padding=3)
-
-            # Personalización del gráfico
-            axes[ax_idx].set_title(f"Grupo: {grupo}", fontsize=11)
-            axes[ax_idx].set_ylabel("Promedio Mejor Fitness")
-            axes[ax_idx].set_xlabel("Configuración")
-            axes[ax_idx].tick_params(axis="x", rotation=45)  # Rotar etiquetas en X
-
-        # Ajustar diseño
-        fig.tight_layout()
-        fig.subplots_adjust(top=0.9)
-        fig.suptitle(f"Gráficos {fig_idx + 1} de {num_figuras}", fontsize=14)
+         # Conexión de los puntos con líneas punteadas
+        plt.plot(range(len(subset)), subset["Tiempo_Promedio"], linestyle="--", color="gray", alpha=0.7)
+        
+        
+        # Etiquetas descriptivas en el eje X
+        configuraciones_etiquetas = [f"Configuración {int(c)}" for c in subset["Configuracion"]]
+        plt.xticks(ticks=range(len(configuraciones_etiquetas)), labels=configuraciones_etiquetas, rotation=45)
+        
+        # Etiquetas en cada punto
+        for x, y in enumerate(subset["Tiempo_Promedio"]):
+            plt.text(x, y, f"{y:.6f}", fontsize=8, ha="center", va="bottom")
+        
+        # Configuración del gráfico
+        plt.title(f"Modelo {i+1}: {metodo[0]}, {metodo[1]}, {metodo[2]}")
+        plt.xlabel("Configuraciones")
+        plt.ylabel("Tiempos Invertidos")
+        plt.grid(True, linestyle="--", alpha=0.6)
+        plt.legend()
+        
+        # Mostrar el gráfico
+        plt.tight_layout()
         plt.show()
 
+# Cargar el DataFrame (ajustar la ruta al archivo CSV según tu caso)
+df = estadisticas_p_modelos
 
-"""
-graficar_modelos_por_grupos(
-    data=estadisticas_p_modelos,
-    num_filas=2,  # Por ejemplo, 2 filas por figura
-    num_columnas=1  # Por ejemplo, 2 columnas por figura
-)
+# Lista de métodos únicos a graficar
+metodos_unicos = df[["Metodo_Seleccion", "Metodo_Cruce", "Metodo_Mutacion"]].drop_duplicates().values.tolist()
 
-"""
+# Generar los gráficos scatter
+graficar_promedios_scatter(df, metodos_unicos)
+
