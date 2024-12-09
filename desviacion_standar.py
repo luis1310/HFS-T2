@@ -7,10 +7,10 @@ pd.set_option("display.float_format", "{:.10f}".format)
 pd.set_option("display.max_rows", None)  # Muestra todas las filas del DataFrame
 
 # Cargar el archivo CSV
-archivo = "resultados_META_algoritmo_renumerado.csv"
+archivo = "v2_resultados_META_algoritmo.csv"
 
 
-def calcular_estadisticas(archivo=archivo, output_file="estadisticas_modelos.csv"):
+def calcular_estadisticas(archivo=archivo, output_file="v2_estadisticas_modelos.csv"):
     df = pd.read_csv(archivo)
 
     # Agrupar por el conjunto único de columnas que definen un modelo
@@ -23,6 +23,9 @@ def calcular_estadisticas(archivo=archivo, output_file="estadisticas_modelos.csv
             Desviacion_Generacion=("Mejor_generacion", "std"),
             Promedio_Mejor_Fitness=("Mejor_Fitness", "mean"),
             Desviacion_Fitness=("Mejor_Fitness", "std"),
+            Promedio_promedios=("Promedios_20p", "mean"),
+            Desviacion_promedio_20p=("Promedios_20p", "std"),
+            
         )
         .reset_index()
     )
@@ -40,7 +43,7 @@ estadisticas_p_modelos = calcular_estadisticas()
 
 
 
-def graficar_promedios_scatter(df, metodos, columna_fitness="Promedio_Mejor_Fitness"):
+def graficar_promedios_scatter(df, metodos, columna_fitness="Promedio_promedios"):
     """
     Generar gráficos de puntos con etiquetas descriptivas en el eje X (e.g., "Configuración 1").
     Agrupa por "Metodo_Seleccion", "Metodo_Cruce" y "Metodo_Mutacion".
@@ -89,7 +92,20 @@ def graficar_promedios_scatter(df, metodos, columna_fitness="Promedio_Mejor_Fitn
         
         # Mostrar el gráfico
         plt.tight_layout()
-        plt.show()
+
+        # Guardar el gráfico
+        nombre_grafico = f"graf_configv2/prom_modelos/graf_tiempo_mod_{i + 1}.png"
+        
+        # Extraer el directorio de la ruta
+        directorio = os.path.dirname(nombre_grafico)
+
+        # Crear las carpetas si no existen
+        os.makedirs(directorio, exist_ok=True)
+        
+        plt.savefig(nombre_grafico)
+        print(f"Gráfico de evolucion de fitness guardado: {nombre_grafico}")
+
+        #plt.show()
 
 # Cargar el DataFrame (ajustar la ruta al archivo CSV según tu caso)
 df = estadisticas_p_modelos

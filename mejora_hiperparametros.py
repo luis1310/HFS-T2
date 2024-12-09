@@ -47,8 +47,8 @@ tasa_cruzamiento_arr = [
 
 
 # Indices:
-iteraciones_mod = 8
-ite_ind = 22  # ultimo valor de iteracion
+iteraciones_mod = 6
+ite_ind = 24  # ultimo valor de iteracion
 indice_de_mod = 0
 indice_de_config = 0
 
@@ -58,8 +58,8 @@ coleccion_mejores_resultados = []
 coleccion_array_fit = []
 coleccion_promedio_promedios = []
 
-archivo_csv = "resultados_META_algoritmo.csv"
-archivo_salida = "resultados_META_algoritmo_renumerado.csv"
+archivo_csv = "v2_resultados_META_algoritmo.csv"
+archivo_salida = "v2_resultados_META_algoritmo_renumerado.csv"
 
 
 # Verificar si el archivo existe y, si no, crearlo con el encabezado
@@ -78,7 +78,7 @@ except FileNotFoundError:
                 "Metodo_Mutacion",
                 "Mejor_Fitness",
                 "Mejor_generacion",
-                "Promedio_promedios",
+                "Promedios_20p",
             ]
         )
 
@@ -135,6 +135,7 @@ for seleccion in metodos_seleccion:
 
                     # Ejecutar e l algoritmo evolutivo
                     inicio = time.time()
+
                     # Ejecutar el algoritmo genético con elitismo
                     (
                         mejor_individuo,
@@ -180,8 +181,16 @@ for seleccion in metodos_seleccion:
                     f"Evolución del Fitness por Configuracion\nModelo {indice_de_mod +1}:\n{seleccion.__name__}, {cruce.__name__}, {mutacion.__name__}\nIteración: {iteracion+1+ite_ind}"
                 )
                 plt.legend(fontsize="x-large")
+                
                 # Guardar el gráfico
-                nombre_grafico = f"graf_config/modelo{indice_de_mod +1}/META_ALG_{seleccion.__name__}_{cruce.__name__}_{mutacion.__name__}_iteracion{iteracion+1+ite_ind}.png"
+                nombre_grafico = f"graf_configv2/modelo{indice_de_mod +1}/META_ALG_{seleccion.__name__}_{cruce.__name__}_{mutacion.__name__}_iteracion{iteracion+1+ite_ind}.png"
+                
+                # Extraer el directorio de la ruta
+                directorio = os.path.dirname(nombre_grafico)
+
+                # Crear las carpetas si no existen
+                os.makedirs(directorio, exist_ok=True)
+                
                 plt.savefig(nombre_grafico)
                 print(f"Gráfico de evolucion de fitness guardado: {nombre_grafico}")
 
@@ -217,7 +226,14 @@ for seleccion in metodos_seleccion:
                 plt.legend()
                 plt.tight_layout()
                 # Guardar el gráfico
-                nombre_grafico2 = f"graf_config/modelo{indice_de_mod +1}/Prom_META_ALG_{seleccion.__name__}_{cruce.__name__}_{mutacion.__name__}_iteracion{iteracion+1+ite_ind}.png"
+                nombre_grafico2 = f"graf_configv2/modelo{indice_de_mod +1}/Prom_META_ALG_{seleccion.__name__}_{cruce.__name__}_{mutacion.__name__}_iteracion{iteracion+1+ite_ind}.png"
+                
+                # Extraer el directorio de la ruta
+                directorio = os.path.dirname(nombre_grafico2)
+
+                # Crear las carpetas si no existen
+                os.makedirs(directorio, exist_ok=True)
+                
                 plt.savefig(nombre_grafico2)
                 print(
                     f"Gráfico de evolucion de fitness guardado: {nombre_grafico2}\n\n"
@@ -226,4 +242,3 @@ for seleccion in metodos_seleccion:
             print("\n\n")
 
             indice_de_mod += 1
-            # """
