@@ -1,4 +1,5 @@
 from Parametros.Parametros_tot import *
+from graficos_prom_time import *
 
 # Configurar Pandas para que muestre 10 decimales de exactitud
 pd.set_option("display.float_format", "{:.10f}".format)
@@ -37,82 +38,80 @@ def calcular_estadisticas(archivo=archivo, output_file="v2_estadisticas_modelos.
     estadisticas_modelos.to_csv(output_file, index=False)
     return estadisticas_modelos
 
+################################
 
-estadisticas_p_modelos = calcular_estadisticas()
+def calcular_estadisticas_makespam(archivo=archivo, output_file="v2_estadisticas_makespam.csv"):
+    # Leer el archivo CSV
+    df = pd.read_csv(archivo)
+
+    # Agregar una columna con las inversas de Mejor_Fitness
+    df['Tiempos_makespam'] = 1 / df['Mejor_Fitness']
+
+    # Agregar una columna con las inversas de Promedios_20p
+    df['Tiempos_Promedios_20p'] = 1 / df['Promedios_20p']
+
+    # Agrupar por el conjunto único de columnas que definen un modelo
+    estadisticas_modelos = (
+        df.groupby(
+            ["Configuracion", "Metodo_Seleccion", "Metodo_Cruce", "Metodo_Mutacion"]
+        )
+        .agg(
+            Promedio_Mejor_Generacion=("Mejor_generacion", "mean"),
+            Desviacion_Generacion=("Mejor_generacion", "std"),
+            Promedio_makespam=("Tiempos_makespam", "mean"),
+            Desviacion_makespam=("Tiempos_makespam", "std"),
+            Promedio_promedios_tiempos=("Tiempos_Promedios_20p", "mean"),
+            Desviacion_promedios_tiempos=("Tiempos_Promedios_20p", "std"),
+        )
+        .reset_index()
+    )
+    # Seleccionar las 10 filas con la menor desviación estándar de las inversas
+    top_10_menor_desviacion = estadisticas_modelos.nsmallest(10, "Desviacion_promedios_tiempos")
+
+    # Mostrar la tabla de resultados
+    print("Estadísticas completas:")
+    print(estadisticas_modelos)
+    print("\nTop 10 modelos con menor desviación estandar:")
+    print(top_10_menor_desviacion)
+
+    # Guardar las estadísticas completas en un nuevo archivo CSV
+    estadisticas_modelos.to_csv(output_file, index=False)
+
+    # Guardar el top 10 en otro archivo CSV
+    top_10_output_file = output_file.replace(".csv", "_top10.csv")
+    top_10_menor_desviacion.to_csv(top_10_output_file, index=False)
+
+    return estadisticas_modelos, top_10_menor_desviacion
 
 
+################################
 
+estadisticas_makespam, top_10 = calcular_estadisticas_makespam()
 
-def graficar_promedios_scatter(df, metodos, columna_fitness="Promedio_promedios"):
-    """
-    Generar gráficos de puntos con etiquetas descriptivas en el eje X (e.g., "Configuración 1").
-    Agrupa por "Metodo_Seleccion", "Metodo_Cruce" y "Metodo_Mutacion".
+################################
 
-    Args:
-        df (pd.DataFrame): DataFrame con las estadísticas de los modelos.
-        metodos (list): Lista de combinaciones de métodos a graficar.
-        columna_generacion (str): Columna con el promedio de generación (se invertirá para mostrar tiempos).
-    """
-    for i, metodo in enumerate(metodos):
-        subset = df[
-            (df["Metodo_Seleccion"] == metodo[0]) &
-            (df["Metodo_Cruce"] == metodo[1]) &
-            (df["Metodo_Mutacion"] == metodo[2])
-        ]
-        
-        if subset.empty:
-            print(f"No hay datos para el método {metodo}")
-            continue
-        
-        # Calcular los valores invertidos para mostrar como tiempos
-        subset["Tiempo_Promedio"] = 1 / subset[columna_fitness]
-        
-        # Crear el gráfico scatter
-        plt.figure(figsize=(12, 8))
-        plt.scatter(range(len(subset)), subset["Tiempo_Promedio"], color="blue", label="Makespan promedio por configuración")
+#estadisticas_promedio_tiempos = calcular_estadisticas()
 
-         # Conexión de los puntos con líneas punteadas
-        plt.plot(range(len(subset)), subset["Tiempo_Promedio"], linestyle="--", color="gray", alpha=0.7)
-        
-        
-        # Etiquetas descriptivas en el eje X
-        configuraciones_etiquetas = [f"Configuración {int(c)}" for c in subset["Configuracion"]]
-        plt.xticks(ticks=range(len(configuraciones_etiquetas)), labels=configuraciones_etiquetas, rotation=45)
-        
-        # Etiquetas en cada punto
-        for x, y in enumerate(subset["Tiempo_Promedio"]):
-            plt.text(x, y, f"{y:.6f}", fontsize=8, ha="center", va="bottom")
-        
-        # Configuración del gráfico
-        plt.title(f"Modelo {i+1}: {metodo[0]}, {metodo[1]}, {metodo[2]}")
-        plt.xlabel("Configuraciones")
-        plt.ylabel("Tiempos Invertidos")
-        plt.grid(True, linestyle="--", alpha=0.6)
-        plt.legend()
-        
-        # Mostrar el gráfico
-        plt.tight_layout()
-
-        # Guardar el gráfico
-        nombre_grafico = f"graf_configv2/prom_modelos/graf_tiempo_mod_{i + 1}.png"
-        
-        # Extraer el directorio de la ruta
-        directorio = os.path.dirname(nombre_grafico)
-
-        # Crear las carpetas si no existen
-        os.makedirs(directorio, exist_ok=True)
-        
-        plt.savefig(nombre_grafico)
-        print(f"Gráfico de evolucion de fitness guardado: {nombre_grafico}")
-
-        #plt.show()
-
-# Cargar el DataFrame (ajustar la ruta al archivo CSV según tu caso)
-df = estadisticas_p_modelos
+################################
+"""
+# Cargar el data frame
+df = estadisticas_promedio_tiempos
 
 # Lista de métodos únicos a graficar
 metodos_unicos = df[["Metodo_Seleccion", "Metodo_Cruce", "Metodo_Mutacion"]].drop_duplicates().values.tolist()
 
-# Generar los gráficos scatter
-graficar_promedios_scatter(df, metodos_unicos)
+# Generar los gráficos
+graficar_promedios(df, metodos_unicos, columna_fitness="Promedio_promedios")
+"""
+"""
+# Cargar el data frame
+df = estadisticas_makespam
 
+# Lista de métodos únicos a graficar
+metodos_unicos = df[["Metodo_Seleccion", "Metodo_Cruce", "Metodo_Mutacion"]].drop_duplicates().values.tolist()
+
+# Generar los gráficos
+graficar_promedios_2(df, metodos_unicos, columna_fitness="Promedio_Mejor_Fitness")
+
+
+"""
