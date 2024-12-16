@@ -61,8 +61,7 @@ Proyecto tesis 2:
 - Se añadió una población inicial de prueba con parámetros numéricos preestablecidos que se usaran para las ejecuciones posteriores de cada modelo posible y recopilación de información de los mismos.
 
 ## Versión 1.0:
-- Añadidas funciones para recopilar información (meta algoritmo), añadida función para reenumerar las iteraciones, añadida función que grafica los modelos (mostrando 3 niveles de calidad de respuesta) y los guarda en una carpeta
+- Añadidas funciones para recopilar información (meta algoritmo), añadida función que grafica los modelos y cada una de sus confiuraciones y los guarda en una carpeta por cada modelo.
 
-## Versión 1.1:
-- La graficas ahora tienen 5 niveles para medir que tan "Bueno" son los resultados de las diversas iteraciones.
+## Versión 1.1 en adelante:
 - Se añade más datos para los modelos del algoritmo evolutivo.

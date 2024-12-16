@@ -1,11 +1,24 @@
 from Algoritmo_evo.algoritmo_evo import *
+from Algoritmo_evo.META_alg_evo import *
 
-poblacion = inicializar_poblacion(tamano_poblacion, maquinas_por_etapa, num_pedidos)
+poblacion = inicializar_poblacion(240, maquinas_por_etapa, num_pedidos)
 # Ejecutar el algoritmo
 inicio = time.time()
 
-mejor_individuo, mejor_fitness, mejor_generacion, mejores_fitness_por_generacion = (
-    algoritmo_evolutivo(poblacion)
+(
+    mejor_individuo,
+    mejor_fitness,
+    mejor_generacion,
+    mejores_fitness_por_generacion,
+    mejores_20p_fit,
+) = meta_algoritmo_evolutivo(
+    poblacion,
+    seleccion_por_ranking,
+    cruce_1_punto,
+    mutacion_intercambio_por_etapa,
+    prob_cruz=0.5748538522008351,
+    prob_mut=0.490015123270944,
+    tamano_poblacion=240,
 )
 fin = time.time()
 print(
