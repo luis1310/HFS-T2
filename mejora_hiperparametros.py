@@ -180,16 +180,16 @@ for seleccion in metodos_seleccion:
                     f"Evolución del Fitness por Configuracion\nModelo {indice_de_mod +1}:\n{seleccion.__name__}, {cruce.__name__}, {mutacion.__name__}\nIteración: {iteracion+1+ite_ind}"
                 )
                 plt.legend(fontsize="x-large")
-                
+
                 # Guardar el gráfico
                 nombre_grafico = f"graf_configv2/modelo{indice_de_mod +1}/META_ALG_{seleccion.__name__}_{cruce.__name__}_{mutacion.__name__}_iteracion{iteracion+1+ite_ind}.png"
-                
+
                 # Extraer el directorio de la ruta
                 directorio = os.path.dirname(nombre_grafico)
 
                 # Crear las carpetas si no existen
                 os.makedirs(directorio, exist_ok=True)
-                
+
                 plt.savefig(nombre_grafico)
                 print(f"Gráfico de evolucion de fitness guardado: {nombre_grafico}")
 
@@ -226,13 +226,13 @@ for seleccion in metodos_seleccion:
                 plt.tight_layout()
                 # Guardar el gráfico
                 nombre_grafico2 = f"graf_configv2/modelo{indice_de_mod +1}/Prom_META_ALG_{seleccion.__name__}_{cruce.__name__}_{mutacion.__name__}_iteracion{iteracion+1+ite_ind}.png"
-                
+
                 # Extraer el directorio de la ruta
                 directorio = os.path.dirname(nombre_grafico2)
 
                 # Crear las carpetas si no existen
                 os.makedirs(directorio, exist_ok=True)
-                
+
                 plt.savefig(nombre_grafico2)
                 print(
                     f"Gráfico de evolucion de fitness guardado: {nombre_grafico2}\n\n"

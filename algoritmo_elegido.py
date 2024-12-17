@@ -5,6 +5,89 @@ poblacion = inicializar_poblacion(240, maquinas_por_etapa, num_pedidos)
 # Ejecutar el algoritmo
 inicio = time.time()
 
+alg_geneticos = [
+    [  # AG 1
+        seleccion_por_ranking,
+        cruce_1_punto,
+        mutacion_intercambio_por_etapa,
+        0.5748538522008351,  # prob cruza
+        0.490015123270944,  # prob mutacion
+        240,  # tamaño población
+    ],
+    [  # AG 2
+        seleccion_por_ruleta,
+        cruce_2_puntos,
+        mutacion_intercambio_por_etapa,
+        0.6201369561158429,  # prob cruza
+        0.4263064349527299,  # prob mutacion
+        70,  # tamaño población
+    ],
+    [  # AG 3
+        seleccion_por_ranking,
+        cruce_1_punto,
+        mutacion_intercambio_por_etapa,
+        0.8690387173349006,  # prob cruza
+        0.2627083516388411,  # prob mutacion
+        170,  # tamaño población
+    ],
+    [  # AG 4
+        seleccion_por_torneo,
+        cruce_2_puntos,
+        mutacion_aleatoria,
+        0.6641427039708248,  # prob cruza
+        0.18709717720279678,  # prob mutacion
+        210,  # tamaño población
+    ],
+    [  # AG 5
+        seleccion_por_torneo,
+        cruce_1_punto,
+        mutacion_intercambio_por_etapa,
+        0.5748538522008351,  # prob cruza
+        0.490015123270944,  # prob mutacion
+        240,  # tamaño población
+    ],
+    [  # AG 6
+        seleccion_por_ranking,
+        cruce_2_puntos,
+        mutacion_intercambio_por_etapa,
+        0.8710230131356245,  # prob cruza
+        0.11782972115214507,  # prob mutacion
+        70,  # tamaño población
+    ],
+    [  # AG 7
+        seleccion_por_ruleta,
+        cruce_1_punto,
+        mutacion_intercambio_por_etapa,
+        0.6538401618566114,  # prob cruza
+        0.15067767889314274,  # prob mutacion
+        180,  # tamaño población
+    ],
+    [  # AG 8
+        seleccion_por_torneo,
+        cruce_1_punto,
+        mutacion_aleatoria,
+        0.8070389690090312,  # prob cruza
+        0.19710262526458855,  # prob mutacion
+        240,  # tamaño población
+    ],
+    [  # AG 9
+        seleccion_por_ranking,
+        cruce_1_punto,
+        mutacion_intercambio_por_etapa,
+        0.7575243079969969,  # prob cruza
+        0.34694846442880817,  # prob mutacion
+        190,  # tamaño población
+    ],
+    [  # AG 10
+        seleccion_por_ruleta,
+        cruce_1_punto,
+        mutacion_intercambio_por_etapa,
+        0.5748538522008351,  # prob cruza
+        0.490015123270944,  # prob mutacion
+        240,  # tamaño población
+    ],
+]
+
 (
     mejor_individuo,
     mejor_fitness,
