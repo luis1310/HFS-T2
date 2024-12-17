@@ -88,9 +88,9 @@ alg_geneticos = [
 poblacion = inicializar_poblacion(240, maquinas_por_etapa, num_pedidos)
 
 print("Modelo:\n")
-print("Método de selección", alg_geneticos[eleg][0].__name__)
-print("Método de cruza", alg_geneticos[eleg][1].__name__)
-print("Método de mutación", alg_geneticos[eleg][2].__name__)
+print("Método de selección:", alg_geneticos[eleg][0].__name__)
+print("Método de cruza:", alg_geneticos[eleg][1].__name__)
+print("Método de mutación:", alg_geneticos[eleg][2].__name__)
 print("Probabilidad de cruza:", alg_geneticos[eleg][3])
 print("Probabilidad de mutación:",alg_geneticos[eleg][4])
 print("Tamaño de población:",alg_geneticos[eleg][5])
