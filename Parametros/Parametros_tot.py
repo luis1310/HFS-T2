@@ -13,13 +13,14 @@ import seaborn as sns
 tiempos_iniciales = [55, 53, 56, 42, 41, 30, 34, 35, 28, 26, 20]
 
 """
-
+# Incremento entre 2 y 4%
 incremento_min = 0.02
 incremento_max = 0.04
 
-"""
-
-# incrementos = [random.uniform(incremento_min, incremento_max) for _ in tiempos_iniciales]  # Incremento entre 2 y 4%
+incrementos = [
+    random.uniform(incremento_min, incremento_max) for _ in tiempos_iniciales
+    ]
+#"""
 
 # Incrementos para comparación con el colab versión v0.3 y posteriores
 

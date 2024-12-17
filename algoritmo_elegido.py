@@ -1,10 +1,7 @@
 from Algoritmo_evo.algoritmo_evo import *
 from Algoritmo_evo.META_alg_evo import *
 
-poblacion = inicializar_poblacion(240, maquinas_por_etapa, num_pedidos)
-# Ejecutar el algoritmo
-inicio = time.time()
-
+eleg = 0  # Algoritmo Genetico elegido
 alg_geneticos = [
     [  # AG 1
         seleccion_por_ranking,
@@ -88,6 +85,18 @@ alg_geneticos = [
     ],
 ]
 
+poblacion = inicializar_poblacion(240, maquinas_por_etapa, num_pedidos)
+
+print("Modelo:\n")
+print("Método de selección", alg_geneticos[eleg][0].__name__)
+print("Método de cruza", alg_geneticos[eleg][1].__name__)
+print("Método de mutación", alg_geneticos[eleg][2].__name__)
+print("Probabilidad de cruza:", alg_geneticos[eleg][3])
+print("Probabilidad de mutación:",alg_geneticos[eleg][4])
+print("Tamaño de población:",alg_geneticos[eleg][5])
+# Ejecutar el algoritmo
+inicio = time.time()
+
 (
     mejor_individuo,
     mejor_fitness,
@@ -96,19 +105,19 @@ alg_geneticos = [
     mejores_20p_fit,
 ) = meta_algoritmo_evolutivo(
     poblacion,
-    seleccion_por_ranking,
-    cruce_1_punto,
-    mutacion_intercambio_por_etapa,
-    prob_cruz=0.5748538522008351,
-    prob_mut=0.490015123270944,
-    tamano_poblacion=240,
+    alg_geneticos[eleg][0],
+    alg_geneticos[eleg][1],
+    alg_geneticos[eleg][2],
+    prob_cruz=alg_geneticos[eleg][3],
+    prob_mut=alg_geneticos[eleg][4],
+    tamano_poblacion=alg_geneticos[eleg][5],
 )
 fin = time.time()
 print(
-    f"\nMejor fitness encontrado en la generación {mejor_generacion + 1}: {mejor_fitness:.16f}"
+    f"\nMejor fitness encontrado: {mejor_fitness:.16f}"
 )
 print(
-    f"Mejor tiempo encontrado en la generación {mejor_generacion + 1}: {1/mejor_fitness:.16f}"
+    f"Mejor generación {mejor_generacion + 1}: {1/mejor_fitness:.16f}"
 )
 print(f"Mejor orden de pedidos: {mejor_individuo}")
 print("\n########################################################\n")
