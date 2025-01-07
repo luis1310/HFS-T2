@@ -47,7 +47,7 @@ tasa_cruzamiento_arr = [
 
 # Indices:
 iteraciones_mod = 6
-ite_ind = 24  # ultimo valor de iteracion (manualmente se ingresa elultimo valor en que se quedo la ultima iteración)
+ite_ind = 24  # ultimo valor de iteracion (manualmente se ingresa el ultimo valor en que se quedo la ultima iteración)
 indice_de_mod = 0
 indice_de_config = 0
 

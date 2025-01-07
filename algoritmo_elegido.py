@@ -1,6 +1,6 @@
 from Algoritmo_evo.META_alg_evo import *
 
-eleg = 1  # Algoritmo Genetico elegido
+eleg = 0  # Algoritmo Genetico elegido - 1
 alg_geneticos = [
     [  # AG 1
         seleccion_por_ranking,
@@ -83,6 +83,86 @@ alg_geneticos = [
         240,  # tamaño población
     ],
 ]
+
+### Probar solo un AG ###
+
+poblacion_inicial_ = inicializar_poblacion(
+        alg_geneticos[eleg][5], maquinas_por_etapa, num_pedidos
+    )
+
+print(
+    f"################################ Algoritmo Genetico {eleg+1}: ################################"
+)
+print("Método de selección:", alg_geneticos[eleg][0].__name__)
+print("Método de cruza:", alg_geneticos[eleg][1].__name__)
+print("Método de mutación:", alg_geneticos[eleg][2].__name__)
+print("Probabilidad de cruza:", alg_geneticos[eleg][3])
+print("Probabilidad de mutación:", alg_geneticos[eleg][4])
+print("Tamaño de población:", alg_geneticos[eleg][5])
+print(
+    "#######################################################################################"
+)
+print(
+    "##################################### Resultados: #####################################\n"
+)
+# Ejecutar el algoritmo
+inicio = time.time()
+(
+    mejor_individuo,
+    mejor_fitness,
+    mejor_generacion,
+    mejores_fitness_por_generacion,
+    mejores_20p_fit,
+) = meta_algoritmo_evolutivo(
+    poblacion_inicial_,
+    alg_geneticos[eleg][0],
+    alg_geneticos[eleg][1],
+    alg_geneticos[eleg][2],
+    prob_cruz=alg_geneticos[eleg][3],
+    prob_mut=alg_geneticos[eleg][4],
+    tamano_poblacion=alg_geneticos[eleg][5],
+)
+fin = time.time()
+print(f"Mejor fitness encontrado: {mejor_fitness:.16f}")
+print(f"Mejor generación: {mejor_generacion + 1}")
+# print(f"Mejor orden de pedidos: {mejor_individuo}")
+print("\n########################################################\n")
+print("Tiempo de ejecución: ")
+print(fin - inicio)
+print(
+    "\n#######################################################################################\n"
+)
+
+
+# Cálculo de mejores tiempos por generacion
+generacion = [i for i in range(num_generaciones)]
+mejores_tiempos = [
+    1 / fitness if fitness != 0 else 0 for fitness in mejores_fitness_por_generacion
+]
+
+# Crear subplots
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+
+# Primer gráfico: Evolución del Fitness por Generación
+ax1.plot(generacion, mejores_fitness_por_generacion, label="Fitness")
+ax1.set_title("Evolución del Fitness por Generación")
+ax1.set_xlabel("Generaciones")
+ax1.set_ylabel("Fitness")
+ax1.legend()
+
+# Segundo gráfico: Valores de 1 / Fitnessl
+ax2.plot(generacion, mejores_tiempos, label="MakeSpan", color="orange")
+ax2.set_title("Evolucion del MakeSpan por Generación")
+ax2.set_xlabel("Generaciones")
+ax2.set_ylabel("MakeSpan")
+ax2.legend()
+
+# Mostrar los gráficos
+plt.tight_layout()
+plt.show()
+
+### Probar todos los AG ###
+"""
 for ind in range(10):
     eleg=ind
     poblacion_inicial_ = inicializar_poblacion(
@@ -159,3 +239,4 @@ for ind in range(10):
     # Mostrar los gráficos
     #plt.tight_layout()
     #plt.show()
+#"""
