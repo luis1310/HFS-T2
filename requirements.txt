@@ -1,15 +1,18 @@
-contourpy==1.3.3
-cycler==0.12.1
-fonttools==4.60.1
-kiwisolver==1.4.9
-matplotlib==3.10.6
-numpy==2.3.3
-packaging==25.0
-pandas==2.3.3
-pillow==11.3.0
-pyparsing==3.2.5
-python-dateutil==2.9.0.post0
-pytz==2025.2
-seaborn==0.13.2
-six==1.17.0
-tzdata==2025.2
+# Dependencias básicas
+numpy>=1.24.0
+matplotlib>=3.7.0
+pandas>=2.0.0
+seaborn>=0.12.0
+
+# Configuración y utilidades
+pyyaml>=6.0
+tqdm>=4.65.0
+
+# Testing y calidad de código
+pytest>=7.4.0
+pytest-cov>=4.1.0
+black>=23.0.0
+flake8>=6.0.0
+
+# Opcional: aceleración
+numba>=0.57.0
