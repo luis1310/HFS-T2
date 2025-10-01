@@ -1,3 +1,11 @@
+# Actualización a HFS - T3
+Proyecto de tesis 3 (taller de investigación)
+## Version 1.1.1:
+- Implementación del algoritmo evolutivo multiobjetivo NSGA-II con 4 objetivos: Makespan, Balance de carga, Minimización de enfriamientos y Consumo energético. (ETAPA INICIAL)
+- Se añaden scripts para ejecutar el algoritmo y realizar pruebas comparativas entre enfoques mono-objetivo y multiobjetivo. (Comparativa entre HFS-T2 y HFST-T3)
+- Se incluyen funciones de evaluación de fitness y parámetros energéticos necesarios para el cálculo. (Modificación del archivo de parametros)
+- Además, se generan visualizaciones del frente de Pareto y se guardan resultados en archivos CSV.
+
 # HFS-T2
 Proyecto tesis 2:
 

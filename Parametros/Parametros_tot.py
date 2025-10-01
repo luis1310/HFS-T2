@@ -2185,3 +2185,51 @@ poblacion_init = [
 
 
 """
+
+# ==========================================
+# PARÁMETROS ENERGÉTICOS (para 4to objetivo)
+# ==========================================
+
+# Potencia consumida por cada máquina cuando está activa (en kW)
+# Las máquinas más grandes (etapas iniciales) consumen más energía
+potencias_activas = [
+    5.5,  # Máquina 1 (Etapa 1)
+    5.3,  # Máquina 2 (Etapa 1)
+    5.6,  # Máquina 3 (Etapa 1)
+    4.2,  # Máquina 4 (Etapa 2)
+    4.1,  # Máquina 5 (Etapa 2)
+    3.0,  # Máquina 6 (Etapa 3)
+    3.4,  # Máquina 7 (Etapa 3)
+    3.5,  # Máquina 8 (Etapa 3)
+    2.8,  # Máquina 9 (Etapa 4)
+    2.6,  # Máquina 10 (Etapa 4)
+    2.0,  # Máquina 11 (Etapa 5)
+]
+
+# Potencia consumida por cada máquina cuando está en espera/idle (en kW)
+# Aproximadamente 10% de la potencia activa
+potencias_inactivas = [
+    0.5,  # Máquina 1
+    0.5,  # Máquina 2
+    0.5,  # Máquina 3
+    0.4,  # Máquina 4
+    0.4,  # Máquina 5
+    0.3,  # Máquina 6
+    0.3,  # Máquina 7
+    0.3,  # Máquina 8
+    0.3,  # Máquina 9
+    0.3,  # Máquina 10
+    0.2,  # Máquina 11
+]
+
+# Energía adicional consumida por cada evento de enfriamiento (en kWh)
+# Incluye el costo energético de enfriar y volver a calentar la máquina
+energia_por_enfriamiento = 2.0
+
+# NOTA: Los valores de potencia se basan en estimaciones típicas para:
+# - Máquinas de etapas iniciales: Mayor tamaño y consumo (5-6 kW)
+# - Máquinas de etapas intermedias: Consumo medio (3-4 kW)
+# - Máquinas de etapas finales: Menor consumo (2-3 kW)
+# 
+# Estos valores pueden ajustarse según las especificaciones reales
+# de las máquinas en el sistema de producción.
