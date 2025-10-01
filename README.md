@@ -1,5 +1,9 @@
-# Actualización a HFS - T3
+# Actualizacion de HFS - T2 a HFS-T3
 Proyecto de tesis 3 (taller de investigación)
+## Version 1.1.2:
+- Refactorización en rama tesis3-dev
+- Puesta a punto del repositorio, esquema de datos, tests mínimos y CI.
+
 ## Version 1.1.1:
 - Implementación del algoritmo evolutivo multiobjetivo NSGA-II con 4 objetivos: Makespan, Balance de carga, Minimización de enfriamientos y Consumo energético. (ETAPA INICIAL)
 - Se añaden scripts para ejecutar el algoritmo y realizar pruebas comparativas entre enfoques mono-objetivo y multiobjetivo. (Comparativa entre HFS-T2 y HFST-T3)
