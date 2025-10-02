@@ -272,13 +272,13 @@ def es_mejor_nsga2(idx1, idx2, frentes, fitness_poblacion):
     
     # Si están en el mismo frente, usar crowding distance
     # (simplificación: usar dominancia directa)
-    return dominancia(fitness_poblacion[idx1], fitness_poblacion[idx2])"""
-Algoritmo Evolutivo Multiobjetivo basado en NSGA-II
-Para problema de Hybrid Flow Shop con 3 objetivos:
-1. Makespan
-2. Balance de carga
-3. Minimización de enfriamientos
-"""
+    return dominancia(fitness_poblacion[idx1], fitness_poblacion[idx2])
+    """Algoritmo Evolutivo Multiobjetivo basado en NSGA-II
+        Para problema de Hybrid Flow Shop con 3 objetivos:
+        1. Makespan
+        2. Balance de carga
+        3. Minimización de enfriamientos
+    """
 
 from Parametros.Parametros_tot import *
 from Aptitud.funcion_fitness_multiobjetivo import fitness_multiobjetivo

@@ -1,6 +1,11 @@
 # Actualizacion de HFS - T2 a HFS-T3
 Proyecto de tesis 3 (taller de investigación)
-## Version 1.1.2:
+## Version 1.1.2b:
+- Implementación del algoritmo NSGA-II para optimización multiobjetivo, incluyendo funciones de cruce y mutación específicas para un enfoque stage-aware.
+- Se añade un script para ejecutar el algoritmo y se implementan funciones de evaluación de fitness para cuatro objetivos: makespan, balance, enfriamientos y energía. (Actualizado de la versión anterior)
+- Se inicializa la población de manera aleatoria y se organiza el código en módulos para mejorar la estructura del proyecto.
+
+## Version 1.1.2a:
 - Refactorización en rama tesis3-dev
 - Puesta a punto del repositorio, esquema de datos, tests mínimos y CI.
 
