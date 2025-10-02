@@ -1,5 +1,9 @@
 # Actualizacion de HFS - T2 a HFS-T3
 Proyecto de tesis 3 (taller de investigación)
+## Version 1.1.2c:
+- Se añaden nuevos scripts para realizar análisis y comparaciones de operadores en el algoritmo NSGA-II, incluyendo la ejecución de la mejor configuración encontrada (temporalmente) y un diagnóstico de la población inicial.
+- Se implementan funciones para evaluar el rendimiento de diferentes combinaciones de operadores y se guardan los resultados en archivos CSV para su posterior análisis.
+
 ## Version 1.1.2b:
 - Implementación del algoritmo NSGA-II para optimización multiobjetivo, incluyendo funciones de cruce y mutación específicas para un enfoque stage-aware.
 - Se añade un script para ejecutar el algoritmo y se implementan funciones de evaluación de fitness para cuatro objetivos: makespan, balance, enfriamientos y energía. (Actualizado de la versión anterior)
