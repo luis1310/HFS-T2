@@ -39,3 +39,9 @@ tesis3/config/config.local.yaml
 # Datos grandes
 *.zip
 *.tar.gz
+
+# macOS metadata files
+._*
+.DS_Store
+.AppleDouble
+.LSOverride
