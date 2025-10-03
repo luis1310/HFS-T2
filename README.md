@@ -1,5 +1,9 @@
 # Actualizacion de HFS - T2 a HFS-T3
 Proyecto de tesis 3 (taller de investigación)
+## Version 1.1.2d:
+- Se añade configuración para pruebas con pytest, incluyendo archivos de configuración y un script de instalación.
+- Se implementa un nuevo script para comparar el rendimiento de NSGA-II estándar y memético, y se actualiza el README para reflejar los cambios en la estructura de pruebas.
+
 ## Version 1.1.2c:
 - Se añaden nuevos scripts para realizar análisis y comparaciones de operadores en el algoritmo NSGA-II, incluyendo la ejecución de la mejor configuración encontrada (temporalmente) y un diagnóstico de la población inicial.
 - Se implementan funciones para evaluar el rendimiento de diferentes combinaciones de operadores y se guardan los resultados en archivos CSV para su posterior análisis.

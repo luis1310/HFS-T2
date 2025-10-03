@@ -30,7 +30,7 @@ source venv/bin/activate
 pip install -r ../requirements.txt
 
 # Ejecutar tests
-pytest tests/ -v
+pytest tesis3/tests/ -v
 ```
 
 ## Uso Básico
@@ -53,13 +53,13 @@ assert chromosome.is_valid()
 
 ```bash
 # Ejecutar todos los tests
-pytest tests/ -v
+pytest tesis3/tests/ -v
 
 # Con cobertura
-pytest tests/ --cov=src --cov-report=html
+pytest tesis3/tests/ --cov=tesis3/src --cov-report=html
 
 # Solo tests específicos
-pytest tests/test_chromosome.py -v
+pytest tesis3/tests/test_chromosome.py -v
 ```
 
 ## Desarrollo
