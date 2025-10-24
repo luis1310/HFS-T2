@@ -1,4 +1,4 @@
-
+"""Análisis final de la mejor configuración - EN STANDBY TEMPORAL"""
 
 """Análisis riguroso con 30 semillas de la mejor configuración"""
 import sys
