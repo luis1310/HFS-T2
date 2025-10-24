@@ -38,7 +38,7 @@ for semilla in range(5):
     print(f"{'='*60}")
     
     # NSGA-II estándar
-    print("  🔹 Ejecutando NSGA-II estándar...")
+    print("  Ejecutando NSGA-II estándar...")
     inicio = time.time()
     frente_std, fitness_std, _ = nsga2(
         config, cruce, mutacion,
@@ -60,10 +60,10 @@ for semilla in range(5):
         'tiempo': tiempo_std
     })
     
-    print(f"    ✓ Makespan: {mejor_mk_std:.2f}s | Frente: {len(frente_std)} | Tiempo: {tiempo_std:.2f}s")
+    print(f"    Makespan: {mejor_mk_std:.2f}s | Frente: {len(frente_std)} | Tiempo: {tiempo_std:.2f}s")
     
     # NSGA-II memético
-    print("  🔸 Ejecutando NSGA-II memético...")
+    print("  Ejecutando NSGA-II memético...")
     inicio = time.time()
     frente_mem, fitness_mem, _ = nsga2_memetic(
         config, cruce, mutacion,
@@ -87,10 +87,10 @@ for semilla in range(5):
         'tiempo': tiempo_mem
     })
     
-    print(f"    ✓ Makespan: {mejor_mk_mem:.2f}s | Frente: {len(frente_mem)} | Tiempo: {tiempo_mem:.2f}s")
+    print(f"    Makespan: {mejor_mk_mem:.2f}s | Frente: {len(frente_mem)} | Tiempo: {tiempo_mem:.2f}s")
     
     mejora_semilla = ((mejor_mk_std - mejor_mk_mem) / mejor_mk_std) * 100
-    print(f"    ➜ Mejora: {mejora_semilla:+.2f}%")
+    print(f"    Mejora: {mejora_semilla:+.2f}%")
 
 # Análisis final
 print("\n" + "="*60)
@@ -102,13 +102,13 @@ mk_mem = [r['makespan'] for r in resultados['memetico']]
 t_std = [r['tiempo'] for r in resultados['estandar']]
 t_mem = [r['tiempo'] for r in resultados['memetico']]
 
-print(f"\n📊 NSGA-II Estándar:")
+print(f"\nNSGA-II Estándar:")
 print(f"   Makespan promedio: {np.mean(mk_std):.2f}s ± {np.std(mk_std):.2f}")
 print(f"   Mejor caso:        {np.min(mk_std):.2f}s")
 print(f"   Peor caso:         {np.max(mk_std):.2f}s")
 print(f"   Tiempo promedio:   {np.mean(t_std):.2f}s")
 
-print(f"\n📊 NSGA-II Memético:")
+print(f"\nNSGA-II Memético:")
 print(f"   Makespan promedio: {np.mean(mk_mem):.2f}s ± {np.std(mk_mem):.2f}")
 print(f"   Mejor caso:        {np.min(mk_mem):.2f}s")
 print(f"   Peor caso:         {np.max(mk_mem):.2f}s")
@@ -117,14 +117,14 @@ print(f"   Tiempo promedio:   {np.mean(t_mem):.2f}s")
 mejora = ((np.mean(mk_std) - np.mean(mk_mem)) / np.mean(mk_std)) * 100
 overhead = ((np.mean(t_mem) - np.mean(t_std)) / np.mean(t_std)) * 100
 
-print(f"\n🎯 CONCLUSIONES:")
+print(f"\nCONCLUSIONES:")
 print(f"   Mejora promedio en makespan: {mejora:+.2f}%")
 print(f"   Overhead computacional:      {overhead:+.2f}%")
 
 if mejora > 0:
-    print(f"\n✅ La búsqueda local MEJORA los resultados")
+    print(f"\nLa búsqueda local MEJORA los resultados")
 else:
-    print(f"\n⚠️  La búsqueda local NO mejora significativamente")
+    print(f"\nLa búsqueda local NO mejora significativamente")
 
 print("\n" + "="*60)
 
@@ -140,4 +140,4 @@ with open('tesis3/results/comparacion_memetica.csv', 'w', newline='') as f:
     for r in resultados['memetico']:
         writer.writerow({'version': 'memetico', **r})
 
-print("📁 Resultados guardados: tesis3/results/comparacion_memetica.csv")
+print("Resultados guardados: tesis3/results/comparacion_memetica.csv")

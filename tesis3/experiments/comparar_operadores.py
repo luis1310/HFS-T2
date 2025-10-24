@@ -1,4 +1,4 @@
-
+"""Compara diferentes combinaciones de operadores - EN STANDBY TEMPORAL - se puede eliminar"""
 """Compara diferentes combinaciones de operadores"""
 import sys
 from pathlib import Path

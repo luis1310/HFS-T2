@@ -181,7 +181,7 @@ def algoritmo_evolutivo_multiobjetivo(
     # Historial para análisis
     historial_frentes = []
     
-    print(f"\n🚀 Iniciando NSGA-II Multiobjetivo (4 objetivos)")
+    print(f"\n Iniciando NSGA-II Multiobjetivo (4 objetivos)")
     print(f"   Población: {tamano_poblacion} | Generaciones: {num_generaciones}")
     print(f"   Objetivos: Makespan, Balance de Carga, Enfriamientos, Consumo Energético\n")
     
@@ -246,7 +246,7 @@ def algoritmo_evolutivo_multiobjetivo(
     frente_pareto = [poblacion[i] for i in frentes_final[0]]
     fitness_pareto = [fitness_final[i] for i in frentes_final[0]]
     
-    print(f"\n✅ Optimización completada")
+    print(f"\n Optimización completada")
     print(f"   Frente de Pareto final: {len(frente_pareto)} soluciones\n")
     
     return frente_pareto, fitness_pareto, historial_frentes
@@ -454,7 +454,7 @@ def algoritmo_evolutivo_multiobjetivo(
     # Historial para análisis
     historial_frentes = []
     
-    print(f"\n🚀 Iniciando NSGA-II Multiobjetivo")
+    print(f"\n Iniciando NSGA-II Multiobjetivo")
     print(f"   Población: {tamano_poblacion} | Generaciones: {num_generaciones}")
     print(f"   Objetivos: Makespan, Balance de Carga, Enfriamientos\n")
     
@@ -519,7 +519,7 @@ def algoritmo_evolutivo_multiobjetivo(
     frente_pareto = [poblacion[i] for i in frentes_final[0]]
     fitness_pareto = [fitness_final[i] for i in frentes_final[0]]
     
-    print(f"\n✅ Optimización completada")
+    print(f"\n Optimización completada")
     print(f"   Frente de Pareto final: {len(frente_pareto)} soluciones\n")
     
     return frente_pareto, fitness_pareto, historial_frentes

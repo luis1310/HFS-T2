@@ -1,4 +1,4 @@
-
+"""Diagnóstico de la población inicial - EN STANDBY TEMPORAL - se puede eliminar"""
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))

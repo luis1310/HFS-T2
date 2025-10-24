@@ -159,7 +159,7 @@ def fitness_multiobjetivo_demo(cromosoma, tiempos_iniciales=tiempos_iniciales, i
             tiempo_uso_maquinas[maquina] += tiempo_trabajo_real
             tiempo_pedido = tiempo_inicio + tiempo_trabajo_real
 
-            estado = "⚠️ ENFRIAMIENTO" if requiere_enfriamiento else "✓ Normal"
+            estado = " ENFRIAMIENTO" if requiere_enfriamiento else " Normal"
             print(f"  Etapa {etapa + 1} | Máquina {maquina} - {estado} (tiempo: {tiempo_trabajo_real:.2f}s)")
 
         tiempo_total = max(tiempo_total, tiempo_pedido)
@@ -195,23 +195,23 @@ def fitness_multiobjetivo_demo(cromosoma, tiempos_iniciales=tiempos_iniciales, i
     print("\n" + "="*70)
     print("RESULTADOS DE LA EVALUACIÓN MULTIOBJETIVO (4 OBJETIVOS)")
     print("="*70)
-    print(f"\n📊 OBJETIVO 1 - MAKESPAN:")
+    print(f"\n OBJETIVO 1 - MAKESPAN:")
     print(f"   Tiempo total: {tiempo_total:.2f}s")
     print(f"   Fitness makespan: {objetivo_makespan:.8f}")
     
-    print(f"\n⚖️  OBJETIVO 2 - BALANCE DE CARGA:")
+    print(f"\n  OBJETIVO 2 - BALANCE DE CARGA:")
     print(f"   Desviación estándar: {desviacion_std:.2f}s")
     print(f"   Tiempo promedio por máquina: {np.mean(tiempos_uso):.2f}s")
     print(f"   Máquina más cargada: {max(tiempos_uso):.2f}s")
     print(f"   Máquina menos cargada: {min(tiempos_uso):.2f}s")
     print(f"   Fitness balance: {objetivo_balance:.8f}")
     
-    print(f"\n❄️  OBJETIVO 3 - ENFRIAMIENTOS:")
+    print(f"\n  OBJETIVO 3 - ENFRIAMIENTOS:")
     print(f"   Número de enfriamientos: {num_enfriamientos}")
     print(f"   Tiempo total perdido por enfriamiento: {tiempo_enfriamiento_total:.2f}s")
     print(f"   Fitness enfriamiento: {objetivo_enfriamiento:.8f}")
     
-    print(f"\n⚡ OBJETIVO 4 - CONSUMO ENERGÉTICO:")
+    print(f"\n OBJETIVO 4 - CONSUMO ENERGÉTICO:")
     print(f"   Energía total consumida: {energia_total:.2f} kWh")
     print(f"   Energía promedio por máquina: {energia_total/11:.2f} kWh")
     print(f"   Máquina con mayor consumo: {max(energia_por_maquina.values()):.2f} kWh (Máq {max(energia_por_maquina, key=energia_por_maquina.get)})")

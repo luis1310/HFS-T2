@@ -1,4 +1,4 @@
-
+"""Análisis de los operadores de mutación y cruce, verifica posibles errores en el codigo- EN STANDBY TEMPORAL"""
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))

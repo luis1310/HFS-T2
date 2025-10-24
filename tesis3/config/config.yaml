@@ -29,13 +29,13 @@ problem:
 # Configuración de algoritmos
 algorithm:
   nsga2:
-    tamano_poblacion: 100
-    num_generaciones: 500
-    prob_cruce: 0.95
-    prob_mutacion: 0.3
+    tamano_poblacion: 200
+    num_generaciones: 1000
+    prob_cruce: 0.8
+    prob_mutacion: 0.1
   
   memetic:
-    activado: false
+    activado: true
     cada_k_generaciones: 10
     max_iteraciones_local: 5
 

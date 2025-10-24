@@ -5,6 +5,10 @@ from copy import deepcopy
 from tesis3.src.fitness.multi_objective import fitness_multiobjetivo
 from tesis3.src.utils.population import inicializar_poblacion
 
+"""
+Analizar el cruding distance dentro del nsga2 memetico
+"""
+
 
 def dominancia(obj1, obj2):
     """

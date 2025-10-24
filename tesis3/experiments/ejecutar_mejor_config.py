@@ -1,4 +1,4 @@
-"""Ejecuta la mejor configuración encontrada"""
+"""Ejecuta la mejor configuración encontrada - EN STANDBY TEMPORAL - se puede eliminar"""
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))

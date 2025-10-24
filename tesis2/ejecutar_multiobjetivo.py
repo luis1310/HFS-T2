@@ -27,7 +27,7 @@ print("="*80)
 print("ALGORITMO EVOLUTIVO MULTIOBJETIVO - NSGA-II (4 OBJETIVOS)")
 print("Problema: Hybrid Flow Shop Scheduling")
 print("="*80)
-print(f"\n📋 CONFIGURACIÓN:")
+print(f"\n CONFIGURACIÓN:")
 print(f"   Método de cruce: {configuracion['metodo_cruce'].__name__}")
 print(f"   Método de mutación: {configuracion['metodo_mutacion'].__name__}")
 print(f"   Probabilidad de cruce: {configuracion['prob_cruz']}")
@@ -38,7 +38,7 @@ print(f"   Número de pedidos: {num_pedidos}")
 print("="*80)
 
 # Inicializar población
-print("\n🔄 Inicializando población...")
+print("\n Inicializando población...")
 poblacion_inicial = inicializar_poblacion(
     tamano_poblacion=configuracion['tamano_poblacion'],
     maquinas_por_etapa=maquinas_por_etapa,
@@ -46,7 +46,7 @@ poblacion_inicial = inicializar_poblacion(
 )
 
 # Ejecutar algoritmo
-print("🚀 Ejecutando NSGA-II...\n")
+print(" Ejecutando NSGA-II...\n")
 inicio = time.time()
 
 frente_pareto, fitness_pareto, historial_frentes = algoritmo_evolutivo_multiobjetivo(
@@ -63,10 +63,10 @@ frente_pareto, fitness_pareto, historial_frentes = algoritmo_evolutivo_multiobje
 fin = time.time()
 
 print("="*80)
-print("📊 RESULTADOS FINALES")
+print(" RESULTADOS FINALES")
 print("="*80)
-print(f"⏱️  Tiempo de ejecución: {fin - inicio:.2f} segundos")
-print(f"🎯 Soluciones en el Frente de Pareto: {len(frente_pareto)}")
+print(f"  Tiempo de ejecución: {fin - inicio:.2f} segundos")
+print(f" Soluciones en el Frente de Pareto: {len(frente_pareto)}")
 print("\n" + "="*80)
 print("TOP 5 SOLUCIONES DEL FRENTE DE PARETO")
 print("="*80)
@@ -90,7 +90,7 @@ for rank, idx in enumerate(top_indices, 1):
     print(f"{rank:<4} {mk:<15.2f} {bal:<18.2f} {enf:<16.2f} {eng:<15.2f}")
 
 print("\n" + "="*80)
-print("📈 ESTADÍSTICAS DEL FRENTE DE PARETO")
+print(" ESTADÍSTICAS DEL FRENTE DE PARETO")
 print("="*80)
 
 makespans = [m[0] for m in metricas_reales]
@@ -98,23 +98,23 @@ balances = [m[1] for m in metricas_reales]
 enfriamientos = [m[2] for m in metricas_reales]
 energias = [m[3] for m in metricas_reales]
 
-print(f"\n🔹 MAKESPAN:")
+print(f"\n MAKESPAN:")
 print(f"   Mínimo: {min(makespans):.2f}s")
 print(f"   Máximo: {max(makespans):.2f}s")
 print(f"   Promedio: {np.mean(makespans):.2f}s")
 print(f"   Desviación: {np.std(makespans):.2f}s")
 
-print(f"\n🔹 BALANCE DE CARGA:")
+print(f"\n BALANCE DE CARGA:")
 print(f"   Mínimo: {min(balances):.2f}s")
 print(f"   Máximo: {max(balances):.2f}s")
 print(f"   Promedio: {np.mean(balances):.2f}s")
 
-print(f"\n🔹 PENALIZACIÓN POR ENFRIAMIENTO:")
+print(f"\n PENALIZACIÓN POR ENFRIAMIENTO:")
 print(f"   Mínimo: {min(enfriamientos):.2f}")
 print(f"   Máximo: {max(enfriamientos):.2f}")
 print(f"   Promedio: {np.mean(enfriamientos):.2f}")
 
-print(f"\n🔹 CONSUMO ENERGÉTICO:")
+print(f"\n CONSUMO ENERGÉTICO:")
 print(f"   Mínimo: {min(energias):.2f} kWh")
 print(f"   Máximo: {max(energias):.2f} kWh")
 print(f"   Promedio: {np.mean(energias):.2f} kWh")
@@ -212,7 +212,7 @@ plt.colorbar(im, ax=ax9, shrink=0.8)
 
 plt.tight_layout()
 plt.savefig('frente_pareto_4_objetivos.png', dpi=300, bbox_inches='tight')
-print(f"\n💾 Gráfico guardado: frente_pareto_4_objetivos.png")
+print(f"\n Gráfico guardado: frente_pareto_4_objetivos.png")
 
 # 2. Evolución del tamaño del Frente de Pareto
 fig2, ax10 = plt.subplots(figsize=(12, 6))
@@ -225,12 +225,12 @@ ax10.set_title('Evolución del Frente de Pareto', fontsize=14, fontweight='bold'
 ax10.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.savefig('evolucion_frente_pareto_4obj.png', dpi=300, bbox_inches='tight')
-print(f"💾 Gráfico guardado: evolucion_frente_pareto_4obj.png")
+print(f" Gráfico guardado: evolucion_frente_pareto_4obj.png")
 
 plt.show()
 
 # Guardar resultados en archivo CSV
-print("\n💾 Guardando resultados en CSV...")
+print("\n Guardando resultados en CSV...")
 import csv
 
 with open('resultados_multiobjetivo_4obj.csv', 'w', newline='') as f:
@@ -242,12 +242,12 @@ with open('resultados_multiobjetivo_4obj.csv', 'w', newline='') as f:
         writer.writerow([i+1, f"{mk:.4f}", f"{bal:.4f}", f"{enf:.4f}", f"{eng:.4f}",
                         f"{f1:.8f}", f"{f2:.8f}", f"{f3:.8f}", f"{f4:.8f}"])
 
-print("✅ Resultados guardados en: resultados_multiobjetivo_4obj.csv")
+print(" Resultados guardados en: resultados_multiobjetivo_4obj.csv")
 
 print("\n" + "="*80)
-print("🎉 PROCESO COMPLETADO")
+print(" PROCESO COMPLETADO")
 print("="*80)
-print("\n📝 PRÓXIMOS PASOS:")
+print("\n PRÓXIMOS PASOS:")
 print("   1. Analizar el frente de Pareto para identificar soluciones de compromiso")
 print("   2. Seleccionar una solución según preferencias del decisor")
 print("   3. Analizar correlaciones entre objetivos en la matriz")
@@ -259,7 +259,7 @@ print("="*80)
 print("ALGORITMO EVOLUTIVO MULTIOBJETIVO - NSGA-II")
 print("Problema: Hybrid Flow Shop Scheduling")
 print("="*80)
-print(f"\n📋 CONFIGURACIÓN:")
+print(f"\n CONFIGURACIÓN:")
 print(f"   Método de cruce: {configuracion['metodo_cruce'].__name__}")
 print(f"   Método de mutación: {configuracion['metodo_mutacion'].__name__}")
 print(f"   Probabilidad de cruce: {configuracion['prob_cruz']}")
@@ -270,7 +270,7 @@ print(f"   Número de pedidos: {num_pedidos}")
 print("="*80)
 
 # Inicializar población
-print("\n🔄 Inicializando población...")
+print("\n Inicializando población...")
 poblacion_inicial = inicializar_poblacion(
     tamano_poblacion=configuracion['tamano_poblacion'],
     maquinas_por_etapa=maquinas_por_etapa,
@@ -278,7 +278,7 @@ poblacion_inicial = inicializar_poblacion(
 )
 
 # Ejecutar algoritmo
-print("🚀 Ejecutando NSGA-II...\n")
+print(" Ejecutando NSGA-II...\n")
 inicio = time.time()
 
 frente_pareto, fitness_pareto, historial_frentes = algoritmo_evolutivo_multiobjetivo(
@@ -295,10 +295,10 @@ frente_pareto, fitness_pareto, historial_frentes = algoritmo_evolutivo_multiobje
 fin = time.time()
 
 print("="*80)
-print("📊 RESULTADOS FINALES")
+print(" RESULTADOS FINALES")
 print("="*80)
-print(f"⏱️  Tiempo de ejecución: {fin - inicio:.2f} segundos")
-print(f"🎯 Soluciones en el Frente de Pareto: {len(frente_pareto)}")
+print(f"  Tiempo de ejecución: {fin - inicio:.2f} segundos")
+print(f" Soluciones en el Frente de Pareto: {len(frente_pareto)}")
 print("\n" + "="*80)
 print("TOP 5 SOLUCIONES DEL FRENTE DE PARETO")
 print("="*80)
@@ -321,25 +321,25 @@ for rank, idx in enumerate(top_indices, 1):
     print(f"{rank:<4} {mk:<15.2f} {bal:<18.2f} {enf:<20.2f}")
 
 print("\n" + "="*80)
-print("📈 ESTADÍSTICAS DEL FRENTE DE PARETO")
+print(" ESTADÍSTICAS DEL FRENTE DE PARETO")
 print("="*80)
 
 makespans = [m[0] for m in metricas_reales]
 balances = [m[1] for m in metricas_reales]
 enfriamientos = [m[2] for m in metricas_reales]
 
-print(f"\n🔹 MAKESPAN:")
+print(f"\n MAKESPAN:")
 print(f"   Mínimo: {min(makespans):.2f}s")
 print(f"   Máximo: {max(makespans):.2f}s")
 print(f"   Promedio: {np.mean(makespans):.2f}s")
 print(f"   Desviación: {np.std(makespans):.2f}s")
 
-print(f"\n🔹 BALANCE DE CARGA:")
+print(f"\n BALANCE DE CARGA:")
 print(f"   Mínimo: {min(balances):.2f}s")
 print(f"   Máximo: {max(balances):.2f}s")
 print(f"   Promedio: {np.mean(balances):.2f}s")
 
-print(f"\n🔹 PENALIZACIÓN POR ENFRIAMIENTO:")
+print(f"\n PENALIZACIÓN POR ENFRIAMIENTO:")
 print(f"   Mínimo: {min(enfriamientos):.2f}")
 print(f"   Máximo: {max(enfriamientos):.2f}")
 print(f"   Promedio: {np.mean(enfriamientos):.2f}")
@@ -384,7 +384,7 @@ ax4.grid(True, alpha=0.3)
 
 plt.tight_layout()
 plt.savefig('frente_pareto_multiobjetivo.png', dpi=300, bbox_inches='tight')
-print(f"\n💾 Gráfico guardado: frente_pareto_multiobjetivo.png")
+print(f"\n Gráfico guardado: frente_pareto_multiobjetivo.png")
 
 # 2. Evolución del tamaño del Frente de Pareto
 fig2, ax5 = plt.subplots(figsize=(12, 6))
@@ -397,12 +397,12 @@ ax5.set_title('Evolución del Frente de Pareto', fontsize=14, fontweight='bold')
 ax5.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.savefig('evolucion_frente_pareto.png', dpi=300, bbox_inches='tight')
-print(f"💾 Gráfico guardado: evolucion_frente_pareto.png")
+print(f" Gráfico guardado: evolucion_frente_pareto.png")
 
 plt.show()
 
 # Guardar resultados en archivo CSV
-print("\n💾 Guardando resultados en CSV...")
+print("\n Guardando resultados en CSV...")
 import csv
 
 with open('resultados_multiobjetivo.csv', 'w', newline='') as f:
@@ -414,12 +414,12 @@ with open('resultados_multiobjetivo.csv', 'w', newline='') as f:
         writer.writerow([i+1, f"{mk:.4f}", f"{bal:.4f}", f"{enf:.4f}", 
                         f"{f1:.8f}", f"{f2:.8f}", f"{f3:.8f}"])
 
-print("✅ Resultados guardados en: resultados_multiobjetivo.csv")
+print(" Resultados guardados en: resultados_multiobjetivo.csv")
 
 print("\n" + "="*80)
-print("🎉 PROCESO COMPLETADO")
+print(" PROCESO COMPLETADO")
 print("="*80)
-print("\n📝 PRÓXIMOS PASOS:")
+print("\n PRÓXIMOS PASOS:")
 print("   1. Analizar el frente de Pareto para identificar soluciones de compromiso")
 print("   2. Seleccionar una solución según preferencias del decisor")
 print("   3. Comparar con el enfoque mono-objetivo anterior")
