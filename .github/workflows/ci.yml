@@ -22,33 +22,8 @@ jobs:
       - name: Tests con timeout y cobertura
         run: |
           pip install pytest pytest-timeout pytest-cov
-          pytest tesis3/tests -v --timeout=30 --cov=tesis3/src/core --cov=tesis3/src/operators --cov-report=xml --cov-config=.coveragerc_ci
-      - name: Gate de cobertura mínima (≥80% core+operators)
-        run: |
-          python - << 'PY'
-          import xml.etree.ElementTree as ET
-          root = ET.parse('coverage.xml').getroot()
-          total_lines = 0
-          covered_lines = 0
-          targets_sub = ('/core/', '/operators/')
-          # Recorremos todas las clases y filtramos por filename (ruta)
-          for cls in root.findall('.//class'):
-            filename = cls.get('filename','')
-            if any(seg in filename for seg in targets_sub):
-              lines = cls.find('lines')
-              if lines is None:
-                continue
-              for line in lines.findall('line'):
-                total_lines += 1
-                hits = line.get('hits','0')
-                try:
-                  covered = float(hits) > 0.0
-                except ValueError:
-                  covered = False
-                if covered:
-                  covered_lines += 1
-          cov = (covered_lines / total_lines) if total_lines else 0.0
-          assert cov >= 0.80, f'Cobertura {cov*100:.1f}% < 80% (core+operators)'
-          PY
+          pytest tesis3/tests -v --timeout=30 \
+            --cov=tesis3/src/core --cov=tesis3/src/operators \
+            --cov-config=.coveragerc_ci --cov-report=xml --cov-fail-under=80
 
 
