@@ -52,18 +52,23 @@ def mutacion_insert_stage_aware(poblacion, config, tasa_mut=0.3):
 
 def mutacion_invert_stage_aware(poblacion, config, tasa_mut=0.3):
     """
-    Invierte asignaciones de máquinas en un rango de etapas
+    Invierte asignaciones de máquinas dentro de una etapa (stage-aware)
+    Reversa el orden de las máquinas asignadas para un rango de pedidos
+    en UNA etapa seleccionada, manteniendo siempre validez por etapa.
     """
     mutados = []
     for individuo in poblacion:
         if random.random() < tasa_mut:
             ind_copy = individuo.copy()
-            pedido_idx = random.randint(0, len(ind_copy.genes) - 1)
-            
-            if config.num_etapas >= 2:
-                etapa1, etapa2 = sorted(random.sample(range(config.num_etapas), 2))
-                ind_copy.genes[pedido_idx][etapa1:etapa2+1] = \
-                    ind_copy.genes[pedido_idx][etapa1:etapa2+1][::-1]
+            if len(ind_copy.genes) >= 2:
+                etapa = random.randint(0, config.num_etapas - 1)
+                i, j = sorted(random.sample(range(len(ind_copy.genes)), 2))
+                # Extraer la secuencia de máquinas asignadas en la etapa elegida
+                segmento = [ind_copy.genes[k][etapa] for k in range(i, j + 1)]
+                segmento.reverse()
+                # Reasignar las máquinas invertidas solo en esa etapa
+                for offset, k in enumerate(range(i, j + 1)):
+                    ind_copy.genes[k][etapa] = segmento[offset]
             
             mutados.append(ind_copy)
         else:
