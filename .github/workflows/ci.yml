@@ -27,9 +27,31 @@ jobs:
         run: |
           python - << 'PY'
           import xml.etree.ElementTree as ET
-          r=ET.parse('coverage.xml').getroot()
-          cov=float(r.get('line-rate','0'))
-          assert cov>=0.80, f'Cobertura {cov*100:.1f}% < 80% (solo core+operators)'
+          tree = ET.parse('coverage.xml')
+          root = tree.getroot()
+          # coverage.py XML: packages/package have attributes line-rate, branch-rate, name
+          pkgs = root.find('packages')
+          total_lines = 0.0
+          covered_lines = 0.0
+          targets = ('tesis3.src.core', 'tesis3.src.operators')
+          if pkgs is not None:
+            for pkg in pkgs.findall('package'):
+              name = pkg.get('name','')
+              if name.startswith(targets):
+                classes = pkg.find('classes')
+                if classes is None:
+                  # fallback to package line-rate with unknown totals -> skip
+                  continue
+                for cls in classes.findall('class'):
+                  lines = cls.find('lines')
+                  if lines is None: 
+                    continue
+                  for line in lines.findall('line'):
+                    total_lines += 1
+                    if line.get('hits','0') not in ('0','0.0'):
+                      covered_lines += 1
+          cov = (covered_lines / total_lines) if total_lines else 0.0
+          assert cov >= 0.80, f'Cobertura {cov*100:.1f}% < 80% (core+operators)'
           PY
 
 
