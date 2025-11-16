@@ -91,7 +91,10 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
         if (gen + 1) % cada_k_gen == 0:
             aplicaciones_local += 1
             if verbose:
-                print(f"Gen {gen+1:3d} | Aplicando búsqueda local al frente ({len(frentes[0])} ind)...")
+                print(
+                    f"Gen {gen+1:3d} | Aplicando búsqueda local al frente "
+                    f"({len(frentes[0])} ind)..."
+                )
             
             # Mejorar individuos del primer frente
             for idx in frentes[0]:
@@ -118,7 +121,10 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
         
         # Combinar y seleccionar
         poblacion_combinada = poblacion + descendencia
-        fitness_combinada = [fitness_multiobjetivo(ind, config) for ind in poblacion_combinada]
+        fitness_combinada = [
+            fitness_multiobjetivo(ind, config)
+            for ind in poblacion_combinada
+        ]
         poblacion = seleccion_nsga2(poblacion_combinada, fitness_combinada, tamano_poblacion)
     
     # Frente final
