@@ -22,7 +22,7 @@ jobs:
       - name: Tests con timeout y cobertura
         run: |
           pip install pytest pytest-timeout pytest-cov
-          pytest tesis3/tests -v --timeout=30 --cov=tesis3/src/core --cov=tesis3/src/operators --cov-report=xml
+          pytest tesis3/tests -v --timeout=30 --cov=tesis3/src/core --cov=tesis3/src/operators --cov-report=xml --cov-config=.coveragerc_ci
       - name: Gate de cobertura mínima (≥80% core+operators)
         run: |
           python - << 'PY'

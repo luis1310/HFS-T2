@@ -1,0 +1,12 @@
+[run]
+source =
+    tesis3/src/core
+    tesis3/src/operators
+omit =
+    */tests/*
+    */experiments/*
+
+[report]
+show_missing = True
+
+
