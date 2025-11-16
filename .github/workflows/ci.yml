@@ -30,11 +30,11 @@ jobs:
           root = ET.parse('coverage.xml').getroot()
           total_lines = 0
           covered_lines = 0
-          targets = ('tesis3/src/core/', 'tesis3/src/operators/')
+          targets_sub = ('/core/', '/operators/')
           # Recorremos todas las clases y filtramos por filename (ruta)
           for cls in root.findall('.//class'):
             filename = cls.get('filename','')
-            if filename.startswith(targets):
+            if any(seg in filename for seg in targets_sub):
               lines = cls.find('lines')
               if lines is None:
                 continue
