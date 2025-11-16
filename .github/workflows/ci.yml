@@ -1,0 +1,33 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Instalar dependencias del proyecto
+        run: |
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Lint estricto (algorithms/ y operators/)
+        run: |
+          pip install flake8 black isort
+          flake8 tesis3/src/algorithms tesis3/src/operators
+          black --check tesis3/src
+          isort --check-only tesis3/src
+      - name: Tests con timeout y cobertura
+        run: |
+          pip install pytest pytest-timeout pytest-cov
+          pytest tesis3/tests -v --timeout=30 --cov=tesis3/src --cov-report=xml
+      - name: Gate de cobertura mínima (≥75% global)
+        run: |
+          python - << 'PY'
+          import xml.etree.ElementTree as ET
+          r=ET.parse('coverage.xml').getroot()
+          cov=float(r.get('line-rate','0'))
+          assert cov>=0.75, f'Cobertura {cov*100:.1f}% < 75%'
+          PY
+
+

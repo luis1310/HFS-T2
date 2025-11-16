@@ -1,0 +1,74 @@
+\chapter{Resultados y Discusión}
+
+\section{Resultados}
+\subsection{Implementación en python}
+La implementación de la función de fitness como se observa en la figura \ref{fitness_python} sigue el modelo visto en la metodología, considerando las condiciones del problema, así como ciertos incrementos los cuales fueron generados de forma aleatoria, por el código visto en la figura \ref{incrementos}, de esta forma los parámetros fijo utilizados como condiciones son los que se aprecian en la figura \ref{parametros}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{Figures/apendice/implementaciones/incrementos.png}
+\caption{Generación de incrementos}
+\label{incrementos}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{Figures/apendice/implementaciones/parametros.png}
+\caption{Generación de incrementos}
+\label{parametros}
+\end{figure}
+
+Por otro lado, la implementación de la función de generación de la población inicial, vista en la figura \ref{poblacion}, mantuvo las condiciones iniciales y las señaladas en la metodología, al hacer uso de $set()$ y tener un conjunto de individuos existentes con los que comparar cada individuo generado es que se garantiza que cada individuo que ingrese a la población inicial sea único, sin embargo el fitness que estos puedan tener si puede llegar a coincidir.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{Figures/apendice/implementaciones/población.png}
+\caption{Generación de la población inicial}
+\label{poblacion}
+\end{figure}
+
+Cada método de selección, cruza y mutación descritos en la metodología se logran implementar en su totalidad, añadiendo una condición. Posterior a la selección de padres, en caso se realice el cruzamiento, los dos individuos que se retornan de la función de cruzamiento para la siguiente generación son los que tengan el mejor fitness entre los 2 padres y 2 hijos, como se visualiza en la figura \ref{SEC_CRUZA_1} la cual es una sección de la implementación del cruzamiento mono-punto, de esta forma cada par de individuos elegidos siempre tendrán los mejores fitness posibles luego del proceso de selección-cruzamiento para pasar a la mutación.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{Figures/apendice/implementaciones/seccion_cruza_1_punto.png}
+\caption{Sección de codigo de cruzamiento en 1 punto}
+\label{SEC_CRUZA_1}
+\end{figure}
+
+De esta forma es que el meta-algoritmo queda como se puede apreciar en la figura \ref{meta_alg}. El código fuente completo de la implementación, la data recopilada en cada ejecución y gráficos de cada modelo en sus diferentes iteraciones pueden encontrarse en el repositorio del proyecto \cite{link_trabajo} visitando el link del apéndice \ref{AppendC}.
+
+\subsection{Mejor algoritmo elegido}
+
+A partir de la data de las ejecuciones de los 120 AG, se tuvo como resultado lo apreciado en las figuras de apéndice \ref{AppendA}, esas figuras permiten ver como cada una de los 12 modelos de hiperparámetros categóricos se desempeña para cada una las 10 configuraciones de la figura \ref{conf_p_mod}, al aplicar los criterios de De Jong descritos en la metodología es que se descartan modelos los cuales tengan un promedio de promedios de makespan bastante elevado, como el modelo 1 visto en la figura \ref{mod1_graf} el cual tiene los promedio de promedios mas altos, como limite para un promedio de promedios se estableció un makespan de 1560 minutos
+
+Adicionalmente al usar el criterio de robustez y ordenar los 120 AG posibles en base a sus desviaciones estándar de los \textit{promedio de makespan de las ultimas 60 generaciones} de cada ejecución, se tuvo como AG finalistas a un total de 10 AG, como se aprecia en la figura \ref{mej_10}.
+
+A partir de los anterior y considerando los criterios de De Jong, el AG a seleccionar tuvo los siguientes hiperparámetros categóricos y numéricos:
+
+Hiperparámetros categóricos:
+\begin{itemize}
+    \item Método de selección: Selección por ranking
+    \item Método de cruzamiento: Cruce mono-punto
+    \item Método de mutación: Mutación por intercambio de etapa
+\end{itemize}
+
+Hiperparámetros numéricos:
+\begin{itemize}
+    \item Tamaño de población: 240
+    \item Probabilidad de cruzamiento: 57.485\%
+    \item Probabilidad de mutación: 49.002\%
+\end{itemize}
+
+Esto debido a que al tener un promedio total de makespan menor al promedio de promedios de las ultimas 60 generaciones por ejecución, se puede apreciar que en esas ultimas 60 generaciones el algoritmo no convergió de manera apresurada, además de tener una desviación estándar baja, de 3.381 aproximadamente, es que este AG es el que ofrece un resultado mejor y más consistente a través de diversas ejecuciones.
+
+\section{Discusión}
+Los resultados previos contrastan con los vistos por Lopez, et al. \cite{Lop_et_al_2015}, dado que la variación de resutltados vista en este seminario es del 0.217\%, la cual es la variación que tendrá en base a la desviación estándar en relación con el promedio del makespan de las ultimas 60 generación por ejecución, esto indica que el AG desarrollado en este seminario es más robusto.
+
+Al igual que en este seminario, Muñoz, et al. \cite{Mun_etal_2024} aborda el tema de la programación de maquinas en una linea de ensamblaje automotriz, con la diferencia que los autores trabajan 2 lineas de ensamblaje para poder operar 29 máquinas, sin embargo su AE utilizado tuvo 2 algoritmos de metaheuristicas, procedimiento de búsqueda adaptativa aleatoria voraz (GRASP) y el algoritmo genético de clave aleatoria sesgada (BRKGA), la diferencia principal es que los autores disponían del makespan optimo a alcanzar, sin embargo, en el presente seminario se busca tener un AG robusto que pueda competir de manera independiente de la cantidad de trabajos que requieran de una programación. De forma similar se explora otro camino de la aplicación de los AG basados en el modelo estándar de selección, cruza y mutación pero condicionando cada uno para acercarse lo más posible a la realidad.
+
+Por otro lado los resultados hallados por Kraul \cite{KRAUL2025125624} en su solución para el problema de HFS, pero de 2 etapas, con el algoritmo genético logrando una brecha de desviación del 9.74\% y un tiempo de ejecución promedio de 9.81 segundos, por parte de este seminario el porcentaje de desviación fue del 0.217\%, pero con un tiempo de ejecución aproximado de 37 segundos aproximadamente. Si bien es casi 4 veces el tiempo de ejecución a comparación de los autores, el porcentaje de desviación es significativamente menor, por lo que es comparativamente mejor a nivel de robustez, esto también muestra una limitación del AG lo que muestra que aun queda aspectos por mejorar.
+
+% [Sección de complejidad eliminada; movida al Capítulo 3]
+
+

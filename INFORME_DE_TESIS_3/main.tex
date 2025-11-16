@@ -1,0 +1,166 @@
+\documentclass[12pt,spanish, singlespacing,]{MastersDoctoralThesis}
+\usepackage[utf8]{inputenc} 
+\usepackage[T1]{fontenc} 
+\usepackage[none]{hyphenat}
+\usepackage{palatino} 
+\usepackage{acronym}
+\spacing{1.5}
+\usepackage[nomain]{glossaries}
+%\usepackage[backend=bibtex,style=authoryear,natbib=true]{biblatex}
+%\addbibresource{main.bib}
+\usepackage[autostyle=true]{csquotes}
+
+\usepackage{afterpage}
+\newcommand\blankpage{%
+    \null
+    \thispagestyle{empty}%
+    \addtocounter{page}{0}%
+    \newpage}
+    
+\usepackage{listings}
+\renewcommand{\lstlistingname}{Código}
+\renewcommand\lstlistlistingname{Índice de Código}
+
+\usepackage{float}
+\usepackage{url}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric}
+\makeatletter
+\g@addto@macro{\UrlBreaks}{\UrlOrds}
+\makeatother                                                  
+
+\thesistitle{}
+\supervisor{Cesar Jesus Lara Avila} 
+\examiner{} 
+\degree{} 
+\author{Luis Alberto De la cruz Mantilla} 
+\subject{}
+\keywords{} 
+\university{\href{http://www.uni.edu.pe/}{Universidad Nacional de Ingenier\'ia}} 
+\department{\href{http://fc.uni.edu.pe/fc/index.php/escuelas/ciencia-de-la-computacion}{}} 
+\faculty{\href{http://fc.uni.edu.pe/fc/}{}}
+\hypersetup{pdftitle=\ttitle} 
+\hypersetup{pdfauthor=\authorname}
+\hypersetup{pdfkeywords=\keywordnames} 
+\sloppy
+\decimalpoint
+\begin{document}
+\frontmatter 
+\pagestyle{plain} 
+\begin{titlepage}
+\begin{center}
+%\textsc{\huge \univname}\\[0.5cm]
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.3\textwidth]{Figures/Escudo_UNI.png}
+\end{figure}
+
+\textsc{\huge \univname}\\[0.3cm]
+\textsc{\Large Facultad de Ciencias}\\[0.2cm]
+\textsc{\large Escuela Profesional de Ciencia de la Computaci\'on}\\[2cm]
+\textsc{\LARGE \textit{Optimización Multiobjetivo de Líneas de Ensamblaje usando NSGA-II y Algoritmo Memético}}\\[2cm] 
+{\Large \textbf{PROYECTO DE TESIS}}
+{\huge \bfseries \ttitle}\\[2cm] 
+% Thesis title
+%\bigskip
+%\HRule \\[0.8cm] % Horizontal line
+
+%\begin{minipage}{1.5\textwidth}
+%\begin{flushleft} \large
+\bigskip
+\bigskip
+\large\emph{Autor:}
+{\authorname}\\ 
+\large\emph{Asesor:} 
+{\supname} 
+%\end{flushleft}
+%\end{minipage}
+%\\[2cm]
+\\[1cm]
+{\large Octubre, 2025}\\[4cm] 
+ 
+\vfill
+\end{center}
+\end{titlepage}
+\afterpage{\blankpage}
+%\cleardoublepage
+%\renewcommand{\abstractname}{Abstract}
+\begin{abstract}
+\addchaptertocentry{\abstractname}
+
+El presente estudio se centra en el desarrollo de algoritmos evolutivos multiobjetivo para abordar el problema de programación de tareas en un entorno de HFS con máquinas en paralelo de una línea de ensamblaje. En particular, se implementa el algoritmo NSGA-II y su variante memética (NSGA-II Memético) para optimizar simultáneamente tres objetivos: minimizar el tiempo total de finalización (makespan), balancear la carga de trabajo entre máquinas, y reducir el consumo energético del sistema. La metodología empleada considera la programación realista de la línea de ensamblaje, incluyendo el desgaste de las máquinas y sus procesos de enfriamiento. Los resultados obtenidos demuestran la efectividad del enfoque multiobjetivo para proporcionar un conjunto de soluciones Pareto-óptimas, permitiendo al decisor elegir la configuración más adecuada según sus prioridades operativas. Las conclusiones del estudio subrayan la complejidad del problema de programación en entornos de taller híbrido (HFS) y la efectividad del algoritmo NSGA-II propuesto, que optimiza simultáneamente aspectos de productividad, equidad de carga y consumo energético, lo que puede ser aplicado en diversas industrias para mejorar la productividad y la sostenibilidad operativa.
+
+\end{abstract}
+\afterpage{\blankpage}
+\tableofcontents
+%\afterpage{\blankpage}
+\listoffigures
+%\afterpage{\blankpage}
+%\listoftables
+%\afterpage{\blankpage}
+%\listoftables 
+%\lstlistoflistings
+%\afterpage{\blankpage}
+\newpage
+\begin{center}
+{\huge Índice de Acrónimos}\\[2cm]
+\end{center}
+\bigskip
+\begin{tabular}{ l c l }
+\textbf{HFS} & & Hybrid Flow Shop\\
+\textbf{AE} & & Algoritmo evolutivo\\
+\textbf{AG} & & Algoritmo Genético \\
+\textbf{NSGA-II} & & Non-dominated Sorting Genetic Algorithm II\\
+\textbf{MILP} & & Mixed Integer Linear Programming\\
+
+\end{tabular}
+\afterpage{\blankpage}
+
+\newpage
+\begin{center}
+{\huge \textit{Agradecimientos}}\\[1.5cm]
+\end{center}
+
+Agradezco a mi asesor de tesis, el profesor Cesar Jesús Lara Avila, por su guía invaluable, paciencia y dedicación a lo largo de todo este proyecto. Sus orientaciones precisas y su compromiso con mi desarrollo académico han sido fundamentales para el crecimiento de este trabajo. Su disposición para ayudarme a resolver dudas, su experiencia y su interés genuino por mi progreso académico fueron una fuente constante de motivación durante este proceso. Gracias por motivarme a superar cada desafío y por brindarme la confianza necesaria para avanzar con seguridad en este trayecto académico. 
+
+A mi familia por mostrarme su apoyo incondicional durante todo el proceso de este proyecto, especialmente durante las largas noches de trabajo, brindándome la tranquilidad necesaria para culminar con esta investigación. Su comprensión y apoyo fueron esenciales para mantener el equilibrio necesario en este periodo.
+
+A todos, gracias por acompañarme en este camino y por ser una parte fundamental en la realización de este proyecto. Su apoyo no solo enriquece mi formación académica, sino también mi crecimiento personal.
+
+\afterpage{\blankpage}
+
+\mainmatter 
+\pagestyle{thesis}
+\input{Chapters/Cap1}
+%\newpage
+%$\ $
+%\thispagestyle{empty} % para que no se numere esta pagina
+\input{Chapters/Cap2}
+%\newpage
+%$\ $
+%\thispagestyle{empty} % para que no se numere esta pagina
+\input{Chapters/Cap3}
+%\newpage
+%$\ $
+%\thispagestyle{empty} % para que no se numere esta pagina
+%\input{Chapters/Cap4}
+%\newpage
+%$\ $
+%\thispagestyle{empty} % para que no se numere esta pagina
+\input{Chapters/Cap5}
+
+
+
+\bibliography{main}
+\bibliographystyle{unsrt}
+\afterpage{\blankpage}
+
+%\appendix
+%\input{Appendix/AppendixA}
+
+\end{document}

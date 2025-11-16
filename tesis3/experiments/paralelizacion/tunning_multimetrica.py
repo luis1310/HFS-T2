@@ -452,21 +452,21 @@ def main():
     # Mejor configuración
     if configuraciones_analizadas:
         mejor = configuraciones_analizadas[0]
-        print(f"\n" + "="*70)
-        print("MEJOR CONFIGURACIÓN ENCONTRADA")
-        print("="*70)
+    print(f"\n" + "="*70)
+    print("MEJOR CONFIGURACIÓN ENCONTRADA")
+    print("="*70)
         print(f"Población: {mejor['configuracion']['tamano_poblacion']}")
         print(f"Generaciones: {mejor['configuracion']['num_generaciones']}")
         print(f"Prob. cruce: {mejor['configuracion']['prob_cruce']}")
         print(f"Prob. mutación: {mejor['configuracion']['prob_mutacion']}")
         print(f"Búsqueda local cada: {mejor['configuracion']['cada_k_gen']} gen")
         print(f"Iteraciones locales: {mejor['configuracion']['max_iter_local']}")
-        print(f"\nMétricas promedio:")
-        print(f"   Score agregado: {mejor['prom_score']:.4f}")
-        print(f"   Makespan: {mejor['prom_makespan']:.2f}s")
-        print(f"   Balance: {mejor['prom_balance']:.2f}")
-        print(f"   Energía: {mejor['prom_energia']:.2f} kWh")
-        print(f"   Tiempo: {mejor['prom_tiempo']:.2f}s")
+    print(f"\nMétricas promedio:")
+    print(f"   Score agregado: {mejor['prom_score']:.4f}")
+    print(f"   Makespan: {mejor['prom_makespan']:.2f}s")
+    print(f"   Balance: {mejor['prom_balance']:.2f}")
+    print(f"   Energía: {mejor['prom_energia']:.2f} kWh")
+    print(f"   Tiempo: {mejor['prom_tiempo']:.2f}s")
     
     # Guardar resultados
     timestamp_final = time.strftime('%Y%m%d_%H%M%S')

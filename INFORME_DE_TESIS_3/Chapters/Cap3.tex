@@ -1,0 +1,537 @@
+\chapter{Metodología y Herramientas}
+
+\section{Metodología}
+La métodología a utilizar en esta problemática se centra en las condiciones que el problema tenga y la función de aptitud (fitness) a utilizar, lo que incluye su estructura, sus parámetros y una breve descripción de los mismos.
+
+\subsection{Condiciones del problema}
+
+El problema clásico del flow shop hibrido flexible (HFS, por sus siglas en inglés) supone un conjunto de $P$ pedidos que deben ser procesados en $E$ etapas. Cada etapa contiene varias máquinas paralelas idénticas y la ruta de proceso es igual para cada trabajo (Pedido); teniendo en cuenta un conjunto de suposiciones estándar \cite{Song202156822}, el objetivo es encontrar la programación que logre el mínimo makespan. El tiempo que transcurre entre el inicio del primer trabajo en la primera máquina y la terminación del último trabajo en la última máquina se conoce con el término de makespan \cite{Garavito-Hernández2019362}. Se considera que minimizar el makespan equivale a maximizar la utilización de las máquinas, ya que se busca disminuir los tiempos de alistamiento y los tiempos de ocio de las máquinas.
+
+Para el presente proyecto, como condición del problema se le asigna un tiempo inicial en minutos a cada maquina, como se ve en la figura \ref{tiempos_maquina}. Estos tiempos indican cuanto tarda dicha maquina en completar una determinada etapa.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1.0\textwidth]{Figures/tiempos.png}
+\caption{Distribución de maquinas por etapa}
+\label{tiempos_maquina}
+\end{figure}
+
+Así mismo, se toma como condición que esta linea de ensamblaje cuente con 5 etapas las cuales deben ser realizadas en orden, con un total de 11 maquinas distribuidas como se ve en la figura \ref{maquinas}. Se considera que el pedido pasa de forma automática a la siguiente maquina disponible en la siguiente etapa.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{Figures/etapas_maquinas.png}
+\caption{Distribución de maquinas por etapa}
+\label{maquinas}
+\end{figure}
+
+\subsection{Diseño del cromosoma}
+En vista de que el algoritmo buscará la alternativa de solución que presente el menor makespan, fue importante determinar la estructura de los cromosomas que conformaron la población inicial, dicha población se modificó durante las iteraciones del algoritmo genético.
+
+Una representación usual en la literatura es la de una representación binaria \cite{Lop_et_al_2015}, tomandolo como un array de desiciones, tal como se ve en la figura \ref{crom_bin}, sin embargo, para una cuantiosa cantidad de trabajos, maquinas y etapas esto no es viable, en caso se requiera el cromosoma para 3 trabajos y una distribución de maquinas como la mencionada en la figura \ref{maquinas} se usa un array de 33 genes, los cuales tendrían valores de 0 o 1.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{Figures/cromosoma_binario.png}
+\caption{Representación binaria de un cromosoma de $i$ pedidos}
+\label{crom_bin}
+\end{figure}
+
+Teniendo en cuenta lo anterior es que la representación a utilizar para el cromosoma es un array de números enteros el cual contendrá los números de las maquinas, cada valor implica la maquina por la que pasa el pedido a través de cada etapa, restringiendo las maquinas por las que puede pasar en cada etapa, así mismo estas maquinas trabajan en paralelo.
+
+Como ejemplo, un recorrido de 3 pedidos estaría dado por el siguiente cromosoma:
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{Figures/cromosoma_ejm_3_ped.png}
+\caption{Cromosoma para 3 pedidos}
+\label{3ped}
+\end{figure}
+
+Esta representación esta implícitamente señalando cada pedido (verde, azul, amarillo), cada cuadro representa la etapa en la que trabaja la maquina y el número dentro del cuadrado es la maquina que completará dicha etapa. De tal forma que si extendemos esta explicación de manera gráfica se tendría la figura \ref{3ped_exp}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{Figures/cromosoma_ext.png}
+\caption{Representación explicita para 3 pedidos}
+\label{3ped_exp}
+\end{figure}
+
+
+Con una representación en base a números enteros es más sencillo de entender para un publico general lo que conlleva a una mayor facilidad de uso.
+
+Para este ejemplo el makespan es de 215.1 minutos como se muestra en la figura \ref{3ped_makespan}, tomando como base a los tiempos iniciales de las maquinas previamente mencionados.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\textwidth]{Figures/Makespan_ejm.png}
+\caption{Desarrollo del makespan para el cromosoma de 3 pedidos}
+\label{3ped_makespan}
+\end{figure}
+
+\subsection{Algoritmo NSGA-II}
+El algoritmo Non-dominated Sorting Genetic Algorithm II (NSGA-II) \cite{Deb2002} es una metaheurística evolutiva multiobjetivo desarrollada por Deb et al. en 2002. Este algoritmo está diseñado para resolver problemas de optimización con múltiples objetivos simultáneos mediante el concepto de dominancia de Pareto.
+
+El NSGA-II opera mediante tres mecanismos fundamentales: (1) la clasificación de no-dominancia, que organiza la población en frentes de Pareto basándose en la dominancia entre individuos; (2) el cálculo de la distancia de crowding (crowding distance), que mide la densidad de soluciones alrededor de cada individuo en el espacio objetivo; y (3) un operador de selección que favorece individuos con mejor rango de frente y mayor diversidad.
+
+En cada generación, el algoritmo evalúa el fitness multiobjetivo de todos los individuos, los clasifica en frentes de Pareto, genera una descendencia mediante cruce y mutación, y luego combina la población padre con la descendencia. Finalmente, selecciona los mejores individuos para formar la nueva población, priorizando soluciones del frente de Pareto y manteniendo la diversidad mediante el operador de crowding distance.
+
+\begin{algorithm}
+\caption{Algoritmo NSGA-II}\label{alg:nsga2}
+\begin{algorithmic}[1]
+\Require $TamPoblacion, NumGeneraciones, ProbCruce, ProbMutacion$
+\State $Poblacion \gets$ Inicializar poblacion aleatoria
+\For{ $Gen=1$ to $NumGeneraciones$ }
+\State $Fitness \gets$ Evaluar fitness multiobjetivo para cada individuo
+\State $Frentes \gets$ Clasificar poblacion por dominancia de Pareto
+\State $Descendencia \gets []$
+\While{$Longitud(Descendencia) < TamPoblacion$}
+\State $Padre1, Padre2 \gets$ Torneo binario basado en crowding
+\State $Hijo1, Hijo2 \gets$ Operador de cruce con probabilidad $ProbCruce$
+\State $Descendencia \gets$ Agregar $Hijo1, Hijo2$
+\EndWhile
+\State $Descendencia \gets$ Operador de mutacion con probabilidad $ProbMutacion$
+\State $PoblacionCombinada \gets$ Combinar $Poblacion$ y $Descendencia$
+\State $FitnessCombinada \gets$ Evaluar fitness de poblacion combinada
+\State $Poblacion \gets$ Seleccionar mejores $TamPoblacion$ individuos via NSGA-II
+\EndFor
+\State $FrentePareto \gets$ Extraer primer frente de Pareto
+\State \Return $FrentePareto, FitnessFrentePareto$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Variante Memética: NSGA-II con Búsqueda Local}
+La versión memética del NSGA-II combina el algoritmo evolutivo estándar con una fase de búsqueda local \cite{Moscato1989}. Este enfoque híbrido incorpora refinamiento local de las soluciones para mejorar la convergencia hacia el frente de Pareto verdadero.
+
+En esta implementación, la búsqueda local se aplica periódicamente (cada $k$ generaciones) a los individuos del primer frente de Pareto. La estrategia de búsqueda local implementada es un algoritmo de ascenso de colina (hill climbing) adaptado al contexto multiobjetivo. Para cada individuo seleccionado, se generan vecinos mediante mutaciones locales pequeñas y se evalúa si estos vecinos dominan o igualan la solución actual. Si un vecino mejora la solución (la domina en el sentido de Pareto), se acepta como la nueva solución.
+
+Esta incorporación de búsqueda local permite explotar la vecindad de las soluciones prometedoras, mejorando la calidad local del frente de Pareto sin comprometer la exploración global del espacio de soluciones. El resultado es un frente de Pareto de mayor calidad con mejor convergencia hacia las soluciones óptimas del problema.
+
+\subsection{Función de aptitud multiobjetivo}
+\subsubsection{Definiciones:}
+Inicialmente se tuvo las siguientes definiciones:
+
+\begin{itemize}
+    \item \( M_i \) es la máquina \( i \)-ésima (donde \( i = 1, 2, \dots, 11 \)) con un tiempo inicial de procesamiento \( T_{i}^{(0)} \).
+    \item \( P_j \) es el pedido \( j \)-ésimo (donde \( j = 1, 2, \dots, n \)).
+    \item \( S_k \) es la \( k \)-ésima etapa de producción (donde \( k = 1, 2, \dots, 5 \)).
+    \item \( T_{i,j}^{(k)} \) es el tiempo que la máquina \( i \)-ésima tarda en procesar el pedido \( j \)-ésimo en la etapa \( k \).
+    \item \( r_i \in [0.02, 0.03] \) es el incremento porcentual del tiempo de trabajo de la máquina \( i \)-ésima después de procesar un pedido.
+    \item \( n \) es el número de trabajos que se solicitarán.
+    \item \( \alpha = 1.30 \) es el umbral del 130\% del tiempo inicial para que se produzca el enfriamiento.
+    \item \( c = 6 \) es el tiempo de enfriamiento en segundos.
+    \item \( \gamma = 0.75 \) es el factor de reducción del tiempo después del enfriamiento.
+\end{itemize}
+La adaptación de la problemática del proyecto de tesis 2 a un problema multiobjetivo requiere que se tengan las siguientes definiciones adicionales:
+\begin{itemize}
+    \item \( D_i \) es el tiempo total de uso de la máquina \( M_i \), calculado como la suma de todos los tiempos de procesamiento realizados por dicha máquina.
+    \item \( \bar{D} \) es el tiempo promedio de uso de todas las máquinas en el sistema.
+    \item \( \sigma_D \) es la desviación estándar de los tiempos de uso de las máquinas, utilizada como métrica de balance de carga.
+    \item \( P_i^{activa} \) es la potencia consumida por la máquina \( M_i \) cuando está en funcionamiento (en kW).
+    \item \( P_i^{inactiva} \) es la potencia consumida por la máquina \( M_i \) cuando está en espera (en kW).
+    \item \( E_{total} \) es el consumo energético total del sistema (en kWh).
+    \item \( \mathbf{1}(\cdot) \) es la función indicadora que toma el valor 1 si la condición entre paréntesis es verdadera y 0 en caso contrario.
+\end{itemize}
+
+\subsubsection{Tiempo de procesamiento de una máquina:}
+
+El tiempo que una máquina \( M_i \) tarda en procesar el pedido \( P_j \) en la etapa \( E_k \), considerando que el tiempo de procesamiento puede aumentar tras cada pedido, se expresa como:
+
+\[
+T_{i,j}^{(k)} = T_i^{(0)} \prod_{m=1}^{j-1} (1 + r_i^{(m)})
+\]
+
+Si \( T_{i,j}^{(k)} \geq \alpha \cdot T_i^{(0)} \), entonces la máquina entra en el estado de enfriamiento y el próximo tiempo de trabajo será reducido por un factor \( \gamma \):
+
+\[
+T_{i,j+1}^{(k)} = \gamma \cdot T_{i,j}^{(k)} + c
+\]
+
+\subsubsection{Tiempo total de procesamiento de un pedido:}
+
+El tiempo total que toma procesar el pedido \( P_j \) es el tiempo que tarda en pasar por las cinco etapas, considerando que las máquinas trabajan en paralelo y que los pedidos pueden quedar en espera si no hay máquinas disponibles. El tiempo de inicio del pedido \( P_j \) en la etapa \( E_k \) dependerá de la disponibilidad de las máquinas en esa etapa:
+
+\[
+T_{P_j} = \max \left( \sum_{k=1}^{5} T_{i,j}^{(k)}, \max_{i \in E_k} (T_{i,j-1}^{(k)} + T_{i,j}^{(k)}) \right)
+\]
+
+Donde \( T_{i,j-1}^{(k)} \) es el tiempo en que la máquina \( M_i \) terminó de procesar el pedido anterior en la etapa \( k \), es decir, es el tiempo que la máquina queda libre para procesar el siguiente pedido.
+
+\subsubsection{Tiempo total de procesamiento de todos los pedidos:}
+
+El tiempo total para procesar los $n$ pedidos se define como:
+
+\[
+T_{\text{total}} = \max_{j=1}^{n} T_{P_j}
+\]
+
+\subsubsection{Parámetros energéticos del sistema:}
+
+Para el cálculo del objetivo de consumo energético, se definen los siguientes parámetros para cada máquina:
+
+\begin{table}[H]
+\centering
+\caption{Parámetros de consumo energético por máquina}
+\label{tab:potencias}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Máquina} & \textbf{Potencia Activa (kW)} & \textbf{Potencia Inactiva (kW)} \\
+\hline
+\( M_1 \) & 5.5 & 0.5 \\
+\( M_2 \) & 5.3 & 0.5 \\
+\( M_3 \) & 5.6 & 0.5 \\
+\( M_4 \) & 4.2 & 0.4 \\
+\( M_5 \) & 4.1 & 0.4 \\
+\( M_6 \) & 3.0 & 0.3 \\
+\( M_7 \) & 3.4 & 0.3 \\
+\( M_8 \) & 3.5 & 0.3 \\
+\( M_9 \) & 2.8 & 0.3 \\
+\( M_{10} \) & 2.6 & 0.3 \\
+\( M_{11} \) & 2.0 & 0.2 \\
+\hline
+\end{tabular}
+\end{table}
+
+Además, se considera que cada evento de enfriamiento consume \( E_{enf} = 2.0 \) kWh adicionales.
+
+\subsubsection{Formulación del problema multiobjetivo:}
+
+El problema se formula como:
+
+\begin{equation}
+\min \vec{F}(C) = \begin{bmatrix} f_1(C) \\ f_2(C) \\ f_3(C) \end{bmatrix}
+\end{equation}
+
+donde \( C \) es el cromosoma que representa la asignación de máquinas para cada pedido en cada etapa, y cada función objetivo \( f_i(C) \) representa un aspecto diferente del rendimiento del sistema.
+
+\subsubsection{Objetivo 1: Minimización del Makespan}
+
+El primer objetivo busca minimizar el tiempo total de producción, definido como:
+
+\begin{equation}
+f_1(C) = T_{\text{total}}(C) = \max_{j=1}^{n} T_{P_j}
+\end{equation}
+
+donde \( T_{P_j} \) es el tiempo total que toma procesar el pedido \( P_j \) a través de todas las etapas, calculado como se definió anteriormente.
+
+\subsubsection{Objetivo 2: Balance de Carga entre Máquinas}
+
+El segundo objetivo busca equilibrar la distribución del trabajo entre las máquinas, minimizando la desviación estándar de sus tiempos de uso:
+
+\begin{equation}
+f_2(C) = \sigma_D = \sqrt{\frac{1}{11} \sum_{i=1}^{11} (D_i - \bar{D})^2}
+\end{equation}
+
+donde el tiempo total de uso de cada máquina \( D_i \) se calcula como:
+
+\begin{equation}
+D_i = \sum_{j=1}^{n} \sum_{k=1}^{5} T_{i,j}^{(k)} \cdot \mathbf{1}_{\{M_i \text{ procesa } P_j \text{ en } E_k\}}
+\end{equation}
+
+y el tiempo promedio de uso es:
+
+\begin{equation}
+\bar{D} = \frac{1}{11}\sum_{i=1}^{11} D_i
+\end{equation}
+
+Un valor menor de \( f_2(C) \) indica una distribución más equitativa del trabajo entre las máquinas, lo que reduce el desgaste desigual y mejora la eficiencia del sistema.
+
+\subsubsection{Objetivo 3: Minimización del Consumo Energético}
+
+El tercer objetivo busca minimizar el consumo energético total del sistema, considerando la energía consumida en estado activo e inactivo:
+
+\begin{equation}
+f_3(C) = E_{total}(C) = \sum_{i=1}^{11} \left[ P_i^{activa} \cdot \frac{D_i}{60} + P_i^{inactiva} \cdot \frac{T_{total} - D_i}{60} \right]
+\end{equation}
+
+donde:
+\begin{itemize}
+    \item \( \frac{D_i}{60} \) convierte el tiempo activo de minutos a horas para el cálculo de energía.
+    \item \( \frac{T_{total} - D_i}{60} \) representa el tiempo que la máquina estuvo en espera, convertido a horas.
+\end{itemize}
+
+Este objetivo captura el impacto energético total de la programación, considerando tanto el consumo operativo de las máquinas cuando están trabajando como su consumo cuando están en espera.
+
+\subsubsection{Función de aptitud para maximización:}
+
+Dado que los algoritmos evolutivos típicamente maximizan la función de aptitud, se define el vector de fitness como la inversa de cada objetivo:
+
+\begin{equation}
+\text{Fitness}(C) = \begin{bmatrix} 
+\frac{1}{f_1(C)} \\ 
+\frac{1}{f_2(C) + 1} \\ 
+\frac{1}{f_3(C) + 1}
+\end{bmatrix}
+\end{equation}
+
+donde se suma 1 en el denominador de \( f_2 \) y \( f_3 \) para evitar divisiones por cero cuando los valores son óptimos (desviación estándar nula o consumo energético nulo).
+
+\subsubsection{Restricciones del problema:}
+
+El cromosoma \( C \) debe satisfacer las siguientes restricciones:
+
+\begin{align}
+C &= [P_1, P_2, \ldots, P_n] \\
+P_j &= [M_{j,1}, M_{j,2}, M_{j,3}, M_{j,4}, M_{j,5}] \quad \forall j \in \{1,\ldots,n\} \\
+M_{j,k} &\in \mathcal{M}_k \quad \forall j \in \{1,\ldots,n\}, \forall k \in \{1,\ldots,5\}
+\end{align}
+
+donde \( \mathcal{M}_k \) representa el conjunto de máquinas disponibles en la etapa \( k \), es decir:
+\begin{align}
+\mathcal{M}_1 &= \{1, 2, 3\} \\
+\mathcal{M}_2 &= \{4, 5\} \\
+\mathcal{M}_3 &= \{6, 7, 8\} \\
+\mathcal{M}_4 &= \{9, 10\} \\
+\mathcal{M}_5 &= \{11\}
+\end{align}
+
+\subsubsection{Dominancia de Pareto y solución óptima:}
+
+En el contexto de optimización multiobjetivo, una solución \( C_1 \) domina en el sentido de Pareto a otra solución \( C_2 \) (denotado como \( C_1 \prec C_2 \)) si y solo si:
+
+\begin{equation}
+f_i(C_1) \leq f_i(C_2) \quad \forall i \in \{1,2,3\} \quad \text{y} \quad \exists j: f_j(C_1) < f_j(C_2)
+\end{equation}
+
+El conjunto de soluciones no dominadas se conoce como el \textbf{frente de Pareto}, y representa el mejor compromiso posible entre los tres objetivos. El algoritmo evolutivo multiobjetivo (NSGA-II) busca encontrar este frente de Pareto, proporcionando al decisor múltiples soluciones óptimas entre las cuales elegir según sus preferencias particulares.
+
+\subsubsection{Interpretación de los objetivos:}
+
+Los tres objetivos capturan aspectos complementarios del rendimiento del sistema:
+
+\begin{itemize}
+    \item \textbf{Makespan} (\( f_1 \)): Representa la eficiencia temporal del sistema. Su minimización reduce el tiempo total de producción.
+    \item \textbf{Balance de Carga} (\( f_2 \)): Mide la equidad en la distribución del trabajo. Su minimización previene el desgaste desigual de las máquinas y mejora la utilización de recursos.
+    \item \textbf{Consumo Energético} (\( f_3 \)): Representa el costo energético y el impacto ambiental. Su minimización reduce costos operativos y la huella de carbono.
+\end{itemize}
+
+Estos objetivos presentan relaciones de conflicto: por ejemplo, minimizar el makespan podría requerir el uso intensivo de ciertas máquinas (aumentando \( f_2 \) y \( f_3 \)), mientras que balancear la carga podría extender el tiempo total de producción (aumentando \( f_1 \)).
+
+\subsubsection{Formulación completa del problema:}
+
+\begin{align}
+\text{Minimizar} \quad & \vec{F}(C) = [f_1(C), f_2(C), f_3(C)]^T \\
+\text{Sujeto a:} \quad & C = [P_1, P_2, \ldots, P_n] \\
+& P_j = [M_{j,1}, M_{j,2}, M_{j,3}, M_{j,4}, M_{j,5}] \\
+& M_{j,k} \in \mathcal{M}_k \quad \forall j \in \{1,\ldots,n\}, \forall k \in \{1,\ldots,5\} \\
+& T_{i,j}^{(k)} = T_i^{(0)} \prod_{m=1}^{j-1} (1 + r_i^{(m)}) \\
+& \text{Si } T_{i,j}^{(k)} \geq \alpha \cdot T_i^{(0)}: \quad T_{i,j+1}^{(k)} = \gamma \cdot T_{i,j}^{(k)} + c \\
+& D_i = \sum_{j=1}^{n} \sum_{k=1}^{5} T_{i,j}^{(k)} \cdot \mathbf{1}_{\{M_i \text{ procesa } P_j \text{ en } E_k\}} \\
+& E_{total} = \sum_{i=1}^{11} \left[ P_i^{activa} \cdot \frac{D_i}{60} + P_i^{inactiva} \cdot \frac{T_{total} - D_i}{60} \right]
+\end{align}
+
+Esta formulación multiobjetivo proporciona una representación más completa y realista del problema de programación en sistemas de manufactura, permitiendo considerar simultáneamente aspectos de productividad, equidad y sostenibilidad operativa.
+
+\subsection{Población}
+La población inicial se genera de manera aleatoria pero condicionada por las restricciones de sus individuos, es decir, cumple con la asignación de las maquinas para cada etapa, así mismo cada individuo de la población inicial es distinto uno del otro, sin embargo pueden llegar a tener el mismo fitness. Posteriormente la población cambiará con cada generación, pero mantendrá un porcentaje de los mejores individuos de la generación anterior.
+
+\section{Herramientas}
+Como herramientas se implementan los operadores de cruce y mutación específicos para el problema de programación en líneas de ensamblaje, adaptados para trabajar con el algoritmo NSGA-II en un contexto multiobjetivo.
+
+\subsection{Selección en NSGA-II}
+En el algoritmo NSGA-II, la selección de padres se realiza mediante un torneo binario que considera simultáneamente el rango de no-dominancia y la distancia de crowding. Los individuos se comparan primero por su rango de frente (preferencia hacia menores rangos), y en caso de empate, se selecciona el individuo con mayor distancia de crowding, promoviendo así tanto la convergencia hacia el frente de Pareto como la diversidad de las soluciones.
+
+\subsection{Métodos de Cruzamiento}
+
+Para el problema de programación en líneas de ensamblaje, se implementan dos operadores de cruce adaptados a la estructura del cromosoma que representa la asignación de máquinas por etapa para cada pedido. Ambos operadores preservan la validez de las soluciones generadas.
+
+\subsubsection{Cruzamiento Uniforme por Etapa}
+Este método realiza un cruce uniforme considerando la estructura de etapas del problema. Para cada etapa de cada pedido, se decide aleatoriamente (con probabilidad 0.5) si la asignación de máquina proviene del padre 1 o del padre 2. De esta forma, cada gen (asignación de máquina) se hereda independientemente de uno de los padres. Este operador preserva la validez de los cromosomas asegurando que cada pedido mantenga una máquina válida para cada etapa. Este operador es particularmente efectivo en problemas multiobjetivo ya que combina soluciones de manera uniforme, explorando eficientemente el espacio de compromiso entre objetivos.
+
+\subsubsection{Cruzamiento de Un Punto}
+En este método se selecciona un punto de corte aleatorio entre pedidos. Para cada pedido, si su posición es anterior al punto de corte, mantiene las asignaciones del padre 1; si es posterior al punto de corte, hereda las asignaciones del padre 2. El hijo 2 se genera con la lógica inversa. Este operador proporciona una variación más conservadora del genoma, agrupando pedidos completos y manteniendo bloques de asignaciones de máquinas de cada padre, útil cuando el frente de Pareto está convergiendo.
+
+\subsection{Métodos de Mutación}
+
+Se implementan tres métodos de mutación orientados a la estructura de etapas del problema. Todos estos operadores respetan las restricciones del problema, asegurando que cada etapa reciba una máquina válida.
+
+\subsubsection{Mutación Swap Stage-Aware}
+Este método intercambia las máquinas asignadas entre dos pedidos en la misma etapa. Para una etapa seleccionada aleatoriamente, se eligen dos pedidos distintos y se intercambian sus asignaciones de máquinas en esa etapa. Este operador es efectivo para redistribuir cargas entre pedidos manteniendo la estructura general del cromosoma.
+
+\subsubsection{Mutación Insert Stage-Aware}
+Este método modifica la asignación de máquina de un pedido en una etapa específica. Se selecciona aleatoriamente un pedido y una etapa, y se cambia la máquina asignada en esa posición por otra máquina válida para esa etapa (diferente a la actual). Este operador proporciona diversidad local al permitir explorar diferentes opciones de máquinas para el mismo pedido en cada etapa.
+
+\subsubsection{Mutación Invert Stage-Aware}
+Este método invierte la secuencia de asignaciones de máquinas de un pedido en un rango de etapas consecutivas. Se selecciona aleatoriamente un pedido y dos etapas, y se invierte la secuencia de máquinas asignadas entre esas etapas. Este operador preserva las asignaciones individuales pero altera su orden, introduciendo variación en la estructura del cromosoma.
+
+\subsection{Metodología de Selección de Configuración}
+
+Para determinar la configuración óptima de los algoritmos implementados (NSGA-II y NSGA-II memético), se emplea una metodología sistemática que combina el tunning de hiperparámetros y la comparación de operadores. Esta metodología permite identificar la configuración más adecuada que se ajuste específicamente al problema de programación en líneas de ensamblaje.
+
+\subsubsection{Tunning Multiobjetivo}
+El tunning de hiperparámetros se realiza mediante experimentos sistemáticos que evalúan múltiples configuraciones de parámetros numéricos. Se consideran diferentes valores para:
+\begin{itemize}
+    \item Tamaño de población
+    \item Número de generaciones
+    \item Probabilidad de cruce
+    \item Probabilidad de mutación
+    \item Para la versión memética: frecuencia de aplicación de búsqueda local y número de iteraciones locales
+\end{itemize}
+
+Estos experimentos evalúan la calidad de las soluciones mediante múltiples métricas del frente de Pareto, permitiendo identificar configuraciones que proporcionen el mejor compromiso entre calidad, diversidad y convergencia.
+
+\subsubsection{Comparación de Operadores}
+Paralelamente, se realizan experimentos de comparación sistemática entre los diferentes operadores implementados:
+\begin{itemize}
+    \item Cruce uniforme por etapa vs. cruce de un punto
+    \item Mutación swap vs. insert vs. invert stage-aware
+    \item NSGA-II estándar vs. NSGA-II memético
+\end{itemize}
+
+Estos experimentos determinan qué combinaciones de operadores proporcionan mejores resultados en términos de calidad del frente de Pareto, diversidad de soluciones y robustez de los algoritmos.
+
+\subsubsection{Criterios de Evaluación}
+La selección de la configuración óptima considera los siguientes criterios:
+\begin{itemize}
+    \item \textbf{Calidad del frente}: Medida mediante métricas como hipervolumen, distancia de convergencia o spread del frente.
+    \item \textbf{Diversidad de soluciones}: Evaluada mediante la distancia de crowding promedio del frente.
+    \item \textbf{Robustez}: Capacidad de mantener un rendimiento consistente a través de múltiples ejecuciones independientes.
+    \item \textbf{Replicabilidad}: Facilidad de reproducir los resultados obtenidos con la misma configuración.
+    \item \textbf{Eficiencia computacional}: Tiempo de ejecución requerido para alcanzar soluciones de calidad aceptable.
+\end{itemize}
+
+\subsection{Evaluación del Frente de Pareto}
+
+En el contexto de optimización multiobjetivo con NSGA-II, la evaluación de la calidad de las soluciones difiere significativamente de los enfoques monoobjetivo. En lugar de identificar una única solución óptima, el objetivo es obtener un conjunto de soluciones que represente adecuadamente el frente de Pareto.
+
+\subsubsection{Métricas de Calidad del Frente}
+
+Para evaluar la calidad del frente de Pareto obtenido, se consideran las siguientes métricas:
+
+\begin{itemize}
+    \item \textbf{Tamaño del frente}: El número de soluciones no dominadas en el primer frente de Pareto.
+    \item \textbf{Diversidad}: La distribución espacial de las soluciones en el espacio objetivo, medida mediante la distancia de crowding.
+    \item \textbf{Extremo}: Las soluciones que minimizan cada objetivo individual.
+    \item \textbf{Rango del frente}: La variedad de valores alcanzados en cada dimensión del espacio objetivo.
+\end{itemize}
+
+\subsubsection{Visualización del Frente de Pareto}
+
+La visualización del frente de Pareto permite al decisor comprender los compromisos entre los objetivos. Para un problema con tres objetivos (makespan, balance de carga, consumo energético), se pueden generar visualizaciones 3D y proyecciones 2D que muestren la distribución de las soluciones en el espacio objetivo.
+
+Las visualizaciones incluyen:
+\begin{itemize}
+    \item Proyección 3D completa mostrando makespan vs balance vs energía.
+    \item Proyecciones 2D bidimensionales para analizar pares de objetivos.
+    \item Evolución del tamaño del frente a lo largo de las generaciones.
+\end{itemize}
+
+\subsubsection{Selección de la Solución Final}
+
+Una vez obtenido el frente de Pareto, el decisor puede elegir la solución final según sus preferencias:
+\begin{itemize}
+    \item Minimizar makespan: Preferir productividad temporal.
+    \item Minimizar balance de carga: Priorizar equidad operativa.
+    \item Minimizar consumo energético: Enfocarse en sostenibilidad.
+    \item Solución de compromiso: Que equilibre los tres objetivos.
+\end{itemize}
+
+\subsection{Complejidad temporal y espacial del algoritmo}
+\label{sec:complejidad}
+
+En esta sección se detalla la complejidad teórica del algoritmo implementado (NSGA-II y su variante memética), en función de parámetros controlados por los experimentos:
+
+\begin{itemize}
+    \item $N$: tamaño de población (\texttt{tamano\_poblacion}).
+    \item $G$: número de generaciones (\texttt{num\_generaciones}).
+    \item $M$: número de objetivos (en este trabajo, $M=3$: \textit{makespan}, \textit{balance}, \textit{energía}).
+    \item $L$: longitud del cromosoma (número de unidades/etapas asignadas).
+    \item $E$: costo de una evaluación de \textit{fitness} para un individuo (depende de la instancia del problema; en general incluye calcular tiempo de proceso, enfriamientos y energía sobre todas las etapas).\footnote{En la práctica, $E$ escala con el tamaño de la instancia: número de trabajos, etapas y máquinas por etapa.}
+    \item $k$: frecuencia de búsqueda local en el memético (\texttt{cada\_k\_gen}).
+    \item $I$: iteraciones máximas de la búsqueda local (\texttt{max\_iter\_local}).
+\end{itemize}
+
+\paragraph{Operadores de NSGA-II por generación}
+
+Por generación, los costos dominantes son:
+
+\begin{enumerate}
+    \item \textbf{Evaluación de la población}: $\mathcal{O}(N\,E)$.
+    \item \textbf{Ordenamiento no dominado (fast non-dominated sorting)}: $\mathcal{O}(M\,N^{2})$ \cite{Deb2002}.
+    \item \textbf{Distancia de hacinamiento (crowding distance)}: ordenar por cada objetivo dentro de cada frente. En el peor caso (frente grande), $\mathcal{O}(M\,N\log N)$ por generación.
+    \item \textbf{Selección, cruce y mutación}: típicamente $\mathcal{O}(N\,L)$, pues se generan $\approx N$ descendientes y cada operador recorre una fracción del cromosoma.
+\end{enumerate}
+
+Por tanto, la complejidad por generación del NSGA-II estándar queda acotada por:
+\[
+\mathcal{O}\big(M\,N^{2} + M\,N\log N + N\,E + N\,L\big) = \mathcal{O}\big(M\,N^{2} + N\,(E+L)\big),
+\]
+siendo el término $\mathcal{O}(M\,N^{2})$ típicamente dominante.
+
+En $G$ generaciones, la complejidad temporal total es:
+\[
+\mathcal{T}_{\text{NSGA-II}}(N,G) = \mathcal{O}\big(G\,M\,N^{2} + G\,N\,(E+L)\big) = \mathcal{O}\big(G\,M\,N^{2}\big).
+\]
+
+\paragraph{Coste adicional por la búsqueda local (versión memética)}
+
+La variante memética aplica una búsqueda local cada $k$ generaciones, hasta $I$ iteraciones por individuo seleccionado. Si se aplica sobre la población completa (caso peor), y el vecindario evalúa $\Theta(1)$ movimientos por iteración (p.ej., \textit{swap/insert/invert} con evaluación incremental), el coste adicional por ciclo de búsqueda local es $\mathcal{O}(N\,I\,E)$. Dado que ocurre aproximadamente $G/k$ veces:
+\[
+\mathcal{T}_{\text{memético}}^{\text{local}} = \mathcal{O}\Big(\frac{G}{k}\,N\,I\,E\Big).
+\]
+
+Así, la complejidad total del NSGA-II memético implementado es:
+\[
+\mathcal{T}_{\text{NSGA-II-mem}}(N,G) = \mathcal{O}\big(G\,M\,N^{2}\big)\; +\; \mathcal{O}\Big(\frac{G}{k}\,N\,I\,E\Big)\; +\; \mathcal{O}\big(G\,N\,(E+L)\big).
+\]
+En la práctica, el término $\mathcal{O}(G\,M\,N^{2})$ sigue siendo dominante salvo que $\tfrac{I\,E}{k}$ sea grande. Esto justifica, en los experimentos, limitar $I$ y espaciar la búsqueda local con $k$ para mantener tiempos manejables.
+
+\paragraph{Complejidad espacial}
+
+La memoria está dominada por almacenar población y descendencia, sus \textit{fitness} y las estructuras de ordenamiento por frentes:
+\[
+\mathcal{S}(N) = \mathcal{O}(N\,L) \; + \; \mathcal{O}(M\,N) \; + \; \mathcal{O}(N) = \mathcal{O}(N\,(L+M)).
+\]
+
+\paragraph{Implicancias prácticas para esta tesis}
+
+En nuestros experimentos, con $M=3$ objetivos y los rangos $N\in\{100,200\}$, $G\in\{400,600\}$, la cota dominante $\mathcal{O}(G\,M\,N^{2})$ explica el tiempo de cómputo observado y la importancia de la paralelización por semillas. La búsqueda local (parámetros \texttt{cada\_k\_gen} y \texttt{max\_iter\_local}) introduce un término adicional proporcional a $\tfrac{G}{k}\,N\,I\,E$, por lo que se recomienda (y así se hizo) mantener $I$ y $k$ en valores moderados para equilibrar calidad/tiempo.
+
+\subsection{Flujo del pipeline}
+En la Figura \ref{fig:pipeline} se muestra el flujo de procesamiento de extremo a extremo del sistema implementado. El \textbf{inicio} del proceso es el bloque “\textit{Cargar config.yaml}”, desde donde se construye la población inicial y se avanza por evaluación, ordenamiento por no-dominancia y operadores evolutivos. En este trabajo la \textbf{búsqueda local (memética) está activada} y forma parte del ciclo (no es opcional); se aplica con la frecuencia y límite configurados. El ciclo se repite por generaciones hasta que no queden generaciones restantes, desembocando en el \textbf{frente de Pareto final}. El paso “\textit{Combinar y seleccionar}” corresponde a la \textit{selección elitista} de NSGA-II: se combinan padres y descendencia, se reevalúa, se clasifica en frentes y se toma la nueva población por frentes y distancia de crowding.
+
+\begin{figure}[H]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+    >=Stealth,
+    proc/.style={rectangle, draw, rounded corners, align=center, minimum width=38mm, minimum height=10mm},
+    decision/.style={diamond, draw, aspect=2, align=center, inner sep=1pt},
+    small/.style={font=\footnotesize}
+]
+% Coordenadas base (4 niveles) en flujo serpiente (zig-zag)
+% Nivel 1 (izq -> der): Cargar, Inicializar
+\node[proc, small] (cfg) at (0,0) {Cargar\\config.yaml};
+\node[proc, small] (pop) at (5.2,0) {Inicializar\\población válida};
+% Nivel 2 (izq -> der): Evaluar, NDS+crowding, Selección, Cruce
+\node[proc, small] (fit) at (0,-2.8) {Evaluar\\fitness multiobjetivo};
+\node[proc, small] (nds) at (5.2,-2.8) {No-dominated sorting\\+ crowding distance};
+\node[proc, small] (sel) at (10.4,-2.8) {Selección\\NSGA-II};
+\node[proc, small] (cru) at (15.6,-2.8) {Cruce\\stage-aware};
+% Nivel 3 (der -> izq): Mutación, Combinar+selección, Búsqueda local, ¿Gen.?
+\node[proc, small] (mut) at (15.6,-5.6) {Mutación\\stage-aware};
+\node[proc, small] (comb) at (10.4,-5.6) {Combinar (padres+descendencia)\\y selección elitista};
+\node[proc, small] (loc) at (5.2,-5.6) {Búsqueda local\\(memética)};
+\node[decision, small] (gen) at (0,-5.6) {¿Gen.\\restantes?};
+% Nivel 4: Frente de Pareto (final)
+\node[proc, small] (pareto) at (0,-8.6) {Frente de\\Pareto final};
+
+% Conexiones principales en serpiente
+\draw[->] (cfg.east) -- (pop.west);
+\draw[->] (pop.south) -- (fit.north);           % baja al inicio de la fila 2 (izquierda)
+\draw[->] (fit.east) -- (nds.west);
+\draw[->] (nds.east) -- (sel.west);
+\draw[->] (sel.east) -- (cru.west);
+\draw[->] (cru.south) -- (mut.north);           % baja al inicio de la fila 3 (derecha)
+\draw[->] (mut.west) -- (comb.east);
+\draw[->] (comb.west) -- (loc.east);
+\draw[->] (loc.west) -- (gen.east);
+% Decisión
+\draw[->] (gen.south) -- node[right, small]{No} (pareto.north);
+\draw[->] (gen.north) -- node[midway, right, small]{Sí} (fit.south); % retorno recto a la parte inferior de evaluación
+\end{tikzpicture}
+}%
+\caption{Pipeline del sistema: desde carga de configuración hasta obtención del frente de Pareto.}
+\label{fig:pipeline}
+\end{figure}
+

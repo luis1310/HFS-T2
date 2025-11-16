@@ -1,0 +1,10 @@
+[run]
+source = tesis3/src
+omit =
+    */tests/*
+    */experiments/*
+
+[report]
+show_missing = True
+
+

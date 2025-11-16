@@ -1,0 +1,42 @@
+\chapter{Conclusiones y Trabajo Futuro}
+
+\section{Conclusiones}
+
+Este proyecto de tesis ha logrado establecer una base sólida para la implementación de algoritmos evolutivos multiobjetivo en la optimización de líneas de ensamblaje. A continuación se presentan las conclusiones principales del trabajo realizado hasta el momento:
+
+\begin{itemize}
+
+\item[•] El enfoque multiobjetivo implementado mediante NSGA-II y su variante memética representa una evolución significativa respecto a métodos monoobjetivo tradicionales. La formulación de tres objetivos simultáneos (makespan, balance de carga y consumo energético) permite capturar la complejidad real de los sistemas de manufactura, proporcionando al decisor múltiples soluciones Pareto-óptimas.
+
+\item[•] La implementación del algoritmo NSGA-II con operadores especializados para problemas de programación en líneas de ensamblaje (cruce uniforme por etapa, mutaciones stage-aware) ha demostrado ser efectiva para explorar el espacio de soluciones manteniendo la validez de las configuraciones generadas. Los operadores desarrollados están específicamente adaptados a la estructura de etapas del problema, respetando las restricciones de máquinas disponibles por etapa.
+
+\item[•] La adaptación del problema monoobjetivo original a un enfoque multiobjetivo con tres objetivos permite considerar simultáneamente aspectos de productividad, equidad operativa y sostenibilidad energética. Esta transformación enriquece el análisis y proporciona soluciones más completas para sistemas de manufactura modernos.
+
+\item[•] El desarrollo de la función de fitness multiobjetivo que considera el desgaste de máquinas y procesos de enfriamiento añade realismo al modelo, permitiendo que el algoritmo opere bajo condiciones similares a entornos industriales reales.
+
+\end{itemize}
+
+\subsection{Estado Actual del Proyecto}
+
+En la fase actual del proyecto, se ha completado la implementación de los algoritmos NSGA-II estándar y memético, junto con los operadores de cruce y mutación especializados. Asimismo, se ha desarrollado la función de evaluación multiobjetivo que considera los tres objetivos simultáneamente.
+
+Los siguientes pasos del proyecto incluyen la realización de experimentos sistemáticos para determinar la configuración óptima de los algoritmos. Específicamente, se está próximo a ejecutar:
+
+\begin{itemize}
+    \item Experimentos de \textit{tunning multiobjetivo} para optimizar los hiperparámetros numéricos (tamaño de población, número de generaciones, probabilidades de cruce y mutación) considerando múltiples métricas de calidad del frente de Pareto.
+    
+    \item Experimentos de comparación de operadores para evaluar sistemáticamente las diferentes combinaciones de métodos de cruce y mutación, determinando cuáles proporcionan mejores resultados en términos de calidad, diversidad y convergencia del frente de Pareto.
+    
+    \item Análisis comparativo entre la versión estándar del NSGA-II y su variante memética para determinar en qué condiciones la búsqueda local aporta mejoras significativas.
+\end{itemize}
+
+Estos experimentos permitirán seleccionar la configuración más adecuada que se ajuste al problema específico, considerando criterios como robustez, replicabilidad y calidad de las soluciones obtenidas. Se espera que los resultados de estos experimentos proporcionen evidencia empírica sobre la efectividad del enfoque multiobjetivo propuesto para problemas de programación en líneas de ensamblaje.
+
+\section{Trabajo Futuro}
+
+Una vez completados los experimentos de tunning multiobjetivo y comparación de operadores, se plantean las siguientes líneas de trabajo futuro:
+
+\subsection*{Análisis de Escalabilidad y Performance}
+Se planea evaluar la escalabilidad del algoritmo implementado con diferentes tamaños de instancias del problema (número de pedidos, número de máquinas, etc.), analizando tanto el tiempo de ejecución como la calidad de las soluciones obtenidas. Este análisis permitirá identificar limitaciones y oportunidades de mejora.
+
+%\afterpage{\blankpage}
