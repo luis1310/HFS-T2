@@ -98,7 +98,11 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
             
             # Mejorar individuos del primer frente
             for idx in frentes[0]:
-                poblacion[idx] = busqueda_local(poblacion[idx], config, max_iter_local)
+                poblacion[idx] = busqueda_local(
+                    poblacion[idx],
+                    config,
+                    max_iter_local,
+                )
             
             # Recalcular fitness después de búsqueda local
             fitness_poblacion = [fitness_multiobjetivo(ind, config) for ind in poblacion]
