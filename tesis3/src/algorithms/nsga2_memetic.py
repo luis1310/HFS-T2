@@ -94,10 +94,8 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
         if (gen + 1) % cada_k_gen == 0:
             aplicaciones_local += 1
             if verbose:
-                print(
-                    f"Gen {gen+1:3d} | Aplicando búsqueda local al frente "
-                    f"({len(frentes[0])} ind)..."
-                )
+                print(f"Gen {gen+1:3d} | Búsqueda local al frente")
+                print(f"   Frente tamaño: {len(frentes[0])} ind")
             
             # Mejorar individuos del primer frente
             for idx in frentes[0]:
