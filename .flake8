@@ -1,0 +1,8 @@
+[flake8]
+max-line-length = 88
+extend-ignore = E203, W503
+per-file-ignores =
+    # Permitir imports posibles no usados en __init__ si existieran en el futuro
+    __init__.py:F401
+
+

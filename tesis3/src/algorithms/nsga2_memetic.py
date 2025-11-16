@@ -1,14 +1,12 @@
 """NSGA-II con búsqueda local (memética)"""
 import random
-from copy import deepcopy
 from tesis3.src.fitness.multi_objective import fitness_multiobjetivo
 from tesis3.src.utils.population import inicializar_poblacion
 from tesis3.src.algorithms.nsga2 import (
-    dominancia, 
+    dominancia,
     clasificacion_no_dominada,
-    distancia_crowding,
     seleccion_nsga2,
-    torneo_binario_nsga2
+    torneo_binario_nsga2,
 )
 
 

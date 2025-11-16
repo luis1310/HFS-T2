@@ -1,7 +1,6 @@
 
 """Operadores de mutación stage-aware"""
 import random
-from copy import deepcopy
 
 
 def mutacion_swap_stage_aware(poblacion, config, tasa_mut=0.3):

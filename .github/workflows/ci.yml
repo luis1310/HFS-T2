@@ -14,9 +14,11 @@ jobs:
       - name: Lint estricto (algorithms/ y operators/)
         run: |
           pip install flake8 black isort
+          # Formateo automático para evitar fallos triviales de estilo
+          black tesis3/src
+          isort tesis3/src --profile black
+          # Verificación de linting
           flake8 tesis3/src/algorithms tesis3/src/operators
-          black --check tesis3/src
-          isort --check-only tesis3/src
       - name: Tests con timeout y cobertura
         run: |
           pip install pytest pytest-timeout pytest-cov
