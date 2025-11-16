@@ -24,11 +24,13 @@ jobs:
           pip install pytest pytest-timeout pytest-cov
           pytest tesis3/tests -v --timeout=30 \
             --cov=tesis3/src/core \
+            --cov-config=.coveragerc_ci \
             --cov-report=term --cov-fail-under=85
       - name: Tests operators (timeout y cobertura)
         run: |
           pytest tesis3/tests -v --timeout=30 \
             --cov=tesis3/src/operators \
+            --cov-config=.coveragerc_ci \
             --cov-report=term --cov-fail-under=85
 
 
