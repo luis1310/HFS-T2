@@ -22,14 +22,14 @@ jobs:
       - name: Tests con timeout y cobertura
         run: |
           pip install pytest pytest-timeout pytest-cov
-          pytest tesis3/tests -v --timeout=30 --cov=tesis3/src --cov-report=xml
-      - name: Gate de cobertura mínima (≥75% global)
+          pytest tesis3/tests -v --timeout=30 --cov=tesis3/src/core --cov=tesis3/src/operators --cov-report=xml
+      - name: Gate de cobertura mínima (≥80% core+operators)
         run: |
           python - << 'PY'
           import xml.etree.ElementTree as ET
           r=ET.parse('coverage.xml').getroot()
           cov=float(r.get('line-rate','0'))
-          assert cov>=0.75, f'Cobertura {cov*100:.1f}% < 75%'
+          assert cov>=0.80, f'Cobertura {cov*100:.1f}% < 80% (solo core+operators)'
           PY
 
 
