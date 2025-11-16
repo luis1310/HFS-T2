@@ -83,7 +83,10 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
     
     for gen in range(num_generaciones):
         # Evaluar fitness
-        fitness_poblacion = [fitness_multiobjetivo(ind, config) for ind in poblacion]
+        fitness_poblacion = [
+            fitness_multiobjetivo(ind, config)
+            for ind in poblacion
+        ]
         frentes = clasificacion_no_dominada(poblacion, fitness_poblacion)
         historial_frentes.append(len(frentes[0]))
         
@@ -105,7 +108,10 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
                 )
             
             # Recalcular fitness después de búsqueda local
-            fitness_poblacion = [fitness_multiobjetivo(ind, config) for ind in poblacion]
+            fitness_poblacion = [
+                fitness_multiobjetivo(ind, config)
+                for ind in poblacion
+            ]
             frentes = clasificacion_no_dominada(poblacion, fitness_poblacion)
         
         if verbose and (gen % 50 == 0 or gen == 0):
@@ -132,7 +138,10 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
         poblacion = seleccion_nsga2(poblacion_combinada, fitness_combinada, tamano_poblacion)
     
     # Frente final
-    fitness_final = [fitness_multiobjetivo(ind, config) for ind in poblacion]
+    fitness_final = [
+        fitness_multiobjetivo(ind, config)
+        for ind in poblacion
+    ]
     frentes_final = clasificacion_no_dominada(poblacion, fitness_final)
     
     frente_pareto = [poblacion[i] for i in frentes_final[0]]
