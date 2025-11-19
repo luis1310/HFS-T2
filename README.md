@@ -1,5 +1,19 @@
 # Actualizacion de HFS - T2 a HFS-T3
 Proyecto de tesis 3 (taller de investigación)
+## Version 1.1.2e:
+- Pipeline de CI habilitado con GitHub Actions (`.github/workflows/ci.yml`):
+  - Lint estricto: flake8 (algorithms/operators), black e isort.
+  - Tests con timeout (`pytest-timeout`).
+  - Gates de cobertura por paquete: `core/` y `operators/` con umbral ≥85%.
+  - Aislamiento de cobertura en CI vía `-o addopts=` y `.coveragerc_ci`.
+- Configuración de estilo y cobertura:
+  - `.flake8` (largo de línea 100, reglas compatibles con black).
+  - `.coveragerc_ci` para medir solo `tesis3/src/core` y `tesis3/src/operators`.
+- Tests mínimos añadidos para factibilidad de operadores (cruce y mutación) y validaciones de cromosomas/población.
+- Corrección del operador `invert` stage-aware (inversión dentro de una sola etapa, preservando validez).
+- Documentación actualizada:
+  - Sección “CI (checks mínimos como gates)” en `tesis3/README.md`.
+  - Diagrama del pipeline del algoritmo en la tesis (Capítulo 3) y ajuste de complejidad.
 ## Version 1.1.2d:
 - Se añade configuración para pruebas con pytest, incluyendo archivos de configuración y un script de instalación.
 - Se implementa un nuevo script para comparar el rendimiento de NSGA-II estándar y memético, y se actualiza el README para reflejar los cambios en la estructura de pruebas.
