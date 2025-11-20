@@ -8,6 +8,7 @@ from tesis3.src.algorithms.nsga2_memetic import nsga2_memetic
 from tesis3.src.operators.crossover import aplicar_cruce
 from tesis3.src.operators.mutation import aplicar_mutacion
 import numpy as np
+import random
 import time
 import csv
 import multiprocessing as mp

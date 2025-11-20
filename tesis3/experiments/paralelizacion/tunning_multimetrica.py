@@ -9,6 +9,7 @@ from tesis3.src.operators.crossover import aplicar_cruce
 from tesis3.src.operators.mutation import aplicar_mutacion
 from tesis3.src.utils.seeds import cargar_semillas
 import numpy as np
+import random
 import time
 import csv
 from itertools import product

@@ -26,10 +26,17 @@ Proyecto de tesis 3 (taller de investigación)
   - Muestra contenido de archivos YAML generados y cómo extraer valores para copiar a config.yaml.
   - Lista completa de operadores disponibles en cada categoría.
 
+- **Corrección de imports faltantes**:
+  - Agregado `import random` en `comparacion_operadores.py` y `tunning_multimetrica.py`.
+  - Corrige error `name 'random' is not defined` durante ejecución paralela.
+  - Garantiza que `random.seed(semilla)` funcione correctamente en todos los scripts de paralelización.
+
 - **Resumen de archivos modificados**:
   - `tesis3/config/config.yaml`: Nueva sección `algorithm.operators`.
   - `tesis3/experiments/ejecutar_memetico.py`: Lectura dinámica de operadores.
   - `tesis3/experiments/visualizar_frente_memetico.py`: Lectura dinámica de operadores.
+  - `tesis3/experiments/paralelizacion/comparacion_operadores.py`: Agregado `import random`.
+  - `tesis3/experiments/paralelizacion/tunning_multimetrica.py`: Agregado `import random`.
   - `PLAN_EXPERIMENTOS.md`: Flujo completo con instrucciones detalladas.
 
 ## Version 1.1.3:
