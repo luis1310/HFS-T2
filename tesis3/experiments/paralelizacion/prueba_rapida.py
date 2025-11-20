@@ -62,9 +62,8 @@ def guardar_resultados_parciales(todos_resultados, num_semillas):
     # Asegurar que el directorio existe
     os.makedirs('tesis3/results', exist_ok=True)
     
-    # Guardar en CSV con timestamp
-    timestamp = time.strftime('%Y%m%d_%H%M%S')
-    output_file = f'tesis3/results/prueba_rapida_parcial_{timestamp}.csv'
+    # Guardar en UN SOLO archivo sin timestamp (se sobrescribe constantemente)
+    output_file = 'tesis3/results/prueba_rapida_parcial.csv'
     with open(output_file, 'w', newline='') as f:
         fieldnames = ['tamano_poblacion', 'num_generaciones', 'prob_cruce', 'prob_mutacion',
                       'cada_k_gen', 'max_iter_local', 'prom_makespan', 'prom_balance',
@@ -82,7 +81,7 @@ def guardar_resultados_parciales(todos_resultados, num_semillas):
             })
             writer.writerow(row)
     
-    print(f"    💾 Resultados parciales guardados: {len(configuraciones_completas)} configuraciones completas")
+    print(f"    [GUARDADO] Resultados parciales guardados: {len(configuraciones_completas)} configuraciones completas")
 
 def verificar_configuraciones_completas(todos_resultados, num_semillas):
     """Verifica qué configuraciones están completas (tienen todas sus semillas)"""
@@ -108,7 +107,7 @@ def ejecutar_semilla(args):
     
     # Timestamp de inicio del proceso
     timestamp_inicio = time.strftime('%H:%M:%S.%f')[:-3]  # Incluir milisegundos
-    print(f"🚀 INICIO: {timestamp_inicio} - Config {configuracion['tamano_poblacion']}-{configuracion['num_generaciones']}-{configuracion['prob_cruce']:.1f}-{configuracion['prob_mutacion']:.2f} - Semilla {semilla}")
+    print(f"[INICIO] {timestamp_inicio} - Config {configuracion['tamano_poblacion']}-{configuracion['num_generaciones']}-{configuracion['prob_cruce']:.1f}-{configuracion['prob_mutacion']:.2f} - Semilla {semilla}")
     
     # Configurar semilla para reproducibilidad
     np.random.seed(semilla)
@@ -134,7 +133,7 @@ def ejecutar_semilla(args):
     
     # Timestamp de fin del proceso
     timestamp_fin = time.strftime('%H:%M:%S.%f')[:-3]
-    print(f"✅ FIN: {timestamp_fin} - Config {configuracion['tamano_poblacion']}-{configuracion['num_generaciones']}-{configuracion['prob_cruce']:.1f}-{configuracion['prob_mutacion']:.2f} - Semilla {semilla} - Tiempo: {tiempo:.1f}s")
+    print(f"[FIN] {timestamp_fin} - Config {configuracion['tamano_poblacion']}-{configuracion['num_generaciones']}-{configuracion['prob_cruce']:.1f}-{configuracion['prob_mutacion']:.2f} - Semilla {semilla} - Tiempo: {tiempo:.1f}s")
     
     # Convertir fitness a métricas reales
     metricas = [(1/f[0], 1/f[1]-1, 1/f[2]-1) for f in fitness_pareto]
@@ -218,7 +217,7 @@ def main():
         print(f"  Tarea {i+1}: Config {config['tamano_poblacion']}-{config['num_generaciones']}-{config['prob_cruce']:.1f}-{config['prob_mutacion']:.2f}, Semilla {semilla}")
     print()
     
-    print(f"📊 ANÁLISIS DE PARALELIZACIÓN:")
+    print(f"ANALISIS DE PARALERIZACION:")
     print(f"   Total tareas: {len(tareas)}")
     print(f"   Núcleos disponibles: {num_nucleos}")
     print(f"   Tareas por núcleo: {len(tareas) / num_nucleos:.1f}")
@@ -232,8 +231,8 @@ def main():
     configuraciones_ya_guardadas = set()  # Para evitar guardar la misma configuración múltiples veces
     
     with ProcessPoolExecutor(max_workers=num_nucleos) as executor:
-        print(f"🚀 INICIANDO {len(tareas)} TAREAS EN {num_nucleos} NÚCLEOS...")
-        print(f"⏰ Timestamp inicio: {time.strftime('%H:%M:%S')}")
+        print(f"[INICIANDO] {len(tareas)} TAREAS EN {num_nucleos} NUCLEOS...")
+        print(f"[TIEMPO] Timestamp inicio: {time.strftime('%H:%M:%S')}")
         print()
         
         # Enviar todas las tareas
@@ -285,7 +284,7 @@ def main():
                     
                     if configuraciones_nuevas:
                         print(f"    Mejor config actual: {mejor_config}")
-                        print(f"    ✅ Configuraciones completadas: {len(configuraciones_nuevas)}")
+                        print(f"    [OK] Configuraciones completadas: {len(configuraciones_nuevas)}")
                         
                         # Guardar resultados parciales
                         guardar_resultados_parciales(todos_resultados, num_semillas)

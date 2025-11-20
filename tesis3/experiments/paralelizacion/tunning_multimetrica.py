@@ -48,11 +48,12 @@ def detectar_resultados_previos(num_semillas=30, semillas_esperadas=None):
     if semillas_esperadas is None:
         semillas_esperadas = list(range(num_semillas))
     
-    # Buscar archivos parciales
-    archivos_parciales = glob.glob('tesis3/results/tunning_multimetrica_parcial_*.csv')
+    # Buscar archivo parcial (ahora es uno solo, sin timestamp)
+    archivo_parcial = 'tesis3/results/tunning_multimetrica_parcial.csv'
     archivos_finales = glob.glob('tesis3/results/tunning_multimetrica_real_*.csv')
     
-    print(f"   Archivos parciales encontrados: {len(archivos_parciales)}")
+    existe_parcial = os.path.exists(archivo_parcial)
+    print(f"   Archivo parcial existente: {'Sí' if existe_parcial else 'No'}")
     print(f"   Archivos finales encontrados: {len(archivos_finales)}")
     
     # Cargar todos los resultados previos desde archivos finales (tienen semillas individuales)
@@ -81,10 +82,11 @@ def detectar_resultados_previos(num_semillas=30, semillas_esperadas=None):
         except Exception as e:
             print(f"   Error leyendo {archivo}: {e}")
     
-    # Cargar desde archivos parciales (asumimos que si está en parcial, tiene todas las semillas)
-    for archivo in archivos_parciales:
+    # Cargar desde archivo parcial (ahora es uno solo)
+    # El archivo parcial contiene solo configuraciones completas (30/30 semillas)
+    if existe_parcial:
         try:
-            with open(archivo, 'r') as f:
+            with open(archivo_parcial, 'r') as f:
                 reader = csv.DictReader(f)
                 for row in reader:
                     configuracion = {
@@ -100,7 +102,7 @@ def detectar_resultados_previos(num_semillas=30, semillas_esperadas=None):
                     if config_key not in resultados_por_config:
                         resultados_por_config[config_key] = set(semillas_esperadas)
         except Exception as e:
-            print(f"   Error leyendo {archivo}: {e}")
+            print(f"   Error leyendo archivo parcial: {e}")
     
     # Verificar configuraciones completas: deben tener exactamente las semillas esperadas
     semillas_esperadas_set = set(semillas_esperadas)
@@ -110,17 +112,20 @@ def detectar_resultados_previos(num_semillas=30, semillas_esperadas=None):
         if semillas_encontradas == semillas_esperadas_set:
             configuraciones_completas_previas.add(config_key)
             config_dict = dict(config_key)
-            print(f"   ✅ Configuración completa detectada: {config_dict} (semillas {min(semillas_esperadas)}-{max(semillas_esperadas)} verificadas)")
+            print(f"   [OK] Configuración completa detectada: {config_dict} (semillas {min(semillas_esperadas)}-{max(semillas_esperadas)} verificadas)")
         elif len(semillas_encontradas) > 0:
             faltantes = semillas_esperadas_set - semillas_encontradas
             config_dict = dict(config_key)
-            print(f"   ⚠️ Configuración parcial: {config_dict} - Semillas faltantes: {sorted(faltantes)} ({len(faltantes)} faltantes)")
+            print(f"   [PARCIAL] Configuración parcial: {config_dict} - Semillas faltantes: {sorted(faltantes)} ({len(faltantes)} faltantes)")
     
     print(f"   Total configuraciones completas previas: {len(configuraciones_completas_previas)}")
     return configuraciones_completas_previas
 
 def guardar_resultados_parciales(todos_resultados, num_semillas):
-    """Guarda resultados parciales cada vez que se completa una configuración"""
+    """
+    Guarda resultados parciales en UN SOLO archivo que se actualiza constantemente.
+    Esto evita generar cientos de archivos CSV durante la ejecución.
+    """
     # Agrupar resultados por configuración
     resultados_agrupados = {}
     for res in todos_resultados:
@@ -151,9 +156,8 @@ def guardar_resultados_parciales(todos_resultados, num_semillas):
     # Asegurar que el directorio existe
     os.makedirs('tesis3/results', exist_ok=True)
     
-    # Guardar en CSV con timestamp
-    timestamp = time.strftime('%Y%m%d_%H%M%S')
-    output_file = f'tesis3/results/tunning_multimetrica_parcial_{timestamp}.csv'
+    # Guardar en UN SOLO archivo sin timestamp (se sobrescribe constantemente)
+    output_file = 'tesis3/results/tunning_multimetrica_parcial.csv'
     with open(output_file, 'w', newline='') as f:
         fieldnames = ['tamano_poblacion', 'num_generaciones', 'prob_cruce', 'prob_mutacion',
                       'cada_k_gen', 'max_iter_local', 'prom_makespan', 'prom_balance',
@@ -171,7 +175,7 @@ def guardar_resultados_parciales(todos_resultados, num_semillas):
             })
             writer.writerow(row)
     
-    print(f"    Resultados parciales guardados: {len(configuraciones_completas)} configuraciones completas")
+    print(f"    [GUARDADO] Progreso guardado: {len(configuraciones_completas)} configuraciones completas")
 
 def verificar_configuraciones_completas(todos_resultados, num_semillas):
     """Verifica qué configuraciones están completas (tienen todas sus semillas)"""
@@ -320,10 +324,10 @@ def main():
     try:
         semillas = cargar_semillas(tipo="estandar")
         num_semillas = len(semillas)
-        print(f"\n✅ Semillas cargadas desde archivo centralizado: {num_semillas} semillas")
+        print(f"\n[OK] Semillas cargadas desde archivo centralizado: {num_semillas} semillas")
         print(f"   Semillas a usar: {semillas}")
     except (FileNotFoundError, KeyError) as e:
-        print(f"\n⚠️ No se pudo cargar semillas centralizadas: {e}")
+        print(f"\n[ADVERTENCIA] No se pudo cargar semillas centralizadas: {e}")
         print(f"   Usando semillas estándar (0-29)")
         semillas = list(range(30))
         num_semillas = 30

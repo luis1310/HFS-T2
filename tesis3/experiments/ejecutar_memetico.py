@@ -66,15 +66,15 @@ def ejecutar_semilla_version(version, semilla, config_yaml_path='tesis3/config/c
         )
     else:  # memético
         frente, fitness, _ = nsga2_memetic(
-            config, cruce, mutacion,
+        config, cruce, mutacion,
             tamano_poblacion=tamano_poblacion,
             num_generaciones=num_generaciones,
             prob_cruce=prob_cruce,
             prob_mutacion=prob_mutacion,
             cada_k_gen=cada_k_gen,
             max_iter_local=max_iter_local,
-            verbose=False
-        )
+        verbose=False
+    )
     
     tiempo_ejecucion = time.time() - inicio
     
@@ -136,25 +136,24 @@ def detectar_resultados_previos(num_semillas=30):
     
     # Buscar archivos de resultados parciales
     import glob
-    archivos_parciales = glob.glob('tesis3/results/comparacion_memetica_parcial_*.csv')
+    archivo_parcial = 'tesis3/results/comparacion_memetica_parcial.csv'
     
-    if not archivos_parciales:
+    if not os.path.exists(archivo_parcial):
         print("No se encontraron resultados previos.")
         return resultados_por_version
     
-    print(f"\nEncontrados {len(archivos_parciales)} archivo(s) de resultados previos")
+    print(f"\nEncontrado archivo de resultados previos")
     
-    # Leer todos los archivos parciales
-    for archivo in archivos_parciales:
-        try:
-            with open(archivo, 'r') as f:
+    # Leer el archivo parcial
+    try:
+        with open(archivo_parcial, 'r') as f:
                 reader = csv.DictReader(f)
                 for row in reader:
                     version = row['version']
                     semilla = int(row['semilla'])
                     resultados_por_version[version].add(semilla)
-        except Exception as e:
-            print(f"Error leyendo {archivo}: {e}")
+    except Exception as e:
+        print(f"Error leyendo archivo parcial: {e}")
     
     # Mostrar resumen
     print("\nEstado de ejecuciones previas:")
@@ -168,9 +167,12 @@ def detectar_resultados_previos(num_semillas=30):
     
     return resultados_por_version
 
-def guardar_resultado_parcial(resultado, timestamp):
-    """Guarda un resultado individual en el archivo parcial"""
-    archivo = f'tesis3/results/comparacion_memetica_parcial_{timestamp}.csv'
+def guardar_resultado_parcial(resultado):
+    """
+    Guarda un resultado individual en el archivo parcial.
+    Usa UN SOLO archivo sin timestamp para permitir continuación si se interrumpe.
+    """
+    archivo = 'tesis3/results/comparacion_memetica_parcial.csv'
     
     # Si el archivo no existe, crear con encabezados
     file_exists = os.path.exists(archivo)
@@ -268,9 +270,6 @@ def main():
     tiempo_estimado_total = len(tareas) * 2 / num_nucleos / 60  # ~2 segundos por tarea
     print(f"\nTiempo estimado: {tiempo_estimado_total:.1f} minutos")
     
-    # Timestamp para este lote de ejecuciones
-    timestamp = time.strftime('%Y%m%d_%H%M%S')
-    
     # Asegurar que el directorio de resultados existe
     os.makedirs('tesis3/results', exist_ok=True)
     
@@ -301,7 +300,7 @@ def main():
                 resultado = future.result()
                 
                 # Guardar resultado parcial inmediatamente
-                guardar_resultado_parcial(resultado, timestamp)
+                guardar_resultado_parcial(resultado)
                 
                 completadas += 1
                 progreso = (completadas / total_tareas) * 100
@@ -332,13 +331,12 @@ def main():
     print("="*70)
     
     # Leer todos los resultados (incluyendo los previos)
-    import glob
-    archivos_parciales = glob.glob('tesis3/results/comparacion_memetica_parcial_*.csv')
+    archivo_parcial = 'tesis3/results/comparacion_memetica_parcial.csv'
     
     resultados = defaultdict(list)
     
-    for archivo in archivos_parciales:
-        with open(archivo, 'r') as f:
+    if os.path.exists(archivo_parcial):
+        with open(archivo_parcial, 'r') as f:
             reader = csv.DictReader(f)
             for row in reader:
                 version = row['version']
@@ -352,6 +350,8 @@ def main():
                     'tamano_frente': int(row['tamano_frente']),
                     'tiempo_ejecucion': float(row['tiempo_ejecucion'])
                 })
+    else:
+        print("\n[ADVERTENCIA] No se encontró archivo parcial para análisis final")
     
     # Verificar que tengamos 30 semillas de cada versión
     for version in ['estandar', 'memetico']:
@@ -360,8 +360,8 @@ def main():
     
     # Calcular estadísticas
     if len(resultados['estandar']) > 0 and len(resultados['memetico']) > 0:
-        mk_std = [r['makespan'] for r in resultados['estandar']]
-        mk_mem = [r['makespan'] for r in resultados['memetico']]
+mk_std = [r['makespan'] for r in resultados['estandar']]
+mk_mem = [r['makespan'] for r in resultados['memetico']]
         
         bal_std = [r['balance'] for r in resultados['estandar']]
         bal_mem = [r['balance'] for r in resultados['memetico']]
@@ -395,7 +395,7 @@ def main():
         mejora_eng = ((np.mean(eng_std) - np.mean(eng_mem)) / np.mean(eng_std)) * 100
         mejora_score = ((np.mean(score_std) - np.mean(score_mem)) / np.mean(score_std)) * 100
         
-        overhead = ((np.mean(t_mem) - np.mean(t_std)) / np.mean(t_std)) * 100
+overhead = ((np.mean(t_mem) - np.mean(t_std)) / np.mean(t_std)) * 100
         
         print(f"\nCOMPARACIÓN Y MEJORAS (3 objetivos):")
         print(f"   Mejora en Makespan:       {mejora_mk:+6.2f}%")
@@ -403,8 +403,8 @@ def main():
         print(f"   Mejora en Energía:        {mejora_eng:+6.2f}%")
         print(f"   Mejora en Score agregado: {mejora_score:+6.2f}%")
         print(f"   Overhead computacional:   {overhead:+6.2f}%")
-        
-        print(f"\nCONCLUSIONES:")
+
+print(f"\nCONCLUSIONES:")
         if mejora_score > 5:
             print(f"   La búsqueda local MEJORA SIGNIFICATIVAMENTE los resultados ({mejora_score:+.2f}%)")
         elif mejora_score > 0:
@@ -414,17 +414,18 @@ def main():
         
         if overhead < 50:
             print(f"   El overhead computacional es ACEPTABLE ({overhead:+.2f}%)")
-        else:
+else:
             print(f"   El overhead computacional es ALTO ({overhead:+.2f}%)")
         
-        # Guardar resultado final consolidado
-        archivo_final = f'tesis3/results/comparacion_memetica_final_{timestamp}.csv'
+        # Guardar resultado final consolidado con timestamp
+        timestamp_final = time.strftime('%Y%m%d_%H%M%S')
+        archivo_final = f'tesis3/results/comparacion_memetica_final_{timestamp_final}.csv'
         with open(archivo_final, 'w', newline='') as f:
             fieldnames = ['version', 'semilla', 'makespan', 'balance', 'energia', 
                          'score_agregado', 'tamano_frente', 'tiempo_ejecucion']
             writer = csv.DictWriter(f, fieldnames=fieldnames)
-            writer.writeheader()
-            
+    writer.writeheader()
+    
             for version in ['estandar', 'memetico']:
                 for resultado in sorted(resultados[version], key=lambda x: x['semilla']):
                     writer.writerow({
@@ -441,7 +442,7 @@ def main():
         print(f"\nResultado final guardado: {archivo_final}")
         
         # Guardar resumen en YAML
-        yaml_file = f'tesis3/results/comparacion_memetica_resumen_{timestamp}.yaml'
+        yaml_file = f'tesis3/results/comparacion_memetica_resumen_{timestamp_final}.yaml'
         with open(yaml_file, 'w') as f:
             yaml.dump({
                 'estandar': {

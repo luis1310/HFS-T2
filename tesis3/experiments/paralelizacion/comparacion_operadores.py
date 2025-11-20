@@ -72,9 +72,8 @@ def guardar_resultados_parciales(todos_resultados, num_semillas):
     # Asegurar que el directorio existe
     os.makedirs('tesis3/results', exist_ok=True)
     
-    # Guardar en CSV con timestamp
-    timestamp = time.strftime('%Y%m%d_%H%M%S')
-    output_file = f'tesis3/results/comparacion_operadores_parcial_{timestamp}.csv'
+    # Guardar en UN SOLO archivo sin timestamp (se sobrescribe constantemente)
+    output_file = 'tesis3/results/comparacion_operadores_parcial.csv'
     with open(output_file, 'w', newline='') as f:
         fieldnames = ['configuracion_nombre', 'cruce', 'mutacion',
                       'prom_makespan', 'prom_balance', 'prom_energia',
@@ -84,7 +83,7 @@ def guardar_resultados_parciales(todos_resultados, num_semillas):
         for res in configuraciones_completas:
             writer.writerow(res)
     
-    print(f"    💾 Resultados parciales guardados: {len(configuraciones_completas)} configuraciones completas")
+    print(f"    [GUARDADO] Progreso guardado: {len(configuraciones_completas)} configuraciones completas")
 
 def verificar_configuraciones_completas(todos_resultados, num_semillas):
     """Verifica qué configuraciones están completas (tienen todas sus semillas)"""
@@ -110,7 +109,7 @@ def ejecutar_semilla_operador(args):
     
     # Timestamp de inicio del proceso
     timestamp_inicio = time.strftime('%H:%M:%S.%f')[:-3]  # Incluir milisegundos
-    print(f"🚀 INICIO: {timestamp_inicio} - Config {configuracion['nombre']} - Semilla {semilla}")
+    print(f"[INICIO] {timestamp_inicio} - Config {configuracion['nombre']} - Semilla {semilla}")
     
     # Configurar semilla para reproducibilidad
     np.random.seed(semilla)
@@ -149,7 +148,7 @@ def ejecutar_semilla_operador(args):
     
     # Timestamp de fin del proceso
     timestamp_fin = time.strftime('%H:%M:%S.%f')[:-3]
-    print(f"✅ FIN: {timestamp_fin} - Config {configuracion['nombre']} - Semilla {semilla} - Tiempo: {tiempo:.1f}s")
+    print(f"[FIN] {timestamp_fin} - Config {configuracion['nombre']} - Semilla {semilla} - Tiempo: {tiempo:.1f}s")
     
     # Convertir fitness a métricas reales
     metricas = [(1/f[0], 1/f[1]-1, 1/f[2]-1) for f in fitness_pareto]
@@ -284,8 +283,8 @@ def main():
     configuraciones_ya_guardadas = set()  # Para evitar guardar la misma configuración múltiples veces
     
     with ProcessPoolExecutor(max_workers=num_nucleos) as executor:
-        print(f"🚀 INICIANDO {len(tareas)} TAREAS EN {num_nucleos} NÚCLEOS...")
-        print(f"⏰ Timestamp inicio: {time.strftime('%H:%M:%S')}")
+        print(f"[INICIANDO] {len(tareas)} TAREAS EN {num_nucleos} NUCLEOS...")
+        print(f"[TIEMPO] Timestamp inicio: {time.strftime('%H:%M:%S')}")
         print()
         
         # Enviar todas las tareas
@@ -336,7 +335,7 @@ def main():
                     
                     if configuraciones_nuevas:
                         print(f"    Mejor config actual: {mejor_config}")
-                        print(f"    ✅ Configuraciones completadas: {len(configuraciones_nuevas)}")
+                        print(f"    [OK] Configuraciones completadas: {len(configuraciones_nuevas)}")
                         
                         # Guardar resultados parciales
                         guardar_resultados_parciales(todos_resultados, 30)
