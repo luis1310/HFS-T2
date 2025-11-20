@@ -1,6 +1,16 @@
 # Actualizacion de HFS - T2 a HFS-T3
 Proyecto de tesis 3 (taller de investigación)
 
+## Version 1.1.3c:
+- **Corrección crítica en guardado de YAML en `comparacion_operadores.py`**:
+  - Corregido `TypeError: string indices must be integers, not 'str'` al intentar guardar mejor configuración.
+  - **Problema**: En la línea 379 se guardaba solo el string del nombre de configuración (`'Uniforme + Swap'`) en lugar del diccionario completo con campos `cruce`, `mutacion`, y `nombre`.
+  - **Solución**: Ahora guarda `resultados[0]['configuracion']` (diccionario completo) y agrega campo separado `config_key` (string) para impresión.
+  - El script ahora completa exitosamente generando el archivo `mejor_configuracion_operadores_*.yaml`.
+
+- **Archivos modificados**:
+  - `tesis3/experiments/paralelizacion/comparacion_operadores.py`: Líneas 379-380 (guardar diccionario completo), líneas 401 y 411 (usar `config_key` para impresión).
+
 ## Version 1.1.3b:
 - **Lectura de operadores desde `config.yaml`**:
   - **Archivo modificado**: `tesis3/config/config.yaml` actualizado con nueva sección `algorithm.operators`.

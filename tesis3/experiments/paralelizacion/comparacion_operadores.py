@@ -376,7 +376,8 @@ def main():
             prom_tamano_frente = np.mean([r['tamano_frente'] for r in resultados])
             
             configuraciones_analizadas.append({
-                'configuracion': config_key,
+                'configuracion': resultados[0]['configuracion'],  # Diccionario completo, no solo el nombre
+                'config_key': config_key,  # String para ordenar e imprimir
                 'prom_score': prom_score,
                 'std_score': std_score,
                 'prom_makespan': prom_makespan,
@@ -397,7 +398,7 @@ def main():
     print("-"*80)
     
     for i, res in enumerate(configuraciones_analizadas, 1):
-        print(f"{i:<4} {res['configuracion']:<20} {res['prom_score']:<8.4f} "
+        print(f"{i:<4} {res['config_key']:<20} {res['prom_score']:<8.4f} "
               f"{res['prom_makespan']:<8.2f} {res['prom_balance']:<8.2f} "
               f"{res['prom_energia']:<8.2f} {res['prom_tiempo']:<8.2f}")
     
@@ -407,7 +408,7 @@ def main():
         print(f"\n" + "="*70)
         print("MEJOR CONFIGURACIÓN ENCONTRADA")
         print("="*70)
-        print(f"Configuración: {mejor['configuracion']}")
+        print(f"Configuración: {mejor['config_key']}")
         print(f"Score agregado: {mejor['prom_score']:.4f} ± {mejor['std_score']:.4f}")
         print(f"Makespan: {mejor['prom_makespan']:.2f} ± {mejor['std_makespan']:.2f}")
         print(f"Balance: {mejor['prom_balance']:.2f} ± {mejor['std_balance']:.2f}")
