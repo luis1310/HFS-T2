@@ -231,9 +231,10 @@ def ejecutar_semilla(args):
     energias = [m[2] for m in metricas]
     
     # Calcular métrica agregada normalizada (menor es mejor)
-    ref_mk = 2000  # Makespan máximo esperado
-    ref_bal = 300  # Balance máximo esperado
-    ref_eng = 700  # Energía máxima esperada
+    # Los valores de referencia se leen desde config.yaml
+    ref_mk = valores_ref['makespan']
+    ref_bal = valores_ref['balance']
+    ref_eng = valores_ref['energia']
     
     prom_mk = np.mean(makespans)
     prom_bal = np.mean(balances)

@@ -6,6 +6,21 @@ Determinar la **configuración óptima** del algoritmo NSGA-II memético para el
 
 ## Orden de Ejecución de Experimentos
 
+### Resumen de Paralelización por Fase
+
+| Fase | Script | Paralelizado | Detecta Núcleos | Usa Todos los Núcleos |
+|------|--------|--------------|-----------------|----------------------|
+| 1 | `prueba_rapida.py` | SÍ | NO (usa fijo 6) | NO |
+| 2 | `comparacion_operadores.py` | SÍ | SÍ (menú interactivo) | SÍ (opcional: 24/32) |
+| 3 | `tunning_multimetrica.py` | SÍ | SÍ (menú interactivo) | SÍ (opcional: 24/32) |
+| 4 | `ejecutar_memetico.py` | SÍ | SÍ (menú interactivo) | SÍ (opcional: 24/32) |
+| 5 | `visualizar_frente_memetico.py` | NO | NO | NO (no necesita) |
+| 5 | `analizar_mejores_soluciones.py` | NO | NO | NO (no necesita) |
+
+**Nota sobre Fase 4 y 5:**
+- Fase 4 (`ejecutar_memetico.py`): AHORA PARALELIZADO con 30 semillas (60 ejecuciones totales)
+- Fase 5 (visualizaciones): NO necesita paralelización (solo 1 ejecución cada uno)
+
 ### **FASE 1: Verificación y Pruebas Rápidas**
 
 **Objetivo**: Verificar que todo funciona correctamente antes de ejecutar experimentos largos.
@@ -18,6 +33,11 @@ python3 tesis3/experiments/paralelizacion/prueba_rapida.py
 - Prueba rápida con 3 configuraciones × 4 semillas = 12 ejecuciones
 - Verifica que la paralelización funciona correctamente
 - Tiempo estimado: ~5-10 minutos
+
+**Paralelización:**
+- SÍ está paralelizado
+- Usa 6 núcleos fijos (no detecta automáticamente todos los núcleos)
+- Usa ProcessPoolExecutor para paralelización real
 
 **Resultados:**
 - `tesis3/results/prueba_rapida_parcial_*.csv`
@@ -38,6 +58,13 @@ python3 tesis3/experiments/paralelizacion/comparacion_operadores.py
   - Mutación: Swap, Insert, Invert
 - 30 semillas por combinación = 180 ejecuciones totales
 - Tiempo estimado: ~3-4 horas (con 32 núcleos)
+
+**Paralelización:**
+- SÍ está paralelizado
+- SÍ detecta núcleos automáticamente (24 físicos / 32 lógicos)
+- Menú interactivo para seleccionar cuántos núcleos usar
+- Usa ProcessPoolExecutor para paralelización real
+- Recomendado: usar 32 núcleos lógicos para máximo rendimiento
 
 **Resultados:**
 - `tesis3/results/comparacion_operadores_real_*.csv`
@@ -71,6 +98,13 @@ python3 tesis3/experiments/paralelizacion/tunning_multimetrica.py
 - 30 semillas por configuración = 9,720 ejecuciones totales
 - Tiempo estimado: ~22-30 horas (con 32 núcleos)
 
+**Paralelización:**
+- SÍ está paralelizado
+- SÍ detecta núcleos automáticamente (24 físicos / 32 lógicos)
+- Menú interactivo para seleccionar cuántos núcleos usar
+- Usa ProcessPoolExecutor para paralelización real
+- Recomendado: usar 32 núcleos lógicos para máximo rendimiento
+
 **Resultados:**
 - `tesis3/results/tunning_multimetrica_real_*.csv`
 - `tesis3/results/mejor_configuracion_tunning_*.yaml` - **GUARDAR ESTE**
@@ -92,12 +126,22 @@ python3 tesis3/experiments/ejecutar_memetico.py
 ```
 **¿Qué hace?**
 - Compara NSGA-II estándar vs NSGA-II memético
-- Ejecuta ambas versiones con 5 semillas cada una
-- Usa los parámetros del `config.yaml`
-- Tiempo estimado: ~10-15 minutos
+- 30 semillas por versión = 60 ejecuciones totales
+- Parámetros fijos: población=50, generaciones=100
+- Tiempo estimado: ~2-3 minutos (con 32 núcleos)
+
+**Paralelización:**
+- SÍ está paralelizado (actualizado)
+- SÍ detecta núcleos automáticamente (24 físicos / 32 lógicos)
+- Menú interactivo para seleccionar cuántos núcleos usar
+- Usa ProcessPoolExecutor para paralelización real
+- Recomendado: usar 32 núcleos lógicos para máximo rendimiento
+- Detecta y continúa desde resultados previos
 
 **Resultados:**
-- `tesis3/results/comparacion_memetica.csv`
+- `tesis3/results/comparacion_memetica_parcial_*.csv` - Resultados parciales durante la ejecución
+- `tesis3/results/comparacion_memetica_final_*.csv` - Resultado consolidado final
+- `tesis3/results/comparacion_memetica_resumen_*.yaml` - Resumen estadístico
 - Análisis estadístico de mejoras
 
 **Acción después:**
@@ -121,6 +165,12 @@ python3 tesis3/experiments/visualizar_frente_memetico.py
 - Genera visualizaciones 2D y 3D del frente de Pareto
 - Tiempo estimado: ~2-3 minutos
 
+**Paralelización:**
+- NO está paralelizado (no necesita)
+- Ejecuta NSGA-II UNA sola vez (una ejecución)
+- No tiene sentido paralelizar porque solo genera gráficos de una ejecución
+- El tiempo es muy corto (2-3 minutos)
+
 **Resultados:**
 - `tesis3/results/frente_pareto_memetico_3d.png`
 - `tesis3/results/frente_pareto_memetico_2d.png`
@@ -135,6 +185,12 @@ python3 tesis3/experiments/analizar_mejores_soluciones.py
 - Identifica las 3 mejores soluciones del frente de Pareto
 - Genera gráficos comparativos
 - Tiempo estimado: ~2-3 minutos
+
+**Paralelización:**
+- NO está paralelizado (no necesita)
+- Ejecuta NSGA-II UNA sola vez (una ejecución)
+- No tiene sentido paralelizar porque solo analiza soluciones de una ejecución
+- El tiempo es muy corto (2-3 minutos)
 
 **Resultados:**
 - `tesis3/results/mejores_soluciones_pareto.png`

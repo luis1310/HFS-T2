@@ -45,3 +45,14 @@ experiments:
   output_dir: "results/tesis3"
   save_plots: true
   save_csv: true
+  
+  # Valores de referencia para normalización del score agregado
+  # Estos valores son proporcionales al número de pedidos (num_pedidos = 40)
+  # Si se cambia num_pedidos, estos valores deben ajustarse proporcionalmente
+  # Fórmulas aproximadas: ref_makespan ≈ 50 * num_pedidos
+  #                      ref_balance ≈ 7.5 * num_pedidos
+  #                      ref_energia ≈ 17.5 * num_pedidos
+  valores_referencia:
+    makespan: 2000   # minutos (para 40 pedidos)
+    balance: 300     # minutos (para 40 pedidos)
+    energia: 700     # kWh (para 40 pedidos)

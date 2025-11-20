@@ -110,6 +110,12 @@ def ejecutar_semilla(args):
     
     # Configurar semilla para reproducibilidad
     np.random.seed(semilla)
+    random.seed(semilla)
+    
+    # Cargar valores de referencia desde config.yaml
+    with open('tesis3/config/config.yaml', 'r') as f:
+        config_completa = yaml.safe_load(f)
+    valores_ref = config_completa['experiments']['valores_referencia']
     
     inicio = time.time()
     frente_pareto, fitness_pareto, _ = nsga2_memetic(
@@ -136,9 +142,10 @@ def ejecutar_semilla(args):
     energias = [m[2] for m in metricas]
     
     # Calcular métrica agregada normalizada (menor es mejor)
-    ref_mk = 2000  # Makespan máximo esperado
-    ref_bal = 300  # Balance máximo esperado
-    ref_eng = 700  # Energía máxima esperada
+    # Los valores de referencia se leen desde config.yaml
+    ref_mk = valores_ref['makespan']
+    ref_bal = valores_ref['balance']
+    ref_eng = valores_ref['energia']
     
     prom_mk = np.mean(makespans)
     prom_bal = np.mean(balances)

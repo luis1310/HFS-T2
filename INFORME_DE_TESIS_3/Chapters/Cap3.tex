@@ -390,6 +390,95 @@ La selección de la configuración óptima considera los siguientes criterios:
     \item \textbf{Eficiencia computacional}: Tiempo de ejecución requerido para alcanzar soluciones de calidad aceptable.
 \end{itemize}
 
+\subsubsection{Métrica de Comparación: Score Agregado}
+
+Para facilitar la comparación sistemática entre diferentes configuraciones durante el tunning de hiperparámetros y la comparación de operadores, se introduce una métrica agregada que permite ordenar las configuraciones según su desempeño global en los tres objetivos simultáneamente.
+
+\paragraph{Definición del Score Agregado}
+
+Dada una configuración particular (conjunto de hiperparámetros u operadores), esta se ejecuta con $S$ semillas aleatorias independientes (típicamente $S=30$ para robustez estadística). Para cada ejecución con semilla $s$, se obtiene un frente de Pareto $\mathcal{F}_s$ con sus respectivos valores de fitness para los tres objetivos. 
+
+Para cada frente de Pareto $\mathcal{F}_s$, se calculan los valores promedio de las métricas reales de las soluciones no dominadas:
+
+\begin{align*}
+\text{makespan}_s &= \frac{1}{|\mathcal{F}_s|} \sum_{i \in \mathcal{F}_s} \text{makespan}_i \\
+\text{balance}_s &= \frac{1}{|\mathcal{F}_s|} \sum_{i \in \mathcal{F}_s} \text{balance}_i \\
+\text{energía}_s &= \frac{1}{|\mathcal{F}_s|} \sum_{i \in \mathcal{F}_s} \text{energía}_i
+\end{align*}
+
+Para normalizar estos valores y permitir su agregación, se emplean valores de referencia que actúan como \textbf{límites superiores aproximados} del espacio de búsqueda, establecidos proporcionalmente al tamaño del problema ($P$ pedidos) usando factores de escalamiento conservadores.
+
+\paragraph{Selección de valores de referencia}
+
+Los valores de referencia se establecen proporcionalmente al número de pedidos, enfoque metodológicamente válido dado que el objetivo es la \textbf{comparación relativa} entre configuraciones, no la medición absoluta de calidad. Para el presente trabajo con $P=40$ pedidos:
+
+\begin{itemize}
+    \item $\text{ref}_{\text{mk}} \approx 50 \times P$ minutos
+    \item $\text{ref}_{\text{bal}} \approx 7.5 \times P$ minutos
+    \item $\text{ref}_{\text{eng}} \approx 17.5 \times P$ kWh
+\end{itemize}
+
+Para el caso de estudio con $P=40$ pedidos:
+
+\begin{itemize}
+    \item $\text{ref}_{\text{mk}} = 2000$ minutos
+    \item $\text{ref}_{\text{bal}} = 300$ minutos
+    \item $\text{ref}_{\text{eng}} = 700$ kWh
+\end{itemize}
+
+\paragraph{Justificación metodológica}
+
+La elección de valores de referencia específicos no afecta la \textbf{validez de las comparaciones relativas} entre configuraciones, que es el objetivo principal del tunning. Esto se debe a que:
+
+\begin{itemize}
+    \item El score agregado es una métrica \textbf{ordinal}: solo el orden relativo entre configuraciones es relevante para identificar la mejor configuración.
+    \item Si dos configuraciones $C_1$ y $C_2$ cumplen $\text{Score}(C_1) < \text{Score}(C_2)$ con ciertos valores de referencia, esta relación se mantiene para cualquier conjunto de valores de referencia positivos, ya que la normalización es una transformación monotónica.
+    \item Los valores de referencia funcionan como \textbf{factores de escala} que balancean la contribución de cada objetivo, no como umbrales absolutos de calidad.
+\end{itemize}
+
+Matemáticamente, para configuraciones $C_1$ y $C_2$ con métricas $(m_1, b_1, e_1)$ y $(m_2, b_2, e_2)$ respectivamente:
+
+\[
+\frac{m_1}{\text{ref}_{\text{mk}}} + \frac{b_1}{\text{ref}_{\text{bal}}} + \frac{e_1}{\text{ref}_{\text{eng}}} < \frac{m_2}{\text{ref}_{\text{mk}}} + \frac{b_2}{\text{ref}_{\text{bal}}} + \frac{e_2}{\text{ref}_{\text{eng}}}
+\]
+
+se mantiene bajo cualquier transformación $(\text{ref}_{\text{mk}}', \text{ref}_{\text{bal}}', \text{ref}_{\text{eng}}') = k \cdot (\text{ref}_{\text{mk}}, \text{ref}_{\text{bal}}, \text{ref}_{\text{eng}})$ con $k > 0$.
+
+Por tanto, la selección específica de valores de referencia no compromete la identificación de la configuración óptima, que es el objetivo del proceso de tunning. Los valores elegidos deben ser \textbf{conservadores} (suficientemente grandes) para evitar que las métricas excedan los valores de referencia, pero su magnitud exacta no es crítica para la comparación.
+
+Este enfoque es estándar en optimización multiobjetivo: Deb et al. \cite{Deb2002} emplean normalización basada en límites del espacio objetivo sin requerir calibración empírica precisa; Zitzler et al. \cite{Zitzler2003} utilizan valores de referencia para métricas de calidad (como hipervolumen) donde los valores específicos afectan magnitudes pero no rankings relativos. La práctica común en la literatura es establecer valores de referencia que sean "razonables" para el problema, no necesariamente "óptimos" u obtenidos empíricamente.
+
+Los valores elegidos como límites conservadores cubren ampliamente el rango esperado de valores del sistema, asegurando que las métricas observadas típicamente se encuentren por debajo de estos límites, permitiendo así una normalización efectiva
+
+El score agregado para la semilla $s$ se calcula como:
+
+\begin{equation}
+\text{score}_s = \frac{\text{makespan}_s}{\text{ref}_{\text{mk}}} + \frac{\text{balance}_s}{\text{ref}_{\text{bal}}} + \frac{\text{energía}_s}{\text{ref}_{\text{eng}}}
+\end{equation}
+
+Finalmente, el score agregado de la configuración se obtiene promediando sobre las $S$ semillas:
+
+\begin{equation}
+\text{Score}_{\text{config}} = \frac{1}{S} \sum_{s=1}^{S} \text{score}_s
+\end{equation}
+
+\paragraph{Interpretación y Uso}
+
+El score agregado es una métrica escalar adimensional donde \textbf{valores menores indican mejor desempeño}. Esta métrica tiene las siguientes características:
+
+\begin{itemize}
+    \item \textbf{Normalización}: Los valores de referencia escalan cada objetivo a un rango comparable, evitando que objetivos con magnitudes mayores dominen la métrica.
+    \item \textbf{Ponderación igual}: Se asigna el mismo peso a los tres objetivos, reflejando la importancia equivalente de minimizar makespan, balance de carga y consumo energético.
+    \item \textbf{Simplicidad}: Permite ordenar configuraciones de forma determinística sin requerir métricas complejas de comparación de conjuntos de Pareto.
+    \item \textbf{Robustez estadística}: Al promediar sobre 30 semillas independientes, se captura el comportamiento típico de cada configuración, reduciendo el efecto de resultados atípicos.
+\end{itemize}
+
+Esta métrica se utiliza exclusivamente durante la fase experimental de selección de configuraciones. Una vez identificada la configuración óptima mediante el score agregado, el análisis final de resultados se realiza directamente sobre el frente de Pareto obtenido, empleando las métricas de calidad del frente descritas en la sección siguiente.
+
+\paragraph{Limitaciones}
+
+Es importante señalar que el score agregado es una métrica de utilidad experimental y no reemplaza el análisis completo del frente de Pareto. Configuraciones con scores similares pueden tener comportamientos muy diferentes en términos de diversidad, convergencia o distribución de soluciones. Por ello, el score agregado se complementa con el análisis visual del frente de Pareto y las métricas de calidad detalladas para validar la selección final.
+
 \subsection{Evaluación del Frente de Pareto}
 
 En el contexto de optimización multiobjetivo con NSGA-II, la evaluación de la calidad de las soluciones difiere significativamente de los enfoques monoobjetivo. En lugar de identificar una única solución óptima, el objetivo es obtener un conjunto de soluciones que represente adecuadamente el frente de Pareto.

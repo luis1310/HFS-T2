@@ -1,5 +1,54 @@
 # Actualizacion de HFS - T2 a HFS-T3
 Proyecto de tesis 3 (taller de investigación)
+
+## Version 1.1.3:
+- **Normalización de score agregado mejorada**:
+  - Valores de referencia ahora se leen desde `config.yaml` en lugar de estar hardcodeados.
+  - Agregada sección `experiments.valores_referencia` en `config.yaml` (makespan: 2000, balance: 300, energia: 700).
+  - Actualización automática en todos los scripts de paralelización: `tunning_multimetrica.py`, `comparacion_operadores.py`, `prueba_rapida.py`, `ejecutar_memetico.py`.
+  - Valores proporcionales al número de pedidos (50 min/pedido, 7.5 min/pedido, 17.5 kWh/pedido) para facilitar escalamiento.
+
+- **Paralelización completa de `ejecutar_memetico.py`**:
+  - Actualizado de 5 semillas secuenciales a 30 semillas con paralelización real.
+  - Implementación de `ProcessPoolExecutor` con detección automática de núcleos del sistema.
+  - Menú interactivo para seleccionar entre núcleos físicos, lógicos, modo seguro o personalizado.
+  - Detección y continuación desde resultados previos.
+  - Guardado de resultados parciales durante ejecución.
+  - Generación de 3 archivos de salida: parcial, final y resumen en YAML.
+  - Reducción de tiempo estimado de ~10-15 min a ~2-3 min (con 32 núcleos).
+
+- **Corrección de objetivos multiobjetivo**:
+  - Corrección en `ejecutar_memetico.py`: cambiado de 4 objetivos a 3 objetivos (makespan, balance, energía).
+  - Enfriamiento no es un objetivo separado, afecta al makespan.
+  - Consistencia en todos los scripts de paralelización con 3 objetivos.
+
+- **Guardado de mejores configuraciones en YAML**:
+  - `tunning_multimetrica.py`: Guarda automáticamente `mejor_configuracion_tunning_TIMESTAMP.yaml`.
+  - `comparacion_operadores.py`: Guarda automáticamente `mejor_configuracion_operadores_TIMESTAMP.yaml`.
+  - `ejecutar_memetico.py`: Guarda `comparacion_memetica_resumen_TIMESTAMP.yaml`.
+  - Formato YAML con configuración completa y métricas promedio con desviaciones estándar.
+
+- **Prevención de errores de directorio**:
+  - Agregado `os.makedirs('tesis3/results', exist_ok=True)` en todos los scripts que escriben archivos.
+  - Scripts afectados: `tunning_multimetrica.py`, `comparacion_operadores.py`, `prueba_rapida.py`, `unir_resultados_parciales.py`, `comparar_operadores.py`, `comparar_operadores_corregido.py`, `analizar_mejores_soluciones.py`, `visualizar_frente_memetico.py`, `ejecutar_memetico.py`.
+
+- **Reproducibilidad mejorada**:
+  - Agregado `random.seed(semilla)` junto a `np.random.seed(semilla)` en funciones de ejecución.
+  - Garantiza reproducibilidad completa usando ambos generadores de números aleatorios (Python estándar y NumPy).
+
+- **Documentación del informe de tesis actualizada**:
+  - Capítulo 3: Agregada sección completa "Métrica de Comparación: Score Agregado".
+  - Justificación matemática formal de valores de referencia como métrica ordinal.
+  - Demostración de invarianza del orden relativo bajo transformaciones de escala.
+  - Referencias bibliográficas de respaldo (Deb et al., Zitzler et al.).
+  - Explicación de selección de valores conservadores proporcionales al tamaño del problema.
+
+- **Plan de experimentos completo**:
+  - Documento `PLAN_EXPERIMENTOS.md` con 5 fases de experimentación.
+  - Tabla de paralelización por fase con información de núcleos y tiempos estimados.
+  - Instrucciones detalladas para cada script (objetivo, comandos, resultados esperados).
+  - Gestión de interrupciones y reanudación de experimentos.
+
 ## Version 1.1.2e:
 - Pipeline de CI habilitado con GitHub Actions (`.github/workflows/ci.yml`):
   - Lint estricto: flake8 (algorithms/operators), black e isort.
