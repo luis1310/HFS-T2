@@ -7,6 +7,7 @@ from tesis3.src.core.problem import ProblemConfig
 from tesis3.src.algorithms.nsga2_memetic import nsga2_memetic
 from tesis3.src.operators.crossover import aplicar_cruce
 from tesis3.src.operators.mutation import aplicar_mutacion
+from tesis3.src.utils.seeds import cargar_semillas
 import numpy as np
 import time
 import csv
@@ -30,9 +31,21 @@ def cruce(p1, p2, cfg, prob):
 def mutacion(pob, cfg, prob):
     return aplicar_mutacion(pob, cfg, metodo='invert', tasa_mut=prob)
 
-def detectar_resultados_previos():
-    """Detecta y carga resultados de ejecuciones previas"""
+def detectar_resultados_previos(num_semillas=30, semillas_esperadas=None):
+    """Detecta y carga resultados de ejecuciones previas
+    
+    Verifica que cada configuración tenga exactamente las semillas esperadas
+    para asegurar que siempre se usan las mismas semillas.
+    
+    Args:
+        num_semillas: Número de semillas esperadas (para compatibilidad)
+        semillas_esperadas: Lista de semillas esperadas. Si es None, usa range(num_semillas)
+    """
     print("🔍 Detectando resultados previos...")
+    
+    # Si no se proporcionan semillas específicas, usar range()
+    if semillas_esperadas is None:
+        semillas_esperadas = list(range(num_semillas))
     
     # Buscar archivos parciales
     archivos_parciales = glob.glob('tesis3/results/tunning_multimetrica_parcial_*.csv')
@@ -41,32 +54,10 @@ def detectar_resultados_previos():
     print(f"   Archivos parciales encontrados: {len(archivos_parciales)}")
     print(f"   Archivos finales encontrados: {len(archivos_finales)}")
     
-    # Cargar todos los resultados previos
-    resultados_previos = []
-    configuraciones_completas_previas = set()
+    # Cargar todos los resultados previos desde archivos finales (tienen semillas individuales)
+    resultados_por_config = {}  # {config_key: set(semillas)}
     
-    # Cargar desde archivos parciales
-    for archivo in archivos_parciales:
-        try:
-            with open(archivo, 'r') as f:
-                reader = csv.DictReader(f)
-                for row in reader:
-                    # Convertir a formato interno
-                    configuracion = {
-                        'tamano_poblacion': int(row['tamano_poblacion']),
-                        'num_generaciones': int(row['num_generaciones']),
-                        'prob_cruce': float(row['prob_cruce']),
-                        'prob_mutacion': float(row['prob_mutacion']),
-                        'cada_k_gen': int(row['cada_k_gen']),
-                        'max_iter_local': int(row['max_iter_local'])
-                    }
-                    config_key = tuple(sorted(configuracion.items()))
-                    configuraciones_completas_previas.add(config_key)
-                    print(f"   ✅ Configuración completa detectada: {configuracion}")
-        except Exception as e:
-            print(f"   ⚠️ Error leyendo {archivo}: {e}")
-    
-    # Cargar desde archivos finales
+    # Cargar desde archivos finales (estos tienen semillas individuales)
     for archivo in archivos_finales:
         try:
             with open(archivo, 'r') as f:
@@ -80,12 +71,51 @@ def detectar_resultados_previos():
                         'cada_k_gen': int(row['cada_k_gen']),
                         'max_iter_local': int(row['max_iter_local'])
                     }
+                    semilla = int(row['semilla'])
                     config_key = tuple(sorted(configuracion.items()))
-                    configuraciones_completas_previas.add(config_key)
+                    
+                    if config_key not in resultados_por_config:
+                        resultados_por_config[config_key] = set()
+                    resultados_por_config[config_key].add(semilla)
         except Exception as e:
-            print(f"   ⚠️ Error leyendo {archivo}: {e}")
+            print(f"   Error leyendo {archivo}: {e}")
     
-    print(f"   📊 Total configuraciones completas previas: {len(configuraciones_completas_previas)}")
+    # Cargar desde archivos parciales (asumimos que si está en parcial, tiene todas las semillas)
+    for archivo in archivos_parciales:
+        try:
+            with open(archivo, 'r') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    configuracion = {
+                        'tamano_poblacion': int(row['tamano_poblacion']),
+                        'num_generaciones': int(row['num_generaciones']),
+                        'prob_cruce': float(row['prob_cruce']),
+                        'prob_mutacion': float(row['prob_mutacion']),
+                        'cada_k_gen': int(row['cada_k_gen']),
+                        'max_iter_local': int(row['max_iter_local'])
+                    }
+                    config_key = tuple(sorted(configuracion.items()))
+                    # Si está en parcial, asumimos que tiene todas las semillas (se guarda solo cuando está completa)
+                    if config_key not in resultados_por_config:
+                        resultados_por_config[config_key] = set(semillas_esperadas)
+        except Exception as e:
+            print(f"   Error leyendo {archivo}: {e}")
+    
+    # Verificar configuraciones completas: deben tener exactamente las semillas esperadas
+    semillas_esperadas_set = set(semillas_esperadas)
+    configuraciones_completas_previas = set()
+    
+    for config_key, semillas_encontradas in resultados_por_config.items():
+        if semillas_encontradas == semillas_esperadas_set:
+            configuraciones_completas_previas.add(config_key)
+            config_dict = dict(config_key)
+            print(f"   ✅ Configuración completa detectada: {config_dict} (semillas {min(semillas_esperadas)}-{max(semillas_esperadas)} verificadas)")
+        elif len(semillas_encontradas) > 0:
+            faltantes = semillas_esperadas_set - semillas_encontradas
+            config_dict = dict(config_key)
+            print(f"   ⚠️ Configuración parcial: {config_dict} - Semillas faltantes: {sorted(faltantes)} ({len(faltantes)} faltantes)")
+    
+    print(f"   Total configuraciones completas previas: {len(configuraciones_completas_previas)}")
     return configuraciones_completas_previas
 
 def guardar_resultados_parciales(todos_resultados, num_semillas):
@@ -137,7 +167,7 @@ def guardar_resultados_parciales(todos_resultados, num_semillas):
             })
             writer.writerow(row)
     
-    print(f"    💾 Resultados parciales guardados: {len(configuraciones_completas)} configuraciones completas")
+    print(f"    Resultados parciales guardados: {len(configuraciones_completas)} configuraciones completas")
 
 def verificar_configuraciones_completas(todos_resultados, num_semillas):
     """Verifica qué configuraciones están completas (tienen todas sus semillas)"""
@@ -163,9 +193,13 @@ def ejecutar_semilla(args):
     
     # Timestamp de inicio del proceso
     timestamp_inicio = time.strftime('%H:%M:%S.%f')[:-3]  # Incluir milisegundos
-    print(f"🚀 INICIO: {timestamp_inicio} - Config {configuracion['tamano_poblacion']}-{configuracion['num_generaciones']}-{configuracion['prob_cruce']:.1f}-{configuracion['prob_mutacion']:.2f} - Semilla {semilla}")
+    print(f"INICIO: {timestamp_inicio} - Config {configuracion['tamano_poblacion']}-{configuracion['num_generaciones']}-{configuracion['prob_cruce']:.1f}-{configuracion['prob_mutacion']:.2f} - Semilla {semilla}")
     
     # Configurar semilla para reproducibilidad
+    # IMPORTANTE: Inicializar ambos generadores aleatorios (Python y NumPy)
+    # para garantizar reproducibilidad completa
+    import random
+    random.seed(semilla)
     np.random.seed(semilla)
     
     inicio = time.time()
@@ -183,7 +217,7 @@ def ejecutar_semilla(args):
     
     # Timestamp de fin del proceso
     timestamp_fin = time.strftime('%H:%M:%S.%f')[:-3]
-    print(f"✅ FIN: {timestamp_fin} - Config {configuracion['tamano_poblacion']}-{configuracion['num_generaciones']}-{configuracion['prob_cruce']:.1f}-{configuracion['prob_mutacion']:.2f} - Semilla {semilla} - Tiempo: {tiempo:.1f}s")
+    print(f"FIN: {timestamp_fin} - Config {configuracion['tamano_poblacion']}-{configuracion['num_generaciones']}-{configuracion['prob_cruce']:.1f}-{configuracion['prob_mutacion']:.2f} - Semilla {semilla} - Tiempo: {tiempo:.1f}s")
     
     # Convertir fitness a métricas reales
     metricas = [(1/f[0], 1/f[1]-1, 1/f[2]-1) for f in fitness_pareto]
@@ -277,15 +311,24 @@ def main():
     combinaciones = list(product(*espacio_busqueda.values()))
     combinaciones = [dict(zip(espacio_busqueda.keys(), combo)) for combo in combinaciones]
     
-    # Número de semillas por configuración
-    num_semillas = 30
+    # Cargar semillas centralizadas desde archivo de configuración
+    try:
+        semillas = cargar_semillas(tipo="estandar")
+        num_semillas = len(semillas)
+        print(f"\n✅ Semillas cargadas desde archivo centralizado: {num_semillas} semillas")
+        print(f"   Semillas a usar: {semillas}")
+    except (FileNotFoundError, KeyError) as e:
+        print(f"\n⚠️ No se pudo cargar semillas centralizadas: {e}")
+        print(f"   Usando semillas estándar (0-29)")
+        semillas = list(range(30))
+        num_semillas = 30
     
     print(f"\nTotal de combinaciones a evaluar: {len(combinaciones)}")
     print(f"Semillas por combinación: {num_semillas}")
     print(f"Total de ejecuciones: {len(combinaciones) * num_semillas}")
     
     # 🔍 DETECTAR RESULTADOS PREVIOS
-    configuraciones_completas_previas = detectar_resultados_previos()
+    configuraciones_completas_previas = detectar_resultados_previos(num_semillas, semillas_esperadas=semillas)
     
     # Filtrar configuraciones que ya están completas
     combinaciones_faltantes = []
@@ -294,7 +337,7 @@ def main():
         if config_key not in configuraciones_completas_previas:
             combinaciones_faltantes.append(combo)
     
-    print(f"\n📊 RESUMEN:")
+    print(f"\nRESUMEN:")
     print(f"   Configuraciones totales: {len(combinaciones)}")
     print(f"   Configuraciones completas previas: {len(configuraciones_completas_previas)}")
     print(f"   Configuraciones faltantes: {len(combinaciones_faltantes)}")
@@ -316,9 +359,10 @@ def main():
     inicio_total = time.time()
     
     # Crear todas las tareas (combinación, semilla) SOLO para las faltantes
+    # Usar las semillas cargadas desde el archivo centralizado
     tareas = []
     for configuracion in combinaciones_faltantes:
-        for semilla in range(num_semillas):
+        for semilla in semillas:  # Usar semillas del archivo, no range()
             tareas.append((configuracion, semilla))
     
     print(f"Total de tareas pendientes: {len(tareas)}")
@@ -331,8 +375,8 @@ def main():
     configuraciones_ya_guardadas = set()  # Para evitar guardar la misma configuración múltiples veces
     
     with ProcessPoolExecutor(max_workers=num_nucleos) as executor:
-        print(f"🚀 INICIANDO {len(tareas)} TAREAS EN {num_nucleos} NÚCLEOS...")
-        print(f"⏰ Timestamp inicio: {time.strftime('%H:%M:%S')}")
+        print(f"INICIANDO {len(tareas)} TAREAS EN {num_nucleos} NÚCLEOS...")
+        print(f"Timestamp inicio: {time.strftime('%H:%M:%S')}")
         print()
         
         # Enviar todas las tareas
@@ -384,7 +428,7 @@ def main():
                     
                     if configuraciones_nuevas:
                         print(f"    Mejor config actual: {mejor_config}")
-                        print(f"    ✅ Configuraciones completadas: {len(configuraciones_nuevas)}")
+                        print(f"    Configuraciones completadas: {len(configuraciones_nuevas)}")
                         
                         # Guardar resultados parciales
                         guardar_resultados_parciales(todos_resultados, num_semillas)
@@ -452,21 +496,21 @@ def main():
     # Mejor configuración
     if configuraciones_analizadas:
         mejor = configuraciones_analizadas[0]
-    print(f"\n" + "="*70)
-    print("MEJOR CONFIGURACIÓN ENCONTRADA")
-    print("="*70)
+        print(f"\n" + "="*70)
+        print("MEJOR CONFIGURACIÓN ENCONTRADA")
+        print("="*70)
         print(f"Población: {mejor['configuracion']['tamano_poblacion']}")
         print(f"Generaciones: {mejor['configuracion']['num_generaciones']}")
         print(f"Prob. cruce: {mejor['configuracion']['prob_cruce']}")
         print(f"Prob. mutación: {mejor['configuracion']['prob_mutacion']}")
         print(f"Búsqueda local cada: {mejor['configuracion']['cada_k_gen']} gen")
         print(f"Iteraciones locales: {mejor['configuracion']['max_iter_local']}")
-    print(f"\nMétricas promedio:")
-    print(f"   Score agregado: {mejor['prom_score']:.4f}")
-    print(f"   Makespan: {mejor['prom_makespan']:.2f}s")
-    print(f"   Balance: {mejor['prom_balance']:.2f}")
-    print(f"   Energía: {mejor['prom_energia']:.2f} kWh")
-    print(f"   Tiempo: {mejor['prom_tiempo']:.2f}s")
+        print(f"\nMétricas promedio:")
+        print(f"   Score agregado: {mejor['prom_score']:.4f}")
+        print(f"   Makespan: {mejor['prom_makespan']:.2f}s")
+        print(f"   Balance: {mejor['prom_balance']:.2f}")
+        print(f"   Energía: {mejor['prom_energia']:.2f} kWh")
+        print(f"   Tiempo: {mejor['prom_tiempo']:.2f}s")
     
     # Guardar resultados
     timestamp_final = time.strftime('%Y%m%d_%H%M%S')
