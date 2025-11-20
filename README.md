@@ -1,6 +1,23 @@
 # Actualizacion de HFS - T2 a HFS-T3
 Proyecto de tesis 3 (taller de investigación)
 
+## Version 1.1.3d:
+- **Corrección de variable `valores_ref` no definida en `tunning_multimetrica.py`**:
+  - **Problema**: La función `ejecutar_semilla` intentaba usar `valores_ref` (líneas 240-242) sin que estuviera definida.
+  - **Error**: `"valores_ref" no está definido - basedpyright(reportUndefinedVariable)`.
+  - **Causa**: Faltaba cargar los valores de referencia desde `config.yaml` como variable global.
+  - **Solución**: Agregado código después de la línea 28 para cargar valores de referencia:
+    ```python
+    # Cargar valores de referencia para el score agregado
+    with open("tesis3/config/config.yaml", 'r') as f:
+        config_completa = yaml.safe_load(f)
+    valores_ref = config_completa['experiments']['valores_referencia']
+    ```
+  - Ahora la variable `valores_ref` está disponible globalmente para todas las funciones.
+
+- **Archivos modificados**:
+  - `tesis3/experiments/paralelizacion/tunning_multimetrica.py`: Líneas 30-33 (carga de valores de referencia).
+
 ## Version 1.1.3c:
 - **Corrección crítica en guardado de YAML en `comparacion_operadores.py`**:
   - Corregido `TypeError: string indices must be integers, not 'str'` al intentar guardar mejor configuración.

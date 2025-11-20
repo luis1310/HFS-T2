@@ -27,6 +27,11 @@ print("="*70)
 # Configuración del problema
 config = ProblemConfig.from_yaml("tesis3/config/config.yaml")
 
+# Cargar valores de referencia para el score agregado
+with open("tesis3/config/config.yaml", 'r') as f:
+    config_completa = yaml.safe_load(f)
+valores_ref = config_completa['experiments']['valores_referencia']
+
 def cruce(p1, p2, cfg, prob):
     return aplicar_cruce(p1, p2, cfg, metodo='uniforme', prob_cruce=prob)
 
@@ -311,8 +316,8 @@ def main():
     espacio_busqueda = {
         'tamano_poblacion': [100, 150, 200],        # 3 valores
         'num_generaciones': [400, 500, 600],        # 3 valores
-        'prob_cruce': [0.7, 0.8, 0.9],              # 3 valores
-        'prob_mutacion': [0.1, 0.125, 0.15],        # 3 valores
+        'prob_cruce': [0.6, 0.7, 0.8, 0.9],              # 4 valores
+        'prob_mutacion': [0.1, 0.15, 0.20, 0.25, 0.30],        # 5 valores
         'cada_k_gen': [5, 10],                      # 2 valores
         'max_iter_local': [3, 5]                    # 2 valores
     }
