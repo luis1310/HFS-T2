@@ -1,14 +1,43 @@
 # Actualizacion de HFS - T2 a HFS-T3
 Proyecto de tesis 3 (taller de investigación)
 
+## Version 1.1.3b:
+- **Lectura de operadores desde `config.yaml`**:
+  - **Archivo modificado**: `tesis3/config/config.yaml` actualizado con nueva sección `algorithm.operators`.
+  - **Nueva sección**: `algorithm.operators` con campos `cruce` y `mutacion` para centralizar configuración de operadores.
+    - Valores por defecto: `cruce: 'uniforme'`, `mutacion: 'invert'`
+    - Opciones de cruce: `uniforme`, `pmx`, `un_punto`, `dos_puntos`
+    - Opciones de mutación: `invert`, `swap`, `scramble`, `insert`
+  - **Scripts actualizados**:
+    - `ejecutar_memetico.py`: Elimina operadores hardcodeados, lee `cruce` y `mutacion` desde config.yaml, funciones dinámicas.
+    - `visualizar_frente_memetico.py`: Elimina operadores hardcodeados, lee `cruce` y `mutacion` desde config.yaml, funciones dinámicas.
+  - Ambos scripts ahora imprimen operadores utilizados en mensajes de inicio para trazabilidad.
+  - Consistencia total entre fases experimentales en uso de operadores.
+
+- **Flujo de trabajo mejorado**:
+  - Fase 2 (Comparación Operadores) → genera YAML → actualizar operadores en config.yaml manualmente.
+  - Fase 3 (Tunning) → lee operadores desde config.yaml → genera YAML → actualizar hiperparámetros en config.yaml manualmente.
+  - Fases 4 y 5 → leen TODO automáticamente desde config.yaml (operadores + hiperparámetros) sin modificar código.
+  - **Beneficios**: Sin modificación de código Python entre fases, trazabilidad completa, reproducibilidad mejorada.
+
+- **Documentación del flujo completo actualizada**:
+  - `PLAN_EXPERIMENTOS.md`: Diagrama de flujo completo con puntos de actualización de config.yaml claramente marcados.
+  - Instrucciones paso a paso para actualizar config.yaml entre fases con ejemplos concretos.
+  - Muestra contenido de archivos YAML generados y cómo extraer valores para copiar a config.yaml.
+  - Lista completa de operadores disponibles en cada categoría.
+
+- **Resumen de archivos modificados**:
+  - `tesis3/config/config.yaml`: Nueva sección `algorithm.operators`.
+  - `tesis3/experiments/ejecutar_memetico.py`: Lectura dinámica de operadores.
+  - `tesis3/experiments/visualizar_frente_memetico.py`: Lectura dinámica de operadores.
+  - `PLAN_EXPERIMENTOS.md`: Flujo completo con instrucciones detalladas.
+
 ## Version 1.1.3:
-- **Configuración centralizada en `config.yaml`**:
-  - **Operadores genéticos**: Agregada sección `algorithm.operators` con campos `cruce` y `mutacion`.
-  - **Valores de referencia**: Agregada sección `experiments.valores_referencia` (makespan: 2000, balance: 300, energia: 700).
-  - Scripts actualizados para leer operadores desde `config.yaml`: `ejecutar_memetico.py`, `visualizar_frente_memetico.py`.
-  - Scripts actualizados para leer valores de referencia: `tunning_multimetrica.py`, `comparacion_operadores.py`, `prueba_rapida.py`, `ejecutar_memetico.py`.
+- **Normalización de score agregado mejorada**:
+  - Valores de referencia ahora se leen desde `config.yaml` en lugar de estar hardcodeados.
+  - Agregada sección `experiments.valores_referencia` en `config.yaml` (makespan: 2000, balance: 300, energia: 700).
+  - Actualización automática en todos los scripts de paralelización: `tunning_multimetrica.py`, `comparacion_operadores.py`, `prueba_rapida.py`, `ejecutar_memetico.py`.
   - Valores proporcionales al número de pedidos (50 min/pedido, 7.5 min/pedido, 17.5 kWh/pedido) para facilitar escalamiento.
-  - Flujo de trabajo optimizado: Fase 2 → actualizar operadores → Fase 3 → actualizar hiperparámetros → Fases 4-5 leen todo automáticamente.
 
 - **Paralelización completa de `ejecutar_memetico.py`**:
   - Actualizado de 5 semillas secuenciales a 30 semillas con paralelización real.
@@ -17,8 +46,8 @@ Proyecto de tesis 3 (taller de investigación)
   - Detección y continuación desde resultados previos.
   - Guardado de resultados parciales durante ejecución.
   - Generación de 3 archivos de salida: parcial, final y resumen en YAML.
-  - **Ahora lee parámetros desde `config.yaml`**: Usa la configuración optimizada del tunning en lugar de valores hardcodeados.
-  - Tiempo de ejecución variable según config.yaml: ~2-3 min (50 pop, 100 gen) o ~10-15 min (150 pop, 500 gen) con 32 núcleos.
+  - Lee hiperparámetros desde `config.yaml`: Población, generaciones, probabilidades de cruce/mutación, parámetros meméticos.
+  - Reducción de tiempo estimado de ~10-15 min a ~2-3 min (con 32 núcleos).
 
 - **Corrección de objetivos multiobjetivo**:
   - Corrección en `ejecutar_memetico.py`: cambiado de 4 objetivos a 3 objetivos (makespan, balance, energía).
