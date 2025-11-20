@@ -17,6 +17,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 import psutil
 import glob
 import os
+import yaml
 
 print("="*70)
 print("TUNNING MULTIMÉTRICA - PARALELIZACIÓN REAL")
@@ -146,6 +147,9 @@ def guardar_resultados_parciales(todos_resultados, num_semillas):
                 'prom_tiempo': avg_time,
                 'prom_score': avg_score
             })
+    
+    # Asegurar que el directorio existe
+    os.makedirs('tesis3/results', exist_ok=True)
     
     # Guardar en CSV con timestamp
     timestamp = time.strftime('%Y%m%d_%H%M%S')
@@ -297,16 +301,16 @@ def main():
     
     print(f"\nUsando {num_nucleos} núcleos para paralelización")
     
-    # Definir espacio de búsqueda de hiperparámetros (optimizado para 30 semillas)
+    # Definir espacio de búsqueda de hiperparámetros
     espacio_busqueda = {
-        'tamano_poblacion': [100, 200],           # 2 valores (poco influyente en frente de Pareto)
-        'num_generaciones': [400, 600],           # 2 valores (muy influyente) - reducido
-        'prob_cruce': [0.8, 0.9],                # 2 valores (muy influyente) - reducido
-        'prob_mutacion': [0.1, 0.15],            # 2 valores (muy influyente) - reducido
-        'cada_k_gen': [5, 10],                   # 2 valores (influyente) - reducido
-        'max_iter_local': [3, 5]                 # 2 valores (influyente) - reducido
+        'tamano_poblacion': [100, 150, 200],        # 3 valores
+        'num_generaciones': [400, 500, 600],        # 3 valores
+        'prob_cruce': [0.7, 0.8, 0.9],              # 3 valores
+        'prob_mutacion': [0.1, 0.125, 0.15],        # 3 valores
+        'cada_k_gen': [5, 10],                      # 2 valores
+        'max_iter_local': [3, 5]                    # 2 valores
     }
-    
+
     # Generar todas las combinaciones
     combinaciones = list(product(*espacio_busqueda.values()))
     combinaciones = [dict(zip(espacio_busqueda.keys(), combo)) for combo in combinaciones]
@@ -511,9 +515,33 @@ def main():
         print(f"   Balance: {mejor['prom_balance']:.2f}")
         print(f"   Energía: {mejor['prom_energia']:.2f} kWh")
         print(f"   Tiempo: {mejor['prom_tiempo']:.2f}s")
+        
+        # Guardar mejor configuración en YAML
+        timestamp_final = time.strftime('%Y%m%d_%H%M%S')
+        os.makedirs('tesis3/results', exist_ok=True)
+        
+        mejor_config_yaml = {
+            'mejor_configuracion': mejor['configuracion'],
+            'metricas_promedio': {
+                'score_agregado': float(mejor['prom_score']),
+                'makespan': float(mejor['prom_makespan']),
+                'balance': float(mejor['prom_balance']),
+                'energia': float(mejor['prom_energia']),
+                'tiempo': float(mejor['prom_tiempo']),
+                'tamano_frente': float(mejor['prom_tamano_frente'])
+            },
+            'timestamp': timestamp_final
+        }
+        
+        yaml_file = f'tesis3/results/mejor_configuracion_tunning_{timestamp_final}.yaml'
+        with open(yaml_file, 'w') as f:
+            yaml.dump(mejor_config_yaml, f, default_flow_style=False, sort_keys=False)
+        
+        print(f"\nMejor configuración guardada en: {yaml_file}")
     
     # Guardar resultados
     timestamp_final = time.strftime('%Y%m%d_%H%M%S')
+    os.makedirs('tesis3/results', exist_ok=True)
     with open(f'tesis3/results/tunning_multimetrica_real_{timestamp_final}.csv', 'w', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=[
             'tamano_poblacion', 'num_generaciones', 'prob_cruce', 'prob_mutacion',

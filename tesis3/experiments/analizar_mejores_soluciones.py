@@ -11,6 +11,7 @@ from tesis3.src.fitness.multi_objective import fitness_multiobjetivo
 import matplotlib.pyplot as plt
 import numpy as np
 import yaml
+import os
 
 print("="*70)
 print("ANÁLISIS DE LAS MEJORES SOLUCIONES DEL FRENTE DE PARETO")
@@ -277,6 +278,10 @@ axes[2].legend()
 axes[2].grid(True, alpha=0.3)
 
 plt.tight_layout()
+
+# Asegurar que el directorio existe
+os.makedirs('tesis3/results', exist_ok=True)
+
 plt.savefig('tesis3/results/mejores_soluciones_pareto.png', dpi=300, bbox_inches='tight')
 print("   Guardado: mejores_soluciones_pareto.png")
 

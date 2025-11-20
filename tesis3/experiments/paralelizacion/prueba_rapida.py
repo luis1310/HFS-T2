@@ -10,6 +10,7 @@ from tesis3.src.operators.mutation import aplicar_mutacion
 import numpy as np
 import time
 import csv
+import os
 import multiprocessing as mp
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import psutil
@@ -55,6 +56,9 @@ def guardar_resultados_parciales(todos_resultados, num_semillas):
                 'prom_tiempo': avg_time,
                 'prom_score': avg_score
             })
+    
+    # Asegurar que el directorio existe
+    os.makedirs('tesis3/results', exist_ok=True)
     
     # Guardar en CSV con timestamp
     timestamp = time.strftime('%Y%m%d_%H%M%S')

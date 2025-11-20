@@ -10,6 +10,7 @@ from tesis3.src.operators.mutation import aplicar_mutacion
 import time
 import csv
 import numpy as np
+import os
 
 config = ProblemConfig.from_yaml("tesis3/config/config.yaml")
 
@@ -88,6 +89,9 @@ def main():
             r['cruce'] = cruce
             r['mutacion'] = mutacion
             todos_resultados.append(r)
+    
+    # Asegurar que el directorio existe
+    os.makedirs('tesis3/results', exist_ok=True)
     
     # Guardar CSV completo
     with open('tesis3/results/comparacion_operadores_completa.csv', 'w', newline='') as f:

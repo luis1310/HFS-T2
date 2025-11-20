@@ -11,6 +11,7 @@ from tesis3.src.operators.mutation import aplicar_mutacion
 import time
 import numpy as np
 import random
+import os
 
 config = ProblemConfig.from_yaml("tesis3/config/config.yaml")
 
@@ -127,6 +128,9 @@ else:
     print(f"\nLa búsqueda local NO mejora significativamente")
 
 print("\n" + "="*60)
+
+# Asegurar que el directorio existe
+os.makedirs('tesis3/results', exist_ok=True)
 
 # Guardar resultados
 import csv

@@ -13,6 +13,8 @@ import csv
 import multiprocessing as mp
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import psutil
+import os
+import yaml
 
 print("="*70)
 print("COMPARACIÓN DE OPERADORES - PARALELIZACIÓN REAL")
@@ -66,6 +68,9 @@ def guardar_resultados_parciales(todos_resultados, num_semillas):
                 'prom_tiempo': avg_time,
                 'prom_score': avg_score
             })
+    
+    # Asegurar que el directorio existe
+    os.makedirs('tesis3/results', exist_ok=True)
     
     # Guardar en CSV con timestamp
     timestamp = time.strftime('%Y%m%d_%H%M%S')
@@ -401,9 +406,49 @@ def main():
         print(f"Balance: {mejor['prom_balance']:.2f} ± {mejor['std_balance']:.2f}")
         print(f"Energía: {mejor['prom_energia']:.2f} ± {mejor['std_energia']:.2f}")
         print(f"Tiempo: {mejor['prom_tiempo']:.2f}s")
+        
+        # Guardar mejor configuración en YAML
+        timestamp_final = time.strftime('%Y%m%d_%H%M%S')
+        os.makedirs('tesis3/results', exist_ok=True)
+        
+        mejor_config_yaml = {
+            'mejor_combinacion_operadores': {
+                'cruce': mejor['configuracion']['cruce'],
+                'mutacion': mejor['configuracion']['mutacion'],
+                'nombre': mejor['configuracion']['nombre']
+            },
+            'metricas_promedio': {
+                'score_agregado': {
+                    'promedio': float(mejor['prom_score']),
+                    'desviacion_std': float(mejor['std_score'])
+                },
+                'makespan': {
+                    'promedio': float(mejor['prom_makespan']),
+                    'desviacion_std': float(mejor['std_makespan'])
+                },
+                'balance': {
+                    'promedio': float(mejor['prom_balance']),
+                    'desviacion_std': float(mejor['std_balance'])
+                },
+                'energia': {
+                    'promedio': float(mejor['prom_energia']),
+                    'desviacion_std': float(mejor['std_energia'])
+                },
+                'tiempo': float(mejor['prom_tiempo']),
+                'tamano_frente': float(mejor['prom_tamano_frente'])
+            },
+            'timestamp': timestamp_final
+        }
+        
+        yaml_file = f'tesis3/results/mejor_configuracion_operadores_{timestamp_final}.yaml'
+        with open(yaml_file, 'w') as f:
+            yaml.dump(mejor_config_yaml, f, default_flow_style=False, sort_keys=False)
+        
+        print(f"\nMejor combinación guardada en: {yaml_file}")
     
     # Guardar resultados
     timestamp_final = time.strftime('%Y%m%d_%H%M%S')
+    os.makedirs('tesis3/results', exist_ok=True)
     with open(f'tesis3/results/comparacion_operadores_real_{timestamp_final}.csv', 'w', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=[
             'configuracion', 'cruce', 'mutacion', 'semilla', 'makespan', 'balance',

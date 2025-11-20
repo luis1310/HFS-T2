@@ -82,6 +82,9 @@ def main():
             r['mutacion'] = mutacion
             todos_resultados.append(r)
     
+    # Asegurar que el directorio existe
+    os.makedirs('tesis3/results', exist_ok=True)
+    
     with open('tesis3/results/comparacion_operadores.csv', 'w', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=[
             'configuracion', 'cruce', 'mutacion', 'semilla',

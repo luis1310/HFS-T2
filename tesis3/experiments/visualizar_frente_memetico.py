@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import yaml
+import os
 
 print("="*60)
 print("VISUALIZACIÓN DEL FRENTE DE PARETO (ALGORITMO MEMÉTICO)")
@@ -89,6 +90,9 @@ print(f"   Energía:      {rango_eng:.2f} kWh")
 # GRÁFICO 1: 3D (3 dimensiones)
 # ============================================================
 print("\nGenerando visualizaciones...")
+
+# Asegurar que el directorio existe
+os.makedirs('tesis3/results', exist_ok=True)
 
 fig = plt.figure(figsize=(12, 10))
 ax = fig.add_subplot(111, projection='3d')

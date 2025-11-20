@@ -93,6 +93,9 @@ def unir_archivos_parciales(tipo_experimento):
     print(f"   Total configuraciones únicas: {len(df_final)}")
     print(f"   Archivos procesados: {len(dataframes)}")
     
+    # Asegurar que el directorio existe
+    os.makedirs('tesis3/results', exist_ok=True)
+    
     # Guardar archivo combinado
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     archivo_final = f'tesis3/results/{tipo_experimento}_combinado_{timestamp}.csv'
