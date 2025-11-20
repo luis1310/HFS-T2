@@ -2,11 +2,13 @@
 Proyecto de tesis 3 (taller de investigación)
 
 ## Version 1.1.3:
-- **Normalización de score agregado mejorada**:
-  - Valores de referencia ahora se leen desde `config.yaml` en lugar de estar hardcodeados.
-  - Agregada sección `experiments.valores_referencia` en `config.yaml` (makespan: 2000, balance: 300, energia: 700).
-  - Actualización automática en todos los scripts de paralelización: `tunning_multimetrica.py`, `comparacion_operadores.py`, `prueba_rapida.py`, `ejecutar_memetico.py`.
+- **Configuración centralizada en `config.yaml`**:
+  - **Operadores genéticos**: Agregada sección `algorithm.operators` con campos `cruce` y `mutacion`.
+  - **Valores de referencia**: Agregada sección `experiments.valores_referencia` (makespan: 2000, balance: 300, energia: 700).
+  - Scripts actualizados para leer operadores desde `config.yaml`: `ejecutar_memetico.py`, `visualizar_frente_memetico.py`.
+  - Scripts actualizados para leer valores de referencia: `tunning_multimetrica.py`, `comparacion_operadores.py`, `prueba_rapida.py`, `ejecutar_memetico.py`.
   - Valores proporcionales al número de pedidos (50 min/pedido, 7.5 min/pedido, 17.5 kWh/pedido) para facilitar escalamiento.
+  - Flujo de trabajo optimizado: Fase 2 → actualizar operadores → Fase 3 → actualizar hiperparámetros → Fases 4-5 leen todo automáticamente.
 
 - **Paralelización completa de `ejecutar_memetico.py`**:
   - Actualizado de 5 semillas secuenciales a 30 semillas con paralelización real.
@@ -15,7 +17,8 @@ Proyecto de tesis 3 (taller de investigación)
   - Detección y continuación desde resultados previos.
   - Guardado de resultados parciales durante ejecución.
   - Generación de 3 archivos de salida: parcial, final y resumen en YAML.
-  - Reducción de tiempo estimado de ~10-15 min a ~2-3 min (con 32 núcleos).
+  - **Ahora lee parámetros desde `config.yaml`**: Usa la configuración optimizada del tunning en lugar de valores hardcodeados.
+  - Tiempo de ejecución variable según config.yaml: ~2-3 min (50 pop, 100 gen) o ~10-15 min (150 pop, 500 gen) con 32 núcleos.
 
 - **Corrección de objetivos multiobjetivo**:
   - Corrección en `ejecutar_memetico.py`: cambiado de 4 objetivos a 3 objetivos (makespan, balance, energía).
@@ -43,11 +46,18 @@ Proyecto de tesis 3 (taller de investigación)
   - Referencias bibliográficas de respaldo (Deb et al., Zitzler et al.).
   - Explicación de selección de valores conservadores proporcionales al tamaño del problema.
 
+- **Optimización de archivos parciales**:
+  - Cambio de múltiples archivos CSV parciales con timestamp a un solo archivo sobreescrito.
+  - Scripts afectados: `tunning_multimetrica.py`, `comparacion_operadores.py`, `prueba_rapida.py`, `ejecutar_memetico.py`.
+  - Reduce drásticamente el número de archivos generados (de cientos a 1 por script).
+  - Mejora la continuación de experimentos interrumpidos.
+
 - **Plan de experimentos completo**:
   - Documento `PLAN_EXPERIMENTOS.md` con 5 fases de experimentación.
   - Tabla de paralelización por fase con información de núcleos y tiempos estimados.
   - Instrucciones detalladas para cada script (objetivo, comandos, resultados esperados).
   - Gestión de interrupciones y reanudación de experimentos.
+  - Flujo actualizado: Fase 3 (tunning) → actualizar config.yaml → Fase 4 (memético) → Fase 5 (visualización).
 
 ## Version 1.1.2e:
 - Pipeline de CI habilitado con GitHub Actions (`.github/workflows/ci.yml`):

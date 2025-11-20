@@ -38,6 +38,12 @@ algorithm:
     activado: true
     cada_k_generaciones: 10
     max_iteraciones_local: 5
+  
+  # Operadores genéticos
+  # Actualizar estos valores después de ejecutar comparacion_operadores.py
+  operators:
+    cruce: 'uniforme'      # Opciones: 'uniforme', 'un_punto', 'dos_puntos', 'pmx'
+    mutacion: 'invert'     # Opciones: 'invert', 'swap', 'scramble', 'insert'
 
 # Configuración de experimentos
 experiments:

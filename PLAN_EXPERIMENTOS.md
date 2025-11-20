@@ -118,7 +118,9 @@ python3 tesis3/experiments/paralelizacion/tunning_multimetrica.py
 
 ### **FASE 4: Comparación Estándar vs Memético**
 
-**Objetivo**: Verificar que la versión **memética** mejora los resultados respecto a la estándar.
+**Objetivo**: Verificar que la versión **memética** mejora los resultados respecto a la estándar usando la configuración optimizada.
+
+**IMPORTANTE**: Este script ahora lee los parámetros del `config.yaml`. Después de completar la Fase 3, debes actualizar el `config.yaml` con los mejores parámetros encontrados en el tunning.
 
 #### 4.1 Comparación NSGA-II Estándar vs Memético
 ```bash
@@ -127,8 +129,10 @@ python3 tesis3/experiments/ejecutar_memetico.py
 **¿Qué hace?**
 - Compara NSGA-II estándar vs NSGA-II memético
 - 30 semillas por versión = 60 ejecuciones totales
-- Parámetros fijos: población=50, generaciones=100
-- Tiempo estimado: ~2-3 minutos (con 32 núcleos)
+- Lee parámetros desde config.yaml (población, generaciones, prob_cruce, etc.)
+- Tiempo estimado: Variable según parámetros del config.yaml
+  - Con params optimizados típicos (150 pop, 500 gen): ~10-15 minutos (con 32 núcleos)
+  - Con params por defecto (200 pop, 1000 gen): ~30-40 minutos
 
 **Paralelización:**
 - SÍ está paralelizado (actualizado)
@@ -207,17 +211,21 @@ python3 tesis3/experiments/analizar_mejores_soluciones.py
 2. COMPARACIÓN DE OPERADORES
    └─> Encontrar mejor combinación (cruce + mutación)
    └─> Guardar: mejor_configuracion_operadores_*.yaml
+   └─> ACTUALIZAR config.yaml sección "operators" con mejores operadores
 
 3. TUNNING MULTIOBJETIVO
-   └─> Usar mejor combinación de operadores encontrada
+   └─> Lee operadores desde config.yaml (actualizados en Fase 2)
    └─> Encontrar mejor configuración de hiperparámetros
    └─> Guardar: mejor_configuracion_tunning_*.yaml
+   └─> ACTUALIZAR config.yaml sección "nsga2" y "memetic" con mejores hiperparámetros
 
 4. COMPARACIÓN ESTÁNDAR VS MEMÉTICO
-   └─> Verificar que versión memética es mejor
+   └─> Lee TODO desde config.yaml (operadores + hiperparámetros)
+   └─> Verificar que versión memética es mejor con config óptima
+   └─> Guardar: comparacion_memetica_resumen_*.yaml
 
 5. VISUALIZACIONES FINALES
-   └─> Actualizar config.yaml con mejor configuración
+   └─> Lee TODO desde config.yaml (operadores + hiperparámetros)
    └─> Generar gráficos del frente de Pareto
    └─> Análisis de mejores soluciones
 ```
@@ -240,22 +248,72 @@ python3 tesis3/experiments/analizar_mejores_soluciones.py
    - Puede aumentar según tu sistema (tienes 24/32 núcleos)
    - Ver archivo `AUMENTAR_CONFIGURACIONES.md`
 
-### Antes de Visualizaciones (Fase 5):
+### Antes de Tunning (Fase 3):
 
-1. **Actualizar `config.yaml`** con la mejor configuración encontrada:
+**ACTUALIZAR OPERADORES en `config.yaml`** con los mejores encontrados:
+
+1. Abre el archivo: `tesis3/results/mejor_configuracion_operadores_TIMESTAMP.yaml`
+   
+   Verás algo como:
+   ```yaml
+   configuracion:
+     cruce: 'pmx'
+     mutacion: 'swap'
+   metricas_promedio:
+     score_agregado: 1.234
+     ...
+   ```
+
+2. Copia los valores de `cruce` y `mutacion`
+
+3. Actualiza `tesis3/config/config.yaml` en la sección `algorithm.operators`:
+   ```yaml
+   algorithm:
+     operators:
+       cruce: 'pmx'       # Copiado del mejor_configuracion_operadores_*.yaml
+       mutacion: 'swap'   # Copiado del mejor_configuracion_operadores_*.yaml
+   ```
+   
+   Operadores disponibles:
+   - Cruce: `uniforme`, `pmx`, `un_punto`, `dos_puntos`
+   - Mutación: `invert`, `swap`, `scramble`, `insert`
+
+### Antes de Comparación Estándar vs Memético (Fase 4) y Visualizaciones (Fase 5):
+
+**ACTUALIZAR HIPERPARÁMETROS en `config.yaml`** con los mejores del tunning:
+
+1. Abre el archivo: `tesis3/results/mejor_configuracion_tunning_TIMESTAMP.yaml`
+   
+   Verás algo como:
+   ```yaml
+   configuracion:
+     tamano_poblacion: 150
+     num_generaciones: 500
+     prob_cruce: 0.85
+     prob_mutacion: 0.125
+     cada_k_gen: 10
+     max_iter_local: 5
+   metricas_promedio:
+     score_agregado: 0.987
+     ...
+   ```
+
+2. Copia todos los valores de `configuracion`
+
+3. Actualiza `tesis3/config/config.yaml`:
    ```yaml
    algorithm:
      nsga2:
-       tamano_poblacion: <mejor_valor>
-       num_generaciones: <mejor_valor>
-       prob_cruce: <mejor_valor>
-       prob_mutacion: <mejor_valor>
+       tamano_poblacion: 150       # Del tunning
+       num_generaciones: 500       # Del tunning
+       prob_cruce: 0.85            # Del tunning
+       prob_mutacion: 0.125        # Del tunning
      memetic:
-       cada_k_generaciones: <mejor_valor>
-       max_iteraciones_local: <mejor_valor>
+       cada_k_generaciones: 10     # Del tunning (cada_k_gen)
+       max_iteraciones_local: 5    # Del tunning (max_iter_local)
    ```
 
-2. **Verificar operadores** en el código de visualización
+NOTA: Los operadores ya deberían estar configurados desde la Fase 2.
 
 ## Archivos de Resultados a Guardar
 
@@ -281,6 +339,40 @@ Con tu sistema (32 núcleos, 125 GB RAM):
 | 4. Comparación Estándar vs Memético | ~10-15 minutos |
 | 5. Visualizaciones | ~5-10 minutos |
 | **TOTAL** | **~25-35 horas** |
+
+## Resumen del Flujo Completo de Configuración
+
+```
+INICIO
+  ↓
+FASE 1: Prueba Rápida (verificar paralelización)
+  ↓
+FASE 2: Comparación de Operadores
+  ↓
+  → Genera: mejor_configuracion_operadores_*.yaml
+  ↓
+  → ACCIÓN: Copiar operadores al config.yaml (sección algorithm.operators)
+  ↓
+FASE 3: Tunning Multiobjetivo
+  ↓  (Lee operadores desde config.yaml)
+  → Genera: mejor_configuracion_tunning_*.yaml
+  ↓
+  → ACCIÓN: Copiar hiperparámetros al config.yaml (secciones algorithm.nsga2 y algorithm.memetic)
+  ↓
+FASE 4: Comparación Estándar vs Memético
+  ↓  (Lee TODO desde config.yaml: operadores + hiperparámetros)
+  → Genera: comparacion_memetica_resumen_*.yaml
+  ↓
+FASE 5: Visualizaciones
+  ↓  (Lee TODO desde config.yaml: operadores + hiperparámetros)
+  → Genera: gráficos PNG y CSV de análisis
+  ↓
+FIN
+```
+
+**IMPORTANTE**: El `config.yaml` se actualiza MANUALMENTE dos veces:
+1. Después de Fase 2: Actualizar operadores
+2. Después de Fase 3: Actualizar hiperparámetros
 
 ## Continuación de Experimentos
 

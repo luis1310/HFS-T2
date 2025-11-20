@@ -27,23 +27,30 @@ with open("tesis3/config/config.yaml") as f:
 
 alg_params = full_config['algorithm']['nsga2']
 memetic_params = full_config['algorithm']['memetic']
+operators_params = full_config['algorithm']['operators']
 
 print(f"\nParámetros del algoritmo (desde config.yaml):")
 print(f"   Población: {alg_params['tamano_poblacion']}")
 print(f"   Generaciones: {alg_params['num_generaciones']}")
 print(f"   Prob. cruce: {alg_params['prob_cruce']}")
 print(f"   Prob. mutación: {alg_params['prob_mutacion']}")
+print(f"   Operador cruce: {operators_params['cruce']}")
+print(f"   Operador mutación: {operators_params['mutacion']}")
 print(f"   Memético: {memetic_params['activado']}")
 print(f"   Búsqueda local cada: {memetic_params['cada_k_generaciones']} gen")
 print(f"   Iteraciones locales: {memetic_params['max_iteraciones_local']}")
 
+# Cargar tipos de operadores desde config.yaml
+tipo_cruce = operators_params['cruce']
+tipo_mutacion = operators_params['mutacion']
+
 def cruce(p1, p2, cfg, prob):
-    return aplicar_cruce(p1, p2, cfg, metodo='uniforme', prob_cruce=prob)
+    return aplicar_cruce(p1, p2, cfg, metodo=tipo_cruce, prob_cruce=prob)
 
 def mutacion(pob, cfg, prob):
-    return aplicar_mutacion(pob, cfg, metodo='invert', tasa_mut=prob)
+    return aplicar_mutacion(pob, cfg, metodo=tipo_mutacion, tasa_mut=prob)
 
-print("\nEjecutando NSGA-II Memético (Uniforme + Invert)...")
+print(f"\nEjecutando NSGA-II Memético ({tipo_cruce.capitalize()} + {tipo_mutacion.capitalize()})...")
 print(f"   Esto tomará ~{alg_params['num_generaciones'] * 0.05:.0f} segundos\n")
 
 frente_pareto, fitness_pareto, historial = nsga2_memetic(

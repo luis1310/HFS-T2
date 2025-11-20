@@ -20,12 +20,6 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from collections import defaultdict
 import yaml
 
-def cruce(p1, p2, cfg, prob):
-    return aplicar_cruce(p1, p2, cfg, metodo='uniforme', prob_cruce=prob)
-
-def mutacion(pob, cfg, prob):
-    return aplicar_mutacion(pob, cfg, metodo='invert', tasa_mut=prob)
-
 def ejecutar_semilla_version(version, semilla, config_yaml_path='tesis3/config/config.yaml'):
     """
     Ejecuta una semilla para una versión específica (estándar o memético).
@@ -42,16 +36,35 @@ def ejecutar_semilla_version(version, semilla, config_yaml_path='tesis3/config/c
     random.seed(semilla)
     np.random.seed(semilla)
     
-    # Cargar configuración
+    # Cargar configuración del problema
     config = ProblemConfig.from_yaml(config_yaml_path)
     
-    # Parámetros fijos para comparación
-    tamano_poblacion = 50
-    num_generaciones = 100
-    prob_cruce = 0.95
-    prob_mutacion = 0.3
-    cada_k_gen = 10
-    max_iter_local = 5
+    # Cargar parámetros del algoritmo desde config.yaml
+    with open(config_yaml_path, 'r') as f:
+        config_completa = yaml.safe_load(f)
+    
+    alg_params = config_completa['algorithm']['nsga2']
+    memetic_params = config_completa['algorithm']['memetic']
+    operators_params = config_completa['algorithm']['operators']
+    
+    # Usar parámetros desde config.yaml (optimizados tras el tunning)
+    tamano_poblacion = alg_params['tamano_poblacion']
+    num_generaciones = alg_params['num_generaciones']
+    prob_cruce = alg_params['prob_cruce']
+    prob_mutacion = alg_params['prob_mutacion']
+    cada_k_gen = memetic_params['cada_k_generaciones']
+    max_iter_local = memetic_params['max_iteraciones_local']
+    
+    # Cargar operadores desde config.yaml
+    tipo_cruce = operators_params['cruce']
+    tipo_mutacion = operators_params['mutacion']
+    
+    # Crear funciones de operadores con los tipos cargados
+    def cruce(p1, p2, cfg, prob):
+        return aplicar_cruce(p1, p2, cfg, metodo=tipo_cruce, prob_cruce=prob)
+    
+    def mutacion(pob, cfg, prob):
+        return aplicar_mutacion(pob, cfg, metodo=tipo_mutacion, tasa_mut=prob)
     
     inicio = time.time()
     
@@ -237,13 +250,23 @@ def main():
     semillas = cargar_semillas(tipo='estandar')  # 30 semillas
     num_semillas = len(semillas)
     
-    print(f"\nParámetros de comparación:")
-    print(f"   Población: 50 individuos")
-    print(f"   Generaciones: 100")
-    print(f"   Prob. cruce: 0.95")
-    print(f"   Prob. mutación: 0.3")
-    print(f"   Memético - cada_k_gen: 10")
-    print(f"   Memético - max_iter_local: 5")
+    # Cargar parámetros desde config.yaml para mostrar
+    with open('tesis3/config/config.yaml', 'r') as f:
+        config_completa = yaml.safe_load(f)
+    
+    alg_params = config_completa['algorithm']['nsga2']
+    memetic_params = config_completa['algorithm']['memetic']
+    operators_params = config_completa['algorithm']['operators']
+    
+    print(f"\nParámetros de comparación (desde config.yaml):")
+    print(f"   Población: {alg_params['tamano_poblacion']} individuos")
+    print(f"   Generaciones: {alg_params['num_generaciones']}")
+    print(f"   Prob. cruce: {alg_params['prob_cruce']}")
+    print(f"   Prob. mutación: {alg_params['prob_mutacion']}")
+    print(f"   Operador cruce: {operators_params['cruce']}")
+    print(f"   Operador mutación: {operators_params['mutacion']}")
+    print(f"   Memético - cada_k_gen: {memetic_params['cada_k_generaciones']}")
+    print(f"   Memético - max_iter_local: {memetic_params['max_iteraciones_local']}")
     print(f"   Semillas: {num_semillas} (0-{num_semillas-1})")
     
     # Detectar resultados previos
