@@ -454,14 +454,57 @@ def main():
     tiempo_total = time.time() - inicio_total
     print(f"\nOptimización completada en {tiempo_total:.1f} segundos")
     
-    # Analizar resultados
+    # 📊 CARGAR TODOS LOS RESULTADOS PREVIOS PARA ANÁLISIS GLOBAL
     print("\n" + "="*70)
-    print("ANÁLISIS DE RESULTADOS")
+    print("CARGANDO RESULTADOS DE TODAS LAS EJECUCIONES")
     print("="*70)
     
-    # Agrupar resultados por configuración
+    # Buscar todos los archivos CSV finales previos
+    archivos_finales_previos = glob.glob('tesis3/results/tunning_multimetrica_real_*.csv')
+    print(f"   Archivos finales encontrados: {len(archivos_finales_previos)}")
+    
+    # Combinar resultados actuales con todos los previos
+    todos_resultados_global = todos_resultados.copy()  # Empezar con la ejecución actual
+    
+    # Cargar resultados de archivos previos
+    for archivo in archivos_finales_previos:
+        try:
+            with open(archivo, 'r') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    # Reconstruir resultado desde CSV
+                    resultado_previo = {
+                        'configuracion': {
+                            'tamano_poblacion': int(row['tamano_poblacion']),
+                            'num_generaciones': int(row['num_generaciones']),
+                            'prob_cruce': float(row['prob_cruce']),
+                            'prob_mutacion': float(row['prob_mutacion']),
+                            'cada_k_gen': int(row['cada_k_gen']),
+                            'max_iter_local': int(row['max_iter_local'])
+                        },
+                        'semilla': int(row['semilla']),
+                        'makespan': float(row['makespan']),
+                        'balance': float(row['balance']),
+                        'energia': float(row['energia']),
+                        'tiempo': float(row['tiempo']),
+                        'tamano_frente': int(row['tamano_frente']),
+                        'score_agregado': float(row['score_agregado'])
+                    }
+                    todos_resultados_global.append(resultado_previo)
+        except Exception as e:
+            print(f"   [ADVERTENCIA] Error al cargar {archivo}: {e}")
+    
+    print(f"   Resultados de ejecución actual: {len(todos_resultados)}")
+    print(f"   Resultados totales (actual + previos): {len(todos_resultados_global)}")
+    
+    # Analizar resultados
+    print("\n" + "="*70)
+    print("ANÁLISIS DE RESULTADOS (TODAS LAS EJECUCIONES)")
+    print("="*70)
+    
+    # Agrupar resultados por configuración (usando todos los resultados)
     resultados_por_config = {}
-    for resultado in todos_resultados:
+    for resultado in todos_resultados_global:
         config_key = tuple(sorted(resultado['configuracion'].items()))
         if config_key not in resultados_por_config:
             resultados_por_config[config_key] = []

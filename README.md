@@ -1,6 +1,27 @@
 # Actualizacion de HFS - T2 a HFS-T3
 Proyecto de tesis 3 (taller de investigación)
 
+## Version 1.1.3e:
+- **Análisis global en `tunning_multimetrica.py`**:
+  - **Mejora crítica**: El script ahora genera el YAML con la mejor configuración GLOBAL considerando todas las ejecuciones previas.
+  - **Problema anterior**: Solo consideraba las configuraciones de la ejecución actual, perdiendo potencialmente la mejor configuración global.
+  - **Solución implementada**:
+    - Después de completar la ejecución actual, el script busca y lee todos los archivos CSV finales previos (`tunning_multimetrica_real_*.csv`).
+    - Combina los resultados actuales con todos los resultados previos en `todos_resultados_global`.
+    - Agrupa y calcula promedios considerando TODAS las configuraciones ejecutadas (previas + actuales).
+    - Genera el YAML con la mejor configuración de todo el conjunto histórico.
+  - **Comportamiento de archivos**:
+    - CSVs finales se mantienen separados con timestamp único (uno por ejecución).
+    - CSV parcial se sobrescribe en cada ejecución (solo para monitoreo temporal).
+    - YAML se genera con la mejor configuración global al final de cada ejecución.
+  - **Beneficios**:
+    - ✅ Permite añadir configuraciones incrementalmente sin perder la mejor global.
+    - ✅ No necesita ejecutar `unir_resultados_parciales.py` manualmente.
+    - ✅ El YAML siempre contiene la mejor configuración histórica.
+
+- **Archivos modificados**:
+  - `tesis3/experiments/paralelizacion/tunning_multimetrica.py`: Líneas 455-507 (carga y combinación de resultados previos), línea 513 (usar `todos_resultados_global`).
+
 ## Version 1.1.3d:
 - **Corrección de variable `valores_ref` no definida en `tunning_multimetrica.py`**:
   - **Problema**: La función `ejecutar_semilla` intentaba usar `valores_ref` (líneas 240-242) sin que estuviera definida.
