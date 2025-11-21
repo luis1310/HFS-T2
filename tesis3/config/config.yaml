@@ -29,16 +29,16 @@ problem:
 # Configuración de algoritmos
 algorithm:
   nsga2:
-    tamano_poblacion: 200
-    num_generaciones: 1000
-    prob_cruce: 0.8
+    tamano_poblacion: 100
+    num_generaciones: 400
+    prob_cruce: 0.9
     prob_mutacion: 0.1
   
   memetic:
     activado: true
     cada_k_generaciones: 10
     max_iteraciones_local: 5
-  
+
   # Operadores genéticos
   # Actualizar estos valores después de ejecutar comparacion_operadores.py
   operators:

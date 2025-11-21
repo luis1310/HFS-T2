@@ -316,9 +316,9 @@ def main():
     espacio_busqueda = {
         'tamano_poblacion': [100, 150, 200],        # 3 valores
         'num_generaciones': [400, 500, 600],        # 3 valores
-        'prob_cruce': [0.6, 0.7, 0.8, 0.9],              # 4 valores
-        'prob_mutacion': [0.1, 0.15, 0.20, 0.25, 0.30],        # 5 valores
-        'cada_k_gen': [5, 10],                      # 2 valores
+        'prob_cruce': [0.6, 0.7, 0.8, 0.9, 0.95],              # 5 valores
+        'prob_mutacion': [0.5, 0.75, 0.1, 0.15, 0.20, 0.25, 0.30],        # 7 valores
+        'cada_k_gen': [5, 10, 20],                      # 3 valores
         'max_iter_local': [3, 5]                    # 2 valores
     }
 
