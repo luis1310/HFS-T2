@@ -399,7 +399,6 @@ def main():
                     'makespan': float(row['makespan']),
                     'balance': float(row['balance']),
                     'energia': float(row['energia']),
-                    'tiempo': float(row['tiempo']),
                     'score_agregado': float(row['score_agregado']),
                     'tamano_frente': int(row['tamano_frente']),
                     'tiempo_ejecucion': float(row['tiempo_ejecucion'])
