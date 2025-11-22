@@ -622,47 +622,29 @@ def main():
         
         print(f"\nMejor configuración guardada en: {yaml_file}")
         
-        # 🔄 ACTUALIZAR config.yaml directamente con la mejor configuración
-        # Esto permite que otros scripts (como ejecutar_memetico.py) usen automáticamente los parámetros optimizados
+        # 📋 MOSTRAR VALORES PARA ACTUALIZAR MANUALMENTE config.yaml
+        # NO actualizamos automáticamente para preservar el formato original, comentarios y estilo
         print("\n" + "="*70)
-        print("ACTUALIZANDO config.yaml CON LA MEJOR CONFIGURACIÓN")
+        print("VALORES PARA ACTUALIZAR MANUALMENTE EN config.yaml")
         print("="*70)
+        print(f"\n⚠️  IMPORTANTE: Para preservar el formato original del config.yaml,")
+        print(f"   debes actualizar MANUALMENTE las siguientes líneas:\n")
         
-        config_yaml_path = 'tesis3/config/config.yaml'
-        try:
-            # Leer config.yaml actual
-            with open(config_yaml_path, 'r') as f:
-                config_completa = yaml.safe_load(f)
-            
-            # Actualizar parámetros con la mejor configuración encontrada
-            mejor_config = mejor['configuracion']
-            
-            # Actualizar algoritmo NSGA-II
-            config_completa['algorithm']['nsga2']['tamano_poblacion'] = mejor_config['tamano_poblacion']
-            config_completa['algorithm']['nsga2']['num_generaciones'] = mejor_config['num_generaciones']
-            config_completa['algorithm']['nsga2']['prob_cruce'] = mejor_config['prob_cruce']
-            config_completa['algorithm']['nsga2']['prob_mutacion'] = mejor_config['prob_mutacion']
-            
-            # Actualizar algoritmo memético
-            config_completa['algorithm']['memetic']['cada_k_generaciones'] = mejor_config['cada_k_gen']
-            config_completa['algorithm']['memetic']['max_iteraciones_local'] = mejor_config['max_iter_local']
-            
-            # Guardar config.yaml actualizado
-            with open(config_yaml_path, 'w') as f:
-                yaml.dump(config_completa, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
-            
-            print(f"✅ config.yaml actualizado con la mejor configuración:")
-            print(f"   Población: {mejor_config['tamano_poblacion']}")
-            print(f"   Generaciones: {mejor_config['num_generaciones']}")
-            print(f"   Prob. cruce: {mejor_config['prob_cruce']}")
-            print(f"   Prob. mutación: {mejor_config['prob_mutacion']}")
-            print(f"   Cada K gen: {mejor_config['cada_k_gen']}")
-            print(f"   Max iter local: {mejor_config['max_iter_local']}")
-            print(f"\n📝 Los scripts futuros (ejecutar_memetico.py, etc.) usarán estos parámetros optimizados.")
-            
-        except Exception as e:
-            print(f"⚠️  [ADVERTENCIA] No se pudo actualizar config.yaml: {e}")
-            print(f"   La mejor configuración está guardada en: {yaml_file}")
+        mejor_config = mejor['configuracion']
+        
+        print(f"📝 Edita el archivo: tesis3/config/config.yaml")
+        print(f"\n   Busca la sección 'algorithm.nsga2' y actualiza:")
+        print(f"      tamano_poblacion: {mejor_config['tamano_poblacion']}      # Era: 100")
+        print(f"      num_generaciones: {mejor_config['num_generaciones']}      # Era: 400")
+        print(f"      prob_cruce: {mejor_config['prob_cruce']}            # Era: 0.9")
+        print(f"      prob_mutacion: {mejor_config['prob_mutacion']}          # Era: 0.1")
+        print(f"\n   Busca la sección 'algorithm.memetic' y actualiza:")
+        print(f"      cada_k_generaciones: {mejor_config['cada_k_gen']}      # Era: 10")
+        print(f"      max_iteraciones_local: {mejor_config['max_iter_local']}   # Ya estaba: 5")
+        print(f"\n✅ La mejor configuración completa está guardada en:")
+        print(f"   {yaml_file}")
+        print(f"\n📝 Los scripts futuros (ejecutar_memetico.py, etc.) usarán estos parámetros")
+        print(f"   una vez que actualices manualmente el config.yaml.")
     
     # Guardar resultados SOLO si hubo ejecución (todos_resultados no está vacío)
     if len(todos_resultados) > 0:

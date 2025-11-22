@@ -13,17 +13,25 @@ Proyecto de tesis 3 (taller de investigación)
   - **Archivos modificados**:
     - `tesis3/experiments/paralelizacion/tunning_multimetrica.py`: Líneas 420-483 (corrección de indentación y estructura del bloque de ejecución).
 
-## Version 1.1.3i:
-- **Mejora crítica: Actualización automática de config.yaml con mejor configuración**:
-  - **Problema**: Después de ejecutar `tunning_multimetrica.py` y encontrar la mejor configuración, el archivo `config.yaml` no se actualizaba automáticamente. Los scripts como `ejecutar_memetico.py` seguían usando los parámetros por defecto en lugar de los optimizados.
-  - **Solución**: Ahora `tunning_multimetrica.py` actualiza directamente el `config.yaml` con la mejor configuración encontrada:
-    1. ✅ Actualiza `algorithm.nsga2` con los parámetros optimizados (población, generaciones, prob_cruce, prob_mutacion)
-    2. ✅ Actualiza `algorithm.memetic` con los parámetros optimizados (cada_k_generaciones, max_iteraciones_local)
-    3. ✅ Mantiene el YAML separado (`mejor_configuracion_tunning_XXXX.yaml`) como respaldo
-    4. ✅ Muestra un mensaje confirmando la actualización
-  - **Beneficio**: Los scripts futuros (`ejecutar_memetico.py`, etc.) usan automáticamente los parámetros optimizados sin necesidad de actualización manual.
+## Version 1.1.3k:
+- **Corrección crítica: Preservación del formato original de config.yaml**:
+  - **Problema detectado**: La actualización automática de `config.yaml` cambiaba completamente el formato:
+    - ❌ Convertía listas inline `[55, 53, ...]` a formato multilínea con guiones
+    - ❌ Eliminaba todos los comentarios importantes
+    - ❌ Cambiaba el estilo de números (1.30 → 1.3)
+    - ❌ Eliminaba comillas de strings ('uniforme' → uniforme)
+    - ❌ Reorganizaba la estructura del archivo
+  - **Solución implementada**: 
+    - ✅ **NO se actualiza automáticamente** el `config.yaml` para preservar formato, comentarios y estilo original
+    - ✅ Se muestran **claramente los valores** que deben copiarse manualmente
+    - ✅ Se indica **exactamente qué líneas** editar en el archivo
+    - ✅ Se mantiene el YAML separado (`mejor_configuracion_tunning_XXXX.yaml`) con la mejor configuración completa
+  - **Beneficio**: El `config.yaml` mantiene su formato legible, comentarios y estructura original. El usuario actualiza manualmente solo los valores necesarios.
   - **Archivos modificados**:
-    - `tesis3/experiments/paralelizacion/tunning_multimetrica.py`: Líneas 686-726 (actualización automática de config.yaml).
+    - `tesis3/experiments/paralelizacion/tunning_multimetrica.py`: Líneas 625-650 (eliminada actualización automática, agregada guía para actualización manual).
+
+## Version 1.1.3i (OBSOLETA):
+- **Nota**: Esta versión intentaba actualizar automáticamente `config.yaml`, pero causaba problemas de formato. Fue reemplazada por la versión 1.1.3k que preserva el formato original.
 
 ## Version 1.1.3h:
 - **Mejora: Generación de YAML incluso si todo está completo**:
