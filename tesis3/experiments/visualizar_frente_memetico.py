@@ -37,7 +37,22 @@ if archivos_resumen:
         with open(archivo_mas_reciente, 'r') as f:
             resumen = yaml.safe_load(f)
         
-        if 'comparacion' in resumen and 'mejora_score_pct' in resumen['comparacion']:
+        if 'comparacion' in resumen and 'version_recomendada' in resumen['comparacion']:
+            version_recomendada = resumen['comparacion']['version_recomendada']
+            razon = resumen['comparacion'].get('razon', 'No especificada')
+            
+            if version_recomendada == 'memetico':
+                usar_memetico = True
+                version_seleccionada = "memético"
+                print(f"   ✅ Versión recomendada: MEMÉTICO")
+                print(f"   → Razón: {razon}")
+            else:
+                usar_memetico = False
+                version_seleccionada = "estándar"
+                print(f"   ✅ Versión recomendada: ESTÁNDAR")
+                print(f"   → Razón: {razon}")
+        elif 'comparacion' in resumen and 'mejora_score_pct' in resumen['comparacion']:
+            # Fallback: inferir de mejora_score_pct (para compatibilidad con archivos antiguos)
             mejora_score = resumen['comparacion']['mejora_score_pct']
             
             if mejora_score > 0:
@@ -51,7 +66,7 @@ if archivos_resumen:
                 print(f"   ⚠️  Memético NO mejora (mejora: {mejora_score:+.2f}%)")
                 print(f"   → Usando algoritmo ESTÁNDAR para visualizaciones")
         else:
-            print(f"   ⚠️  No se encontró información de mejora en el resumen")
+            print(f"   ⚠️  No se encontró información de versión recomendada en el resumen")
             print(f"   → Usando algoritmo MEMÉTICO por defecto")
     except Exception as e:
         print(f"   ⚠️  Error al leer resumen: {e}")

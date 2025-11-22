@@ -469,6 +469,20 @@ def main():
             print(f"   El overhead computacional es ACEPTABLE ({overhead:+.2f}%)")
         else:
             print(f"   El overhead computacional es ALTO ({overhead:+.2f}%)")
+        
+        # 🎯 DETERMINAR VERSIÓN RECOMENDADA Y RAZÓN
+        if mejora_score > 5:
+            version_recomendada = "memetico"
+            razon = f"El algoritmo memético mejora SIGNIFICATIVAMENTE el score agregado en {mejora_score:+.2f}%, con mejoras en makespan ({mejora_mk:+.2f}%), balance ({mejora_bal:+.2f}%) y energía ({mejora_eng:+.2f}%). El overhead computacional ({overhead:+.2f}%) es aceptable dado el beneficio obtenido."
+        elif mejora_score > 0:
+            version_recomendada = "memetico"
+            razon = f"El algoritmo memético mejora MODERADAMENTE el score agregado en {mejora_score:+.2f}%, con mejoras en makespan ({mejora_mk:+.2f}%), balance ({mejora_bal:+.2f}%) y energía ({mejora_eng:+.2f}%). El overhead computacional ({overhead:+.2f}%) es aceptable."
+        else:
+            version_recomendada = "estandar"
+            razon = f"El algoritmo memético NO mejora el score agregado ({mejora_score:+.2f}%). Aunque puede haber mejoras parciales en algunos objetivos, el overhead computacional ({overhead:+.2f}%) no justifica su uso. Se recomienda usar el algoritmo estándar (NSGA-II) que es más eficiente computacionalmente."
+        
+        print(f"\n🎯 VERSIÓN RECOMENDADA: {version_recomendada.upper()}")
+        print(f"   Razón: {razon}")
 
         # Guardar resultado final consolidado con timestamp
         timestamp_final = time.strftime('%Y%m%d_%H%M%S')
@@ -517,7 +531,9 @@ def main():
                     'mejora_balance_pct': float(mejora_bal),
                     'mejora_energia_pct': float(mejora_eng),
                     'mejora_score_pct': float(mejora_score),
-                    'overhead_computacional_pct': float(overhead)
+                    'overhead_computacional_pct': float(overhead),
+                    'version_recomendada': version_recomendada,
+                    'razon': razon
                 }
             }, f, sort_keys=False)
         
