@@ -14,13 +14,16 @@ import numpy as np
 import yaml
 import os
 import glob
+import pickle
+import json
+from datetime import datetime
 
 print("="*70)
 print("ANÁLISIS DE LAS MEJORES SOLUCIONES DEL FRENTE DE PARETO")
 print("="*70)
 
-# 🔍 DETERMINAR QUÉ VERSIÓN USAR (basado en resultados de Fase 4)
-print("\n🔍 Determinando qué versión usar (estándar o memético)...")
+# DETERMINAR QUE VERSION USAR (basado en resultados de Fase 4)
+print("\nDeterminando que version usar (estandar o memetico)...")
 print("   Buscando resultados de la Fase 4 (comparacion_memetica_resumen_*.yaml)...")
 
 archivos_resumen = glob.glob('tesis3/results/comparacion_memetica_resumen_*.yaml')
@@ -43,13 +46,13 @@ if archivos_resumen:
             if version_recomendada == 'memetico':
                 usar_memetico = True
                 version_seleccionada = "memético"
-                print(f"   ✅ Versión recomendada: MEMÉTICO")
-                print(f"   → Razón: {razon}")
+                print(f"   Version recomendada: MEMETICO")
+                print(f"   Razon: {razon}")
             else:
                 usar_memetico = False
                 version_seleccionada = "estándar"
-                print(f"   ✅ Versión recomendada: ESTÁNDAR")
-                print(f"   → Razón: {razon}")
+                print(f"   Version recomendada: ESTANDAR")
+                print(f"   Razon: {razon}")
         elif 'comparacion' in resumen and 'mejora_score_pct' in resumen['comparacion']:
             # Fallback: inferir de mejora_score_pct (para compatibilidad con archivos antiguos)
             mejora_score = resumen['comparacion']['mejora_score_pct']
@@ -57,23 +60,23 @@ if archivos_resumen:
             if mejora_score > 0:
                 usar_memetico = True
                 version_seleccionada = "memético"
-                print(f"   ✅ Memético es MEJOR (mejora: {mejora_score:+.2f}%)")
-                print(f"   → Usando algoritmo MEMÉTICO para análisis")
+                print(f"   Memetico es MEJOR (mejora: {mejora_score:+.2f}%)")
+                print(f"   Usando algoritmo MEMETICO para analisis")
             else:
                 usar_memetico = False
                 version_seleccionada = "estándar"
-                print(f"   ⚠️  Memético NO mejora (mejora: {mejora_score:+.2f}%)")
-                print(f"   → Usando algoritmo ESTÁNDAR para análisis")
+                print(f"   AVISO: Memetico NO mejora (mejora: {mejora_score:+.2f}%)")
+                print(f"   Usando algoritmo ESTANDAR para analisis")
         else:
-            print(f"   ⚠️  No se encontró información de versión recomendada en el resumen")
-            print(f"   → Usando algoritmo MEMÉTICO por defecto")
+            print(f"   AVISO: No se encontro informacion de version recomendada en el resumen")
+            print(f"   Usando algoritmo MEMETICO por defecto")
     except Exception as e:
-        print(f"   ⚠️  Error al leer resumen: {e}")
-        print(f"   → Usando algoritmo MEMÉTICO por defecto")
+        print(f"   AVISO: Error al leer resumen: {e}")
+        print(f"   Usando algoritmo MEMETICO por defecto")
 else:
-    print(f"   ⚠️  No se encontraron archivos de resumen de la Fase 4")
-    print(f"   → Usando algoritmo MEMÉTICO por defecto")
-    print(f"   → Ejecuta primero la Fase 4 para determinar la mejor versión")
+    print(f"   AVISO: No se encontraron archivos de resumen de la Fase 4")
+    print(f"   Usando algoritmo MEMETICO por defecto")
+    print(f"   Ejecuta primero la Fase 4 para determinar la mejor version")
 
 # Cargar configuración
 config = ProblemConfig.from_yaml("tesis3/config/config.yaml")
@@ -307,11 +310,11 @@ for i in range(3):
             print(f"   Iguales en {iguales} objetivos")
             
             if sol_i_mejor > sol_j_mejor:
-                print(f"   → {sol_i['nombre']} tiene ventaja parcial")
+                print(f"   {sol_i['nombre']} tiene ventaja parcial")
             elif sol_j_mejor > sol_i_mejor:
-                print(f"   → {sol_j['nombre']} tiene ventaja parcial")
+                print(f"   {sol_j['nombre']} tiene ventaja parcial")
             else:
-                print(f"   → Empate en dominancia parcial")
+                print(f"   Empate en dominancia parcial")
 
 # ============================================================
 # GRÁFICO DE LAS 3 MEJORES SOLUCIONES
@@ -388,12 +391,249 @@ with open('tesis3/results/mejores_soluciones.csv', 'w', newline='') as f:
 
 print("   Guardado: mejores_soluciones.csv")
 
+# ============================================================
+# GUARDAR CROMOSOMAS COMPLETOS (SOLUCIONES)
+# ============================================================
 print("\n" + "="*70)
-print("ANÁLISIS COMPLETADO")
+print("GUARDANDO SOLUCIONES COMPLETAS")
+print("="*70)
+
+# Guardar cromosomas usando pickle (formato binario, preserva objetos completos)
+pickle_file = f'tesis3/results/mejores_soluciones_cromosomas_{timestamp}.pkl'
+soluciones_completas = {
+    'solucion_1_prioriza_makespan': {
+        'cromosoma': solucion_1['cromosoma'],
+        'metricas': {
+            'makespan': solucion_1['makespan'],
+            'balance': solucion_1['balance'],
+            'energia': solucion_1['energia']
+        }
+    },
+    'solucion_2_prioriza_balance': {
+        'cromosoma': solucion_2['cromosoma'],
+        'metricas': {
+            'makespan': solucion_2['makespan'],
+            'balance': solucion_2['balance'],
+            'energia': solucion_2['energia']
+        }
+    },
+    'solucion_3_prioriza_energia': {
+        'cromosoma': solucion_3['cromosoma'],
+        'metricas': {
+            'makespan': solucion_3['makespan'],
+            'balance': solucion_3['balance'],
+            'energia': solucion_3['energia']
+        }
+    },
+    'config': config  # Guardar también la configuración para poder evaluar después
+}
+
+with open(pickle_file, 'wb') as f:
+    pickle.dump(soluciones_completas, f)
+
+print(f"   Guardado: mejores_soluciones_cromosomas_{timestamp}.pkl")
+print("   (Formato binario, contiene los cromosomas completos para recuperación)")
+
+# Guardar también los genes en formato JSON (legible)
+json_file = f'tesis3/results/mejores_soluciones_genes_{timestamp}.json'
+# Los genes son listas de listas de enteros, se pueden serializar directamente
+genes_serializados = {
+    'solucion_1_prioriza_makespan': {
+        'genes': solucion_1['cromosoma'].genes,
+        'metricas': {
+            'makespan': float(solucion_1['makespan']),
+            'balance': float(solucion_1['balance']),
+            'energia': float(solucion_1['energia'])
+        },
+        'descripcion': 'Solución que prioriza minimizar el makespan (tiempo de ejecución total)'
+    },
+    'solucion_2_prioriza_balance': {
+        'genes': solucion_2['cromosoma'].genes,
+        'metricas': {
+            'makespan': float(solucion_2['makespan']),
+            'balance': float(solucion_2['balance']),
+            'energia': float(solucion_2['energia'])
+        },
+        'descripcion': 'Solución que prioriza minimizar el balance de carga entre máquinas'
+    },
+    'solucion_3_prioriza_energia': {
+        'genes': solucion_3['cromosoma'].genes,
+        'metricas': {
+            'makespan': float(solucion_3['makespan']),
+            'balance': float(solucion_3['balance']),
+            'energia': float(solucion_3['energia'])
+        },
+        'descripcion': 'Solución que prioriza minimizar el consumo energético'
+    },
+    'formato_genes': 'Los genes son una lista de listas: genes[pedido][etapa] = maquina_asignada'
+}
+
+with open(json_file, 'w', encoding='utf-8') as f:
+    json.dump(genes_serializados, f, indent=2, ensure_ascii=False)
+
+print(f"   Guardado: mejores_soluciones_genes_{timestamp}.json")
+print("   (Formato JSON legible, contiene los genes de cada solución)")
+
+# ============================================================
+# GENERAR RESUMEN ESTRUCTURADO PARA EL CLIENTE
+# ============================================================
+print("\n" + "="*70)
+print("GENERANDO RESUMEN PARA CLIENTE")
+print("="*70)
+
+# Calcular diferencias porcentuales entre soluciones
+def calcular_diferencias(sol_ref, sol_comp):
+    """Calcula diferencias porcentuales entre dos soluciones"""
+    return {
+        'makespan_pct': ((sol_comp['makespan'] - sol_ref['makespan']) / sol_ref['makespan']) * 100,
+        'balance_pct': ((sol_comp['balance'] - sol_ref['balance']) / sol_ref['balance']) * 100,
+        'energia_pct': ((sol_comp['energia'] - sol_ref['energia']) / sol_ref['energia']) * 100
+    }
+
+# Generar recomendaciones de uso
+recomendaciones = {
+    'solucion_1': {
+        'cuando_usar': 'Cuando el tiempo de ejecución (makespan) es crítico y se necesita minimizar el tiempo total de procesamiento.',
+        'ventajas': f'Makespan mínimo: {solucion_1["makespan"]:.2f}s. Ideal para sistemas con restricciones de tiempo estrictas.',
+        'desventajas': f'Balance y energía pueden ser mayores que otras soluciones.'
+    },
+    'solucion_2': {
+        'cuando_usar': 'Cuando se requiere balancear la carga entre máquinas para evitar sobrecargas y mejorar la distribución del trabajo.',
+        'ventajas': f'Balance óptimo: {solucion_2["balance"]:.2f}. Distribución más uniforme de tareas entre máquinas.',
+        'desventajas': f'Makespan y energía pueden ser mayores que otras soluciones.'
+    },
+    'solucion_3': {
+        'cuando_usar': 'Cuando el consumo energético es una preocupación principal y se busca minimizar costos operativos.',
+        'ventajas': f'Energía mínima: {solucion_3["energia"]:.2f} kWh. Reduce costos operativos y huella de carbono.',
+        'desventajas': f'Makespan y balance pueden ser mayores que otras soluciones.'
+    }
+}
+
+# Crear resumen estructurado
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+resumen_yaml = {
+    'metadata': {
+        'fecha_analisis': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        'version_algoritmo': version_seleccionada,
+        'total_soluciones_frente': len(frente_pareto),
+        'parametros_algoritmo': {
+            'tamano_poblacion': alg_params['tamano_poblacion'],
+            'num_generaciones': alg_params['num_generaciones'],
+            'prob_cruce': alg_params['prob_cruce'],
+            'prob_mutacion': alg_params['prob_mutacion'],
+            'operador_cruce': tipo_cruce,
+            'operador_mutacion': tipo_mutacion
+        }
+    },
+    'mejores_soluciones': {
+        'solucion_1_prioriza_makespan': {
+            'metricas': {
+                'makespan_s': float(solucion_1['makespan']),
+                'balance': float(solucion_1['balance']),
+                'energia_kwh': float(solucion_1['energia']),
+                'indice_frente': int(solucion_1['indice'])
+            },
+            'recomendacion': recomendaciones['solucion_1']
+        },
+        'solucion_2_prioriza_balance': {
+            'metricas': {
+                'makespan_s': float(solucion_2['makespan']),
+                'balance': float(solucion_2['balance']),
+                'energia_kwh': float(solucion_2['energia']),
+                'indice_frente': int(solucion_2['indice'])
+            },
+            'recomendacion': recomendaciones['solucion_2']
+        },
+        'solucion_3_prioriza_energia': {
+            'metricas': {
+                'makespan_s': float(solucion_3['makespan']),
+                'balance': float(solucion_3['balance']),
+                'energia_kwh': float(solucion_3['energia']),
+                'indice_frente': int(solucion_3['indice'])
+            },
+            'recomendacion': recomendaciones['solucion_3']
+        }
+    },
+    'comparacion': {
+        'rango_makespan': {
+            'min': float(min(solucion_1['makespan'], solucion_2['makespan'], solucion_3['makespan'])),
+            'max': float(max(solucion_1['makespan'], solucion_2['makespan'], solucion_3['makespan'])),
+            'diferencia_pct': float(((max(solucion_1['makespan'], solucion_2['makespan'], solucion_3['makespan']) - 
+                                    min(solucion_1['makespan'], solucion_2['makespan'], solucion_3['makespan'])) / 
+                                   min(solucion_1['makespan'], solucion_2['makespan'], solucion_3['makespan'])) * 100)
+        },
+        'rango_balance': {
+            'min': float(min(solucion_1['balance'], solucion_2['balance'], solucion_3['balance'])),
+            'max': float(max(solucion_1['balance'], solucion_2['balance'], solucion_3['balance'])),
+            'diferencia_pct': float(((max(solucion_1['balance'], solucion_2['balance'], solucion_3['balance']) - 
+                                    min(solucion_1['balance'], solucion_2['balance'], solucion_3['balance'])) / 
+                                   min(solucion_1['balance'], solucion_2['balance'], solucion_3['balance'])) * 100)
+        },
+        'rango_energia': {
+            'min': float(min(solucion_1['energia'], solucion_2['energia'], solucion_3['energia'])),
+            'max': float(max(solucion_1['energia'], solucion_2['energia'], solucion_3['energia'])),
+            'diferencia_pct': float(((max(solucion_1['energia'], solucion_2['energia'], solucion_3['energia']) - 
+                                    min(solucion_1['energia'], solucion_2['energia'], solucion_3['energia'])) / 
+                                   min(solucion_1['energia'], solucion_2['energia'], solucion_3['energia'])) * 100)
+        }
+    },
+    'resumen_ejecutivo': {
+        'total_soluciones_analizadas': len(frente_pareto),
+        'soluciones_recomendadas': 3,
+        'conclusion': f'Se identificaron 3 soluciones óptimas que representan los trade-offs principales del problema multi-objetivo. Cada solución prioriza un objetivo diferente (makespan, balance o energía), permitiendo al cliente elegir según sus necesidades específicas.'
+    }
+}
+
+# Guardar resumen YAML
+yaml_file = f'tesis3/results/mejores_soluciones_resumen_{timestamp}.yaml'
+with open(yaml_file, 'w', encoding='utf-8') as f:
+    yaml.dump(resumen_yaml, f, sort_keys=False, allow_unicode=True, default_flow_style=False)
+
+print(f"   Guardado: mejores_soluciones_resumen_{timestamp}.yaml")
+
+# ============================================================
+# RESUMEN EJECUTIVO EN CONSOLA
+# ============================================================
+print("\n" + "="*70)
+print("RESUMEN EJECUTIVO PARA CLIENTE")
+print("="*70)
+
+print(f"\nSe analizaron {len(frente_pareto)} soluciones del frente de Pareto")
+print(f"Se identificaron 3 soluciones optimas segun prioridad de objetivos\n")
+
+print("SOLUCION 1: Prioriza Makespan (Tiempo de Ejecucion)")
+print(f"   Makespan: {solucion_1['makespan']:.2f}s (MEJOR)")
+print(f"   Balance:  {solucion_1['balance']:.2f}")
+print(f"   Energia:  {solucion_1['energia']:.2f} kWh")
+print(f"   Cuando usar: {recomendaciones['solucion_1']['cuando_usar']}")
+
+print("\nSOLUCION 2: Prioriza Balance de Carga")
+print(f"   Makespan: {solucion_2['makespan']:.2f}s")
+print(f"   Balance:  {solucion_2['balance']:.2f} (MEJOR)")
+print(f"   Energia:  {solucion_2['energia']:.2f} kWh")
+print(f"   Cuando usar: {recomendaciones['solucion_2']['cuando_usar']}")
+
+print("\nSOLUCION 3: Prioriza Consumo Energetico")
+print(f"   Makespan: {solucion_3['makespan']:.2f}s")
+print(f"   Balance:  {solucion_3['balance']:.2f}")
+print(f"   Energia:  {solucion_3['energia']:.2f} kWh (MEJOR)")
+print(f"   Cuando usar: {recomendaciones['solucion_3']['cuando_usar']}")
+
+print("\n" + "="*70)
+print("ANALISIS COMPLETADO")
 print("="*70)
 print("\nArchivos generados:")
-print("  1. mejores_soluciones_pareto.png (visualización)")
-print("  2. mejores_soluciones.csv (datos)")
-print("\nEstas 3 soluciones representan los trade-offs principales")
-print("del frente de Pareto y son ideales para presentar en la tesis.")
+print("  1. mejores_soluciones_pareto.png (visualizacion grafica)")
+print("  2. mejores_soluciones.csv (datos tabulares)")
+print(f"  3. mejores_soluciones_resumen_{timestamp}.yaml (resumen estructurado)")
+print(f"  4. mejores_soluciones_cromosomas_{timestamp}.pkl (cromosomas completos)")
+print(f"  5. mejores_soluciones_genes_{timestamp}.json (genes en formato legible)")
+print("\nEl archivo YAML contiene toda la informacion estructurada")
+print("necesaria para presentar al cliente, incluyendo:")
+print("  - Metricas detalladas de cada solucion")
+print("  - Recomendaciones de cuando usar cada una")
+print("  - Comparaciones y rangos de valores")
+print("  - Resumen ejecutivo")
+print("\nLos archivos .pkl y .json contienen las soluciones completas")
+print("para poder recuperarlas y ejecutarlas posteriormente.")
 print("="*70)
