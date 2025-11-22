@@ -62,10 +62,33 @@ def detectar_resultados_previos(num_semillas=30, semillas_esperadas=None):
     print(f"   Archivo parcial existente: {'Sí' if existe_parcial else 'No'}")
     print(f"   Archivos finales encontrados: {len(archivos_finales)}")
     
-    # Cargar todos los resultados previos desde archivos finales (tienen semillas individuales)
+    # Cargar todos los resultados previos
     resultados_por_config = {}  # {config_key: set(semillas)}
     
-    # Cargar desde archivos finales (estos tienen semillas individuales)
+    # 🔄 NUEVO: Cargar primero desde archivo parcial si existe (protección contra interrupciones)
+    if existe_parcial:
+        try:
+            print(f"   [RECUPERACIÓN] Cargando configuraciones del archivo parcial...")
+            with open(archivo_parcial, 'r') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    # El archivo parcial tiene configuraciones COMPLETAS (30 semillas)
+                    config_key = (
+                        ('tamano_poblacion', int(row['tamano_poblacion'])),
+                        ('num_generaciones', int(row['num_generaciones'])),
+                        ('prob_cruce', float(row['prob_cruce'])),
+                        ('prob_mutacion', float(row['prob_mutacion'])),
+                        ('cada_k_gen', int(row['cada_k_gen'])),
+                        ('max_iter_local', int(row['max_iter_local']))
+                    )
+                    # Marcar como completa (tiene todas las semillas esperadas)
+                    if config_key not in resultados_por_config:
+                        resultados_por_config[config_key] = set(semillas_esperadas)
+            print(f"   [RECUPERACIÓN] Configuraciones recuperadas del parcial: {len(resultados_por_config)}")
+        except Exception as e:
+            print(f"   [ADVERTENCIA] Error al cargar archivo parcial: {e}")
+    
+    # Cargar desde archivos finales (estos tienen semillas individuales y sobreescriben el parcial)
     for archivo in archivos_finales:
         try:
             with open(archivo, 'r') as f:
@@ -357,34 +380,101 @@ def main():
     print(f"   Configuraciones completas previas: {len(configuraciones_completas_previas)}")
     print(f"   Configuraciones faltantes: {len(combinaciones_faltantes)}")
     
-    if len(combinaciones_faltantes) == 0:
+    # Variable para indicar si todo está completo
+    todo_completo = (len(combinaciones_faltantes) == 0)
+    
+    if todo_completo:
         print("🎉 ¡Todas las configuraciones ya están completas!")
         print("   No hay trabajo pendiente.")
-        return
+        print("   Sin embargo, se generará el YAML con la mejor configuración global...")
+        # Inicializar todos_resultados vacío (solo usaremos archivos previos)
+        todos_resultados = []
     
-    print(f"Tiempo estimado restante: {len(combinaciones_faltantes) * num_semillas * 2 / num_nucleos / 60:.1f} horas")
-    
-    # Confirmar ejecución
-    confirmar = input(f"\n¿Continuar con las {len(combinaciones_faltantes)} configuraciones faltantes? (s/n): ").lower()
-    if confirmar != 's':
-        print("Optimización cancelada")
-        return
-    
-    print(f"\nIniciando optimización con {num_nucleos} núcleos...")
-    inicio_total = time.time()
-    
-    # Crear todas las tareas (combinación, semilla) SOLO para las faltantes
-    # Usar las semillas cargadas desde el archivo centralizado
-    tareas = []
-    for configuracion in combinaciones_faltantes:
-        for semilla in semillas:  # Usar semillas del archivo, no range()
-            tareas.append((configuracion, semilla))
-    
-    print(f"Total de tareas pendientes: {len(tareas)}")
-    print("Iniciando paralelización REAL...")
-    
-    # Ejecutar optimización en paralelo REAL
+    # Solo ejecutar si hay configuraciones faltantes
+    if not todo_completo:
+        print(f"Tiempo estimado restante: {len(combinaciones_faltantes) * num_semillas * 2 / num_nucleos / 60:.1f} horas")
+        
+        # Confirmar ejecución
+        confirmar = input(f"\n¿Continuar con las {len(combinaciones_faltantes)} configuraciones faltantes? (s/n): ").lower()
+        if confirmar != 's':
+            print("Optimización cancelada")
+            return
+        
+        print(f"\nIniciando optimización con {num_nucleos} núcleos...")
+        inicio_total = time.time()
+        
+        # Crear todas las tareas (combinación, semilla) SOLO para las faltantes
+        # Usar las semillas cargadas desde el archivo centralizado
+        tareas = []
+        for configuracion in combinaciones_faltantes:
+            for semilla in semillas:  # Usar semillas del archivo, no range()
+                tareas.append((configuracion, semilla))
+        
+        print(f"Total de tareas pendientes: {len(tareas)}")
+        print("Iniciando paralelización REAL...")
+        
+        # 🔄 CARGAR RESULTADOS DEL ARCHIVO PARCIAL (si existe)
+    else:
+        # Si todo está completo, inicializar inicio_total para el mensaje de tiempo
+        inicio_total = time.time()
+    # Esto garantiza que si hubo una interrupción, esos resultados se incluyan en el archivo final
     todos_resultados = []
+    archivo_parcial = 'tesis3/results/tunning_multimetrica_parcial.csv'
+    if os.path.exists(archivo_parcial):
+        print(f"\n[RECUPERACIÓN] Cargando resultados previos del archivo parcial...")
+        try:
+            with open(archivo_parcial, 'r') as f:
+                reader = csv.DictReader(f)
+                configs_recuperadas = 0
+                for row in reader:
+                    # Cargar cada configuración × semilla del archivo parcial
+                    # Necesitamos expandir cada config a sus 30 semillas
+                    config = {
+                        'tamano_poblacion': int(row['tamano_poblacion']),
+                        'num_generaciones': int(row['num_generaciones']),
+                        'prob_cruce': float(row['prob_cruce']),
+                        'prob_mutacion': float(row['prob_mutacion']),
+                        'cada_k_gen': int(row['cada_k_gen']),
+                        'max_iter_local': int(row['max_iter_local'])
+                    }
+                    configs_recuperadas += 1
+                # El archivo parcial tiene promedios, no semillas individuales
+                # Por lo tanto, necesitamos leer desde archivos *_real_*.csv para recuperar las individuales
+            print(f"[ADVERTENCIA] Archivo parcial contiene configuraciones agregadas (sin semillas individuales)")
+            print(f"[INFO] Los resultados completos se recuperarán desde archivos finales previos")
+            
+            # Cargar resultados individuales desde archivos finales previos
+            archivos_finales_previos = glob.glob('tesis3/results/tunning_multimetrica_real_*.csv')
+            for archivo in archivos_finales_previos:
+                with open(archivo, 'r') as f:
+                    reader = csv.DictReader(f)
+                    for row in reader:
+                        resultado = {
+                            'configuracion': {
+                                'tamano_poblacion': int(row['tamano_poblacion']),
+                                'num_generaciones': int(row['num_generaciones']),
+                                'prob_cruce': float(row['prob_cruce']),
+                                'prob_mutacion': float(row['prob_mutacion']),
+                                'cada_k_gen': int(row['cada_k_gen']),
+                                'max_iter_local': int(row['max_iter_local'])
+                            },
+                            'semilla': int(row['semilla']),
+                            'makespan': float(row['makespan']),
+                            'balance': float(row['balance']),
+                            'energia': float(row['energia']),
+                            'tiempo': float(row['tiempo']),
+                            'tamano_frente': int(row['tamano_frente']),
+                            'score_agregado': float(row['score_agregado'])
+                        }
+                        # Solo agregar si esta configuración NO se va a ejecutar de nuevo
+                        config_key = tuple(sorted(resultado['configuracion'].items()))
+                        if config_key in configuraciones_completas_previas:
+                            todos_resultados.append(resultado)
+            print(f"[RECUPERACIÓN] Resultados previos cargados: {len(todos_resultados)} ejecuciones")
+        except Exception as e:
+            print(f"[ADVERTENCIA] Error al cargar archivo parcial: {e}")
+            todos_resultados = []
+    
     mejor_score = float('inf')
     mejor_config = None
     configuraciones_ya_guardadas = set()  # Para evitar guardar la misma configuración múltiples veces
@@ -450,11 +540,12 @@ def main():
                     
             except Exception as exc:
                 print(f"  Generó una excepción: {exc}")
-    
-    tiempo_total = time.time() - inicio_total
-    print(f"\nOptimización completada en {tiempo_total:.1f} segundos")
+        
+        tiempo_total = time.time() - inicio_total
+        print(f"\nOptimización completada en {tiempo_total:.1f} segundos")
     
     # 📊 CARGAR TODOS LOS RESULTADOS PREVIOS PARA ANÁLISIS GLOBAL
+    # (Esto se ejecuta siempre, incluso si todo estaba completo)
     print("\n" + "="*70)
     print("CARGANDO RESULTADOS DE TODAS LAS EJECUCIONES")
     print("="*70)
@@ -592,31 +683,76 @@ def main():
             yaml.dump(mejor_config_yaml, f, default_flow_style=False, sort_keys=False)
         
         print(f"\nMejor configuración guardada en: {yaml_file}")
+        
+        # 🔄 ACTUALIZAR config.yaml directamente con la mejor configuración
+        # Esto permite que otros scripts (como ejecutar_memetico.py) usen automáticamente los parámetros optimizados
+        print("\n" + "="*70)
+        print("ACTUALIZANDO config.yaml CON LA MEJOR CONFIGURACIÓN")
+        print("="*70)
+        
+        config_yaml_path = 'tesis3/config/config.yaml'
+        try:
+            # Leer config.yaml actual
+            with open(config_yaml_path, 'r') as f:
+                config_completa = yaml.safe_load(f)
+            
+            # Actualizar parámetros con la mejor configuración encontrada
+            mejor_config = mejor['configuracion']
+            
+            # Actualizar algoritmo NSGA-II
+            config_completa['algorithm']['nsga2']['tamano_poblacion'] = mejor_config['tamano_poblacion']
+            config_completa['algorithm']['nsga2']['num_generaciones'] = mejor_config['num_generaciones']
+            config_completa['algorithm']['nsga2']['prob_cruce'] = mejor_config['prob_cruce']
+            config_completa['algorithm']['nsga2']['prob_mutacion'] = mejor_config['prob_mutacion']
+            
+            # Actualizar algoritmo memético
+            config_completa['algorithm']['memetic']['cada_k_generaciones'] = mejor_config['cada_k_gen']
+            config_completa['algorithm']['memetic']['max_iteraciones_local'] = mejor_config['max_iter_local']
+            
+            # Guardar config.yaml actualizado
+            with open(config_yaml_path, 'w') as f:
+                yaml.dump(config_completa, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
+            
+            print(f"✅ config.yaml actualizado con la mejor configuración:")
+            print(f"   Población: {mejor_config['tamano_poblacion']}")
+            print(f"   Generaciones: {mejor_config['num_generaciones']}")
+            print(f"   Prob. cruce: {mejor_config['prob_cruce']}")
+            print(f"   Prob. mutación: {mejor_config['prob_mutacion']}")
+            print(f"   Cada K gen: {mejor_config['cada_k_gen']}")
+            print(f"   Max iter local: {mejor_config['max_iter_local']}")
+            print(f"\n📝 Los scripts futuros (ejecutar_memetico.py, etc.) usarán estos parámetros optimizados.")
+            
+        except Exception as e:
+            print(f"⚠️  [ADVERTENCIA] No se pudo actualizar config.yaml: {e}")
+            print(f"   La mejor configuración está guardada en: {yaml_file}")
     
-    # Guardar resultados
-    timestamp_final = time.strftime('%Y%m%d_%H%M%S')
-    os.makedirs('tesis3/results', exist_ok=True)
-    with open(f'tesis3/results/tunning_multimetrica_real_{timestamp_final}.csv', 'w', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=[
-            'tamano_poblacion', 'num_generaciones', 'prob_cruce', 'prob_mutacion',
-            'cada_k_gen', 'max_iter_local', 'semilla', 'makespan', 'balance',
-            'energia', 'tamano_frente', 'score_agregado', 'tiempo'
-        ])
-        writer.writeheader()
-        for resultado in todos_resultados:
-            row = resultado['configuracion'].copy()
-            row.update({
-                'semilla': resultado['semilla'],
-                'makespan': resultado['makespan'],
-                'balance': resultado['balance'],
-                'energia': resultado['energia'],
-                'tamano_frente': resultado['tamano_frente'],
-                'score_agregado': resultado['score_agregado'],
-                'tiempo': resultado['tiempo']
-            })
-            writer.writerow(row)
-    
-    print(f"\nResultados guardados en: tesis3/results/tunning_multimetrica_real_{timestamp_final}.csv")
+    # Guardar resultados SOLO si hubo ejecución (todos_resultados no está vacío)
+    if len(todos_resultados) > 0:
+        timestamp_final = time.strftime('%Y%m%d_%H%M%S')
+        os.makedirs('tesis3/results', exist_ok=True)
+        with open(f'tesis3/results/tunning_multimetrica_real_{timestamp_final}.csv', 'w', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=[
+                'tamano_poblacion', 'num_generaciones', 'prob_cruce', 'prob_mutacion',
+                'cada_k_gen', 'max_iter_local', 'semilla', 'makespan', 'balance',
+                'energia', 'tamano_frente', 'score_agregado', 'tiempo'
+            ])
+            writer.writeheader()
+            for resultado in todos_resultados:
+                row = resultado['configuracion'].copy()
+                row.update({
+                    'semilla': resultado['semilla'],
+                    'makespan': resultado['makespan'],
+                    'balance': resultado['balance'],
+                    'energia': resultado['energia'],
+                    'tamano_frente': resultado['tamano_frente'],
+                    'score_agregado': resultado['score_agregado'],
+                    'tiempo': resultado['tiempo']
+                })
+                writer.writerow(row)
+        
+        print(f"\nResultados guardados en: tesis3/results/tunning_multimetrica_real_{timestamp_final}.csv")
+    else:
+        print(f"\n✅ No se generó archivo final nuevo (todo estaba completo, se usa YAML global)")
     print("="*70)
 
 if __name__ == "__main__":

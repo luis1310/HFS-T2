@@ -1,6 +1,77 @@
 # Actualizacion de HFS - T2 a HFS-T3
 Proyecto de tesis 3 (taller de investigación)
 
+## Version 1.1.3i:
+- **Mejora crítica: Actualización automática de config.yaml con mejor configuración**:
+  - **Problema**: Después de ejecutar `tunning_multimetrica.py` y encontrar la mejor configuración, el archivo `config.yaml` no se actualizaba automáticamente. Los scripts como `ejecutar_memetico.py` seguían usando los parámetros por defecto en lugar de los optimizados.
+  - **Solución**: Ahora `tunning_multimetrica.py` actualiza directamente el `config.yaml` con la mejor configuración encontrada:
+    1. ✅ Actualiza `algorithm.nsga2` con los parámetros optimizados (población, generaciones, prob_cruce, prob_mutacion)
+    2. ✅ Actualiza `algorithm.memetic` con los parámetros optimizados (cada_k_generaciones, max_iteraciones_local)
+    3. ✅ Mantiene el YAML separado (`mejor_configuracion_tunning_XXXX.yaml`) como respaldo
+    4. ✅ Muestra un mensaje confirmando la actualización
+  - **Beneficio**: Los scripts futuros (`ejecutar_memetico.py`, etc.) usan automáticamente los parámetros optimizados sin necesidad de actualización manual.
+  - **Archivos modificados**:
+    - `tesis3/experiments/paralelizacion/tunning_multimetrica.py`: Líneas 686-726 (actualización automática de config.yaml).
+
+## Version 1.1.3h:
+- **Mejora: Generación de YAML incluso si todo está completo**:
+  - **Problema**: Si todas las configuraciones ya estaban completas, el script salía sin generar YAML.
+  - **Solución**: Ahora, aunque todo esté completo, el script:
+    1. ✅ Detecta que todo está completo (no ejecuta configuraciones)
+    2. ✅ Carga TODOS los archivos finales previos
+    3. ✅ Analiza todas las configuraciones históricas
+    4. ✅ Genera YAML con la mejor configuración **global** (de todos los archivos)
+    5. ✅ NO genera archivo final nuevo (todo estaba completo)
+  - **Beneficio**: Permite regenerar el YAML con la mejor configuración global después de ejecutar con código antiguo.
+  - **Archivos modificados**:
+    - `tesis3/experiments/paralelizacion/tunning_multimetrica.py`: Líneas 383-391 (no retorna si todo está completo), líneas 541-542 (mensaje de tiempo condicional), líneas 687-711 (archivo final solo si hubo ejecución).
+
+## Version 1.1.3g:
+- **Corrección crítica: Inclusión de resultados previos en archivo final** (BUG CRÍTICO):
+  - **Problema detectado**: Cuando se reanudaba una ejecución interrumpida, las configuraciones del archivo parcial se recuperaban para NO re-ejecutarlas, pero NO se incluían en el archivo final CSV.
+  - **Resultado**: El archivo final solo contenía configuraciones ejecutadas en la sesión actual, perdiendo las de ejecuciones interrumpidas previas.
+  - **Solución implementada**:
+    - Al iniciar ejecución, `todos_resultados` ahora también carga resultados desde archivos finales previos (`tunning_multimetrica_real_*.csv`).
+    - Solo carga configuraciones que ya están completas (no se van a re-ejecutar).
+    - El archivo final ahora incluye: resultados previos + resultados actuales.
+  - **Comportamiento corregido**:
+    ```
+    Ejecución interrumpida: 90 configs completas
+    Al reiniciar:
+    ├─ Detecta: 90 configs del parcial (no re-ejecutar)
+    ├─ Carga en memoria: 90 × 30 semillas = 2700 filas
+    ├─ Ejecuta: 450 configs nuevas = 13500 filas
+    └─ Archivo final: 2700 + 13500 = 16200 filas totales ✅
+    ```
+  - **Impacto**: Ahora el archivo final es realmente completo y auto-contenido.
+
+- **Archivos modificados**:
+  - `tesis3/experiments/paralelizacion/tunning_multimetrica.py`: Líneas 409-468 (carga de resultados previos en `todos_resultados`).
+
+## Version 1.1.3f:
+- **Protección contra pérdida de progreso en `tunning_multimetrica.py`** (CRÍTICO):
+  - **Problema**: Si la ejecución se interrumpía (apagón, Ctrl+C, error), se perdían todas las configuraciones completadas porque el archivo final solo se genera al terminar TODO.
+  - **Solución**: La función `detectar_resultados_previos()` ahora TAMBIÉN lee el archivo parcial (`tunning_multimetrica_parcial.csv`) para recuperar configuraciones completas.
+  - **Comportamiento mejorado**:
+    1. Al iniciar, busca archivo parcial y archivos finales.
+    2. Si existe archivo parcial, carga configuraciones completas de ejecuciones interrumpidas.
+    3. Marca esas configuraciones como completas (con todas las 30 semillas).
+    4. Al reiniciar después de interrupción, continúa desde donde quedó sin perder progreso.
+  - **Escenario protegido**:
+    ```
+    Ejecución 1: 88/195 configs completadas → APAGÓN
+    ├─ Archivo parcial tiene 88 configs completas
+    ├─ Archivo final NO existe (no llegó a generarse)
+    └─ Al reiniciar:
+        ✅ Lee parcial: 88 configs completas
+        ✅ Solo ejecuta las 107 faltantes
+        ✅ NO pierde las 88 completadas (2640 ejecuciones guardadas)
+    ```
+  - **Archivos clave protegidos**: `tunning_multimetrica_parcial.csv` ahora es crítico para recuperación.
+
+- **Archivos modificados**:
+  - `tesis3/experiments/paralelizacion/tunning_multimetrica.py`: Líneas 65-88 (lectura de archivo parcial en `detectar_resultados_previos()`).
+
 ## Version 1.1.3e:
 - **Análisis global en `tunning_multimetrica.py`**:
   - **Mejora crítica**: El script ahora genera el YAML con la mejor configuración GLOBAL considerando todas las ejecuciones previas.

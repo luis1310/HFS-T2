@@ -347,12 +347,12 @@ def main():
     print(f"Tareas completadas: {completadas}/{total_tareas}")
     print(f"Errores: {errores}")
     print(f"Velocidad promedio: {completadas/(tiempo_total/60):.1f} tareas/minuto")
-    
+
     # Análisis de resultados finales
     print("\n" + "="*70)
     print("ANÁLISIS DE RESULTADOS (30 semillas)")
     print("="*70)
-    
+
     # Leer todos los resultados (incluyendo los previos)
     archivo_parcial = 'tesis3/results/comparacion_memetica_parcial.csv'
     
@@ -383,8 +383,8 @@ def main():
     
     # Calcular estadísticas
     if len(resultados['estandar']) > 0 and len(resultados['memetico']) > 0:
-mk_std = [r['makespan'] for r in resultados['estandar']]
-mk_mem = [r['makespan'] for r in resultados['memetico']]
+        mk_std = [r['makespan'] for r in resultados['estandar']]
+        mk_mem = [r['makespan'] for r in resultados['memetico']]
         
         bal_std = [r['balance'] for r in resultados['estandar']]
         bal_mem = [r['balance'] for r in resultados['memetico']]
@@ -397,28 +397,28 @@ mk_mem = [r['makespan'] for r in resultados['memetico']]
         
         t_std = [r['tiempo_ejecucion'] for r in resultados['estandar']]
         t_mem = [r['tiempo_ejecucion'] for r in resultados['memetico']]
-        
+
         print(f"\nNSGA-II ESTÁNDAR (n={len(resultados['estandar'])}):")
         print(f"   Makespan:        {np.mean(mk_std):7.2f}s ± {np.std(mk_std):5.2f} (mejor: {np.min(mk_std):.2f}, peor: {np.max(mk_std):.2f})")
         print(f"   Balance:         {np.mean(bal_std):7.2f}s ± {np.std(bal_std):5.2f}")
         print(f"   Energía:         {np.mean(eng_std):7.2f}  ± {np.std(eng_std):5.2f}")
         print(f"   Score agregado:  {np.mean(score_std):7.4f} ± {np.std(score_std):6.4f}")
         print(f"   Tiempo ejecución: {np.mean(t_std):6.2f}s ± {np.std(t_std):5.2f}")
-        
+
         print(f"\nNSGA-II MEMÉTICO (n={len(resultados['memetico'])}):")
         print(f"   Makespan:        {np.mean(mk_mem):7.2f}s ± {np.std(mk_mem):5.2f} (mejor: {np.min(mk_mem):.2f}, peor: {np.max(mk_mem):.2f})")
         print(f"   Balance:         {np.mean(bal_mem):7.2f}s ± {np.std(bal_mem):5.2f}")
         print(f"   Energía:         {np.mean(eng_mem):7.2f}  ± {np.std(eng_mem):5.2f}")
         print(f"   Score agregado:  {np.mean(score_mem):7.4f} ± {np.std(score_mem):6.4f}")
         print(f"   Tiempo ejecución: {np.mean(t_mem):6.2f}s ± {np.std(t_mem):5.2f}")
-        
+
         # Calcular mejoras (3 objetivos)
         mejora_mk = ((np.mean(mk_std) - np.mean(mk_mem)) / np.mean(mk_std)) * 100
         mejora_bal = ((np.mean(bal_std) - np.mean(bal_mem)) / np.mean(bal_std)) * 100
         mejora_eng = ((np.mean(eng_std) - np.mean(eng_mem)) / np.mean(eng_std)) * 100
         mejora_score = ((np.mean(score_std) - np.mean(score_mem)) / np.mean(score_std)) * 100
         
-overhead = ((np.mean(t_mem) - np.mean(t_std)) / np.mean(t_std)) * 100
+        overhead = ((np.mean(t_mem) - np.mean(t_std)) / np.mean(t_std)) * 100
         
         print(f"\nCOMPARACIÓN Y MEJORAS (3 objetivos):")
         print(f"   Mejora en Makespan:       {mejora_mk:+6.2f}%")
@@ -427,19 +427,19 @@ overhead = ((np.mean(t_mem) - np.mean(t_std)) / np.mean(t_std)) * 100
         print(f"   Mejora en Score agregado: {mejora_score:+6.2f}%")
         print(f"   Overhead computacional:   {overhead:+6.2f}%")
 
-print(f"\nCONCLUSIONES:")
+        print(f"\nCONCLUSIONES:")
         if mejora_score > 5:
             print(f"   La búsqueda local MEJORA SIGNIFICATIVAMENTE los resultados ({mejora_score:+.2f}%)")
         elif mejora_score > 0:
             print(f"   La búsqueda local MEJORA MODERADAMENTE los resultados ({mejora_score:+.2f}%)")
         else:
             print(f"   La búsqueda local NO mejora significativamente ({mejora_score:+.2f}%)")
-        
+
         if overhead < 50:
             print(f"   El overhead computacional es ACEPTABLE ({overhead:+.2f}%)")
-else:
+        else:
             print(f"   El overhead computacional es ALTO ({overhead:+.2f}%)")
-        
+
         # Guardar resultado final consolidado con timestamp
         timestamp_final = time.strftime('%Y%m%d_%H%M%S')
         archivo_final = f'tesis3/results/comparacion_memetica_final_{timestamp_final}.csv'
@@ -447,8 +447,8 @@ else:
             fieldnames = ['version', 'semilla', 'makespan', 'balance', 'energia', 
                          'score_agregado', 'tamano_frente', 'tiempo_ejecucion']
             writer = csv.DictWriter(f, fieldnames=fieldnames)
-    writer.writeheader()
-    
+            writer.writeheader()
+            
             for version in ['estandar', 'memetico']:
                 for resultado in sorted(resultados[version], key=lambda x: x['semilla']):
                     writer.writerow({
