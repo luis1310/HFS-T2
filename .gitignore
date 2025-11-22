@@ -13,12 +13,15 @@ dist/
 build/
 .pytest_cache/
 
-# Resultados y outputs
-results/
+# Resultados y outputs (excluir por defecto)
 *.png
 *.csv
 *.pdf
 *.log
+
+# PERO permitir la carpeta de resultados completa
+!tesis3/results/
+!tesis3/results/**
 
 # IDEs
 .vscode/
@@ -60,3 +63,4 @@ tesis3/config/config.local.yaml
 /EJECUTAR_PARALELIZACION_UBUNTU.md
 /AUMENTAR_CONFIGURACIONES.md
 /COMO_FUNCIONA_FRENTE_PARETO_TUNNING.md
+/SUBIR_RESULTADOS.md
