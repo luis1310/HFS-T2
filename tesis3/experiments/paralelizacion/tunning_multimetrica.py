@@ -413,136 +413,74 @@ def main():
         print(f"Total de tareas pendientes: {len(tareas)}")
         print("Iniciando paralelización REAL...")
         
-        # 🔄 CARGAR RESULTADOS DEL ARCHIVO PARCIAL (si existe)
-    else:
-        # Si todo está completo, inicializar inicio_total para el mensaje de tiempo
-        inicio_total = time.time()
-    # Esto garantiza que si hubo una interrupción, esos resultados se incluyan en el archivo final
-    todos_resultados = []
-    archivo_parcial = 'tesis3/results/tunning_multimetrica_parcial.csv'
-    if os.path.exists(archivo_parcial):
-        print(f"\n[RECUPERACIÓN] Cargando resultados previos del archivo parcial...")
-        try:
-            with open(archivo_parcial, 'r') as f:
-                reader = csv.DictReader(f)
-                configs_recuperadas = 0
-                for row in reader:
-                    # Cargar cada configuración × semilla del archivo parcial
-                    # Necesitamos expandir cada config a sus 30 semillas
-                    config = {
-                        'tamano_poblacion': int(row['tamano_poblacion']),
-                        'num_generaciones': int(row['num_generaciones']),
-                        'prob_cruce': float(row['prob_cruce']),
-                        'prob_mutacion': float(row['prob_mutacion']),
-                        'cada_k_gen': int(row['cada_k_gen']),
-                        'max_iter_local': int(row['max_iter_local'])
-                    }
-                    configs_recuperadas += 1
-                # El archivo parcial tiene promedios, no semillas individuales
-                # Por lo tanto, necesitamos leer desde archivos *_real_*.csv para recuperar las individuales
-            print(f"[ADVERTENCIA] Archivo parcial contiene configuraciones agregadas (sin semillas individuales)")
-            print(f"[INFO] Los resultados completos se recuperarán desde archivos finales previos")
+        mejor_score = float('inf')
+        mejor_config = None
+        configuraciones_ya_guardadas = set()  # Para evitar guardar la misma configuración múltiples veces
+        
+        with ProcessPoolExecutor(max_workers=num_nucleos) as executor:
+            print(f"INICIANDO {len(tareas)} TAREAS EN {num_nucleos} NÚCLEOS...")
+            print(f"Timestamp inicio: {time.strftime('%H:%M:%S')}")
+            print()
             
-            # Cargar resultados individuales desde archivos finales previos
-            archivos_finales_previos = glob.glob('tesis3/results/tunning_multimetrica_real_*.csv')
-            for archivo in archivos_finales_previos:
-                with open(archivo, 'r') as f:
-                    reader = csv.DictReader(f)
-                    for row in reader:
-                        resultado = {
-                            'configuracion': {
-                                'tamano_poblacion': int(row['tamano_poblacion']),
-                                'num_generaciones': int(row['num_generaciones']),
-                                'prob_cruce': float(row['prob_cruce']),
-                                'prob_mutacion': float(row['prob_mutacion']),
-                                'cada_k_gen': int(row['cada_k_gen']),
-                                'max_iter_local': int(row['max_iter_local'])
-                            },
-                            'semilla': int(row['semilla']),
-                            'makespan': float(row['makespan']),
-                            'balance': float(row['balance']),
-                            'energia': float(row['energia']),
-                            'tiempo': float(row['tiempo']),
-                            'tamano_frente': int(row['tamano_frente']),
-                            'score_agregado': float(row['score_agregado'])
-                        }
-                        # Solo agregar si esta configuración NO se va a ejecutar de nuevo
-                        config_key = tuple(sorted(resultado['configuracion'].items()))
-                        if config_key in configuraciones_completas_previas:
-                            todos_resultados.append(resultado)
-            print(f"[RECUPERACIÓN] Resultados previos cargados: {len(todos_resultados)} ejecuciones")
-        except Exception as e:
-            print(f"[ADVERTENCIA] Error al cargar archivo parcial: {e}")
-            todos_resultados = []
-    
-    mejor_score = float('inf')
-    mejor_config = None
-    configuraciones_ya_guardadas = set()  # Para evitar guardar la misma configuración múltiples veces
-    
-    with ProcessPoolExecutor(max_workers=num_nucleos) as executor:
-        print(f"INICIANDO {len(tareas)} TAREAS EN {num_nucleos} NÚCLEOS...")
-        print(f"Timestamp inicio: {time.strftime('%H:%M:%S')}")
-        print()
-        
-        # Enviar todas las tareas
-        futures = []
-        for tarea in tareas:
-            futures.append(executor.submit(ejecutar_semilla, tarea))
-        
-        # Procesar resultados conforme se completan
-        for i, future in enumerate(as_completed(futures)):
-            try:
-                resultado = future.result()
-                todos_resultados.append(resultado)
-                
-                # Agrupar resultados por configuración
-                config_key = tuple(sorted(resultado['configuracion'].items()))
-                
-                # Calcular promedio de la configuración actual
-                config_resultados = [r for r in todos_resultados if tuple(sorted(r['configuracion'].items())) == config_key]
-                if len(config_resultados) == num_semillas:
-                    prom_score = np.mean([r['score_agregado'] for r in config_resultados])
-                    if prom_score < mejor_score:
-                        mejor_score = prom_score
-                        mejor_config = resultado['configuracion']
-                
-                # Mostrar progreso detallado
-                progreso = (i+1) / len(tareas) * 100
-                tiempo_transcurrido = time.time() - inicio_total
-                tiempo_por_ejecucion = tiempo_transcurrido / (i+1)
-                tiempo_restante = tiempo_por_ejecucion * (len(tareas) - i-1)
-                
-                timestamp = time.strftime('%H:%M:%S')
-                print(f"  [{progreso:5.1f}%] {i+1:4d}/{len(tareas)} - {timestamp} - "
-                      f"Config: {resultado['configuracion']['tamano_poblacion']}-{resultado['configuracion']['num_generaciones']}-{resultado['configuracion']['prob_cruce']:.1f}-{resultado['configuracion']['prob_mutacion']:.2f} - "
-                      f"Semilla: {resultado['semilla']:2d} - "
-                      f"Score: {resultado['score_agregado']:.4f} - "
-                      f"Mejor: {mejor_score:.4f} - "
-                      f"ETA: {tiempo_restante/60:.1f}min")
-                
-                # Verificar si se completó alguna configuración
-                configuraciones_completas = verificar_configuraciones_completas(todos_resultados, num_semillas)
-                if configuraciones_completas:
-                    # Verificar si hay configuraciones nuevas completadas
-                    configuraciones_nuevas = []
-                    for config in configuraciones_completas:
-                        config_key = tuple(sorted(config.items()))
-                        if config_key not in configuraciones_ya_guardadas:
-                            configuraciones_nuevas.append(config)
-                            configuraciones_ya_guardadas.add(config_key)
+            # Enviar todas las tareas
+            futures = []
+            for tarea in tareas:
+                futures.append(executor.submit(ejecutar_semilla, tarea))
+            
+            # Procesar resultados conforme se completan
+            for i, future in enumerate(as_completed(futures)):
+                try:
+                    resultado = future.result()
+                    todos_resultados.append(resultado)
                     
-                    if configuraciones_nuevas:
-                        print(f"    Mejor config actual: {mejor_config}")
-                        print(f"    Configuraciones completadas: {len(configuraciones_nuevas)}")
+                    # Agrupar resultados por configuración
+                    config_key = tuple(sorted(resultado['configuracion'].items()))
+                    
+                    # Calcular promedio de la configuración actual
+                    config_resultados = [r for r in todos_resultados if tuple(sorted(r['configuracion'].items())) == config_key]
+                    if len(config_resultados) == num_semillas:
+                        prom_score = np.mean([r['score_agregado'] for r in config_resultados])
+                        if prom_score < mejor_score:
+                            mejor_score = prom_score
+                            mejor_config = resultado['configuracion']
+                    
+                    # Mostrar progreso detallado
+                    progreso = (i+1) / len(tareas) * 100
+                    tiempo_transcurrido = time.time() - inicio_total
+                    tiempo_por_ejecucion = tiempo_transcurrido / (i+1)
+                    tiempo_restante = tiempo_por_ejecucion * (len(tareas) - i-1)
+                    
+                    timestamp = time.strftime('%H:%M:%S')
+                    print(f"  [{progreso:5.1f}%] {i+1:4d}/{len(tareas)} - {timestamp} - "
+                          f"Config: {resultado['configuracion']['tamano_poblacion']}-{resultado['configuracion']['num_generaciones']}-{resultado['configuracion']['prob_cruce']:.1f}-{resultado['configuracion']['prob_mutacion']:.2f} - "
+                          f"Semilla: {resultado['semilla']:2d} - "
+                          f"Score: {resultado['score_agregado']:.4f} - "
+                          f"Mejor: {mejor_score:.4f} - "
+                          f"ETA: {tiempo_restante/60:.1f}min")
+                    
+                    # Verificar si se completó alguna configuración
+                    configuraciones_completas = verificar_configuraciones_completas(todos_resultados, num_semillas)
+                    if configuraciones_completas:
+                        # Verificar si hay configuraciones nuevas completadas
+                        configuraciones_nuevas = []
+                        for config in configuraciones_completas:
+                            config_key = tuple(sorted(config.items()))
+                            if config_key not in configuraciones_ya_guardadas:
+                                configuraciones_nuevas.append(config)
+                                configuraciones_ya_guardadas.add(config_key)
                         
-                        # Guardar resultados parciales
-                        guardar_resultados_parciales(todos_resultados, num_semillas)
-                    
-            except Exception as exc:
-                print(f"  Generó una excepción: {exc}")
-        
-        tiempo_total = time.time() - inicio_total
-        print(f"\nOptimización completada en {tiempo_total:.1f} segundos")
+                        if configuraciones_nuevas:
+                            print(f"    Mejor config actual: {mejor_config}")
+                            print(f"    Configuraciones completadas: {len(configuraciones_nuevas)}")
+                            
+                            # Guardar resultados parciales
+                            guardar_resultados_parciales(todos_resultados, num_semillas)
+                        
+                except Exception as exc:
+                    print(f"  Generó una excepción: {exc}")
+            
+            tiempo_total = time.time() - inicio_total
+            print(f"\nOptimización completada en {tiempo_total:.1f} segundos")
     
     # 📊 CARGAR TODOS LOS RESULTADOS PREVIOS PARA ANÁLISIS GLOBAL
     # (Esto se ejecuta siempre, incluso si todo estaba completo)

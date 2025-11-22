@@ -1,6 +1,18 @@
 # Actualizacion de HFS - T2 a HFS-T3
 Proyecto de tesis 3 (taller de investigación)
 
+## Version 1.1.3j:
+- **Corrección crítica: Error cuando todas las configuraciones están completas** (BUG CRÍTICO):
+  - **Problema**: Cuando todas las configuraciones ya estaban completas, el script intentaba acceder a la variable `tareas` que no estaba definida, causando `UnboundLocalError`.
+  - **Causa**: El bloque de ejecución (ProcessPoolExecutor) no estaba completamente dentro del `if not todo_completo:`, y había problemas de indentación.
+  - **Solución**: 
+    1. ✅ Todo el bloque de ejecución (creación de tareas, ProcessPoolExecutor, procesamiento de resultados) ahora está correctamente dentro de `if not todo_completo:`
+    2. ✅ Corregida indentación de todo el bloque dentro del `with ProcessPoolExecutor`
+    3. ✅ Cuando todo está completo, el código salta directamente a la sección de análisis y generación de YAML
+  - **Resultado**: El script ahora funciona correctamente tanto cuando hay configuraciones faltantes como cuando todo está completo.
+  - **Archivos modificados**:
+    - `tesis3/experiments/paralelizacion/tunning_multimetrica.py`: Líneas 420-483 (corrección de indentación y estructura del bloque de ejecución).
+
 ## Version 1.1.3i:
 - **Mejora crítica: Actualización automática de config.yaml con mejor configuración**:
   - **Problema**: Después de ejecutar `tunning_multimetrica.py` y encontrar la mejor configuración, el archivo `config.yaml` no se actualizaba automáticamente. Los scripts como `ejecutar_memetico.py` seguían usando los parámetros por defecto en lugar de los optimizados.
