@@ -1,9 +1,10 @@
-"""Genera visualizaciones del frente de Pareto con algoritmo memético"""
+"""Genera visualizaciones del frente de Pareto usando la mejor versión (estándar o memético)"""
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from tesis3.src.core.problem import ProblemConfig
+from tesis3.src.algorithms.nsga2 import nsga2
 from tesis3.src.algorithms.nsga2_memetic import nsga2_memetic
 from tesis3.src.operators.crossover import aplicar_cruce
 from tesis3.src.operators.mutation import aplicar_mutacion
@@ -13,10 +14,52 @@ from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import yaml
 import os
+import glob
 
 print("="*60)
-print("VISUALIZACIÓN DEL FRENTE DE PARETO (ALGORITMO MEMÉTICO)")
+print("VISUALIZACIÓN DEL FRENTE DE PARETO")
 print("="*60)
+
+# 🔍 DETERMINAR QUÉ VERSIÓN USAR (basado en resultados de Fase 4)
+print("\n🔍 Determinando qué versión usar (estándar o memético)...")
+print("   Buscando resultados de la Fase 4 (comparacion_memetica_resumen_*.yaml)...")
+
+archivos_resumen = glob.glob('tesis3/results/comparacion_memetica_resumen_*.yaml')
+usar_memetico = True  # Por defecto usar memético
+version_seleccionada = "memético"
+
+if archivos_resumen:
+    # Ordenar por fecha (más reciente primero)
+    archivos_resumen.sort(reverse=True)
+    archivo_mas_reciente = archivos_resumen[0]
+    
+    try:
+        with open(archivo_mas_reciente, 'r') as f:
+            resumen = yaml.safe_load(f)
+        
+        if 'comparacion' in resumen and 'mejora_score_pct' in resumen['comparacion']:
+            mejora_score = resumen['comparacion']['mejora_score_pct']
+            
+            if mejora_score > 0:
+                usar_memetico = True
+                version_seleccionada = "memético"
+                print(f"   ✅ Memético es MEJOR (mejora: {mejora_score:+.2f}%)")
+                print(f"   → Usando algoritmo MEMÉTICO para visualizaciones")
+            else:
+                usar_memetico = False
+                version_seleccionada = "estándar"
+                print(f"   ⚠️  Memético NO mejora (mejora: {mejora_score:+.2f}%)")
+                print(f"   → Usando algoritmo ESTÁNDAR para visualizaciones")
+        else:
+            print(f"   ⚠️  No se encontró información de mejora en el resumen")
+            print(f"   → Usando algoritmo MEMÉTICO por defecto")
+    except Exception as e:
+        print(f"   ⚠️  Error al leer resumen: {e}")
+        print(f"   → Usando algoritmo MEMÉTICO por defecto")
+else:
+    print(f"   ⚠️  No se encontraron archivos de resumen de la Fase 4")
+    print(f"   → Usando algoritmo MEMÉTICO por defecto")
+    print(f"   → Ejecuta primero la Fase 4 para determinar la mejor versión")
 
 # Cargar configuración completa
 config = ProblemConfig.from_yaml("tesis3/config/config.yaml")
@@ -50,19 +93,33 @@ def cruce(p1, p2, cfg, prob):
 def mutacion(pob, cfg, prob):
     return aplicar_mutacion(pob, cfg, metodo=tipo_mutacion, tasa_mut=prob)
 
-print(f"\nEjecutando NSGA-II Memético ({tipo_cruce.capitalize()} + {tipo_mutacion.capitalize()})...")
+print(f"\nEjecutando NSGA-II {version_seleccionada.capitalize()} ({tipo_cruce.capitalize()} + {tipo_mutacion.capitalize()})...")
 print(f"   Esto tomará ~{alg_params['num_generaciones'] * 0.05:.0f} segundos\n")
 
-frente_pareto, fitness_pareto, historial = nsga2_memetic(
-    config, cruce, mutacion,
-    tamano_poblacion=alg_params['tamano_poblacion'],
-    num_generaciones=alg_params['num_generaciones'],
-    prob_cruce=alg_params['prob_cruce'],
-    prob_mutacion=alg_params['prob_mutacion'],
-    cada_k_gen=memetic_params['cada_k_generaciones'],
-    max_iter_local=memetic_params['max_iteraciones_local'],
-    verbose=True
-)
+if usar_memetico:
+    frente_pareto, fitness_pareto, historial = nsga2_memetic(
+        config, cruce, mutacion,
+        tamano_poblacion=alg_params['tamano_poblacion'],
+        num_generaciones=alg_params['num_generaciones'],
+        prob_cruce=alg_params['prob_cruce'],
+        prob_mutacion=alg_params['prob_mutacion'],
+        cada_k_gen=memetic_params['cada_k_generaciones'],
+        max_iter_local=memetic_params['max_iteraciones_local'],
+        verbose=True
+    )
+else:
+    # Usar versión estándar (sin búsqueda local)
+    frente_pareto, fitness_pareto, historial = nsga2(
+        config, cruce, mutacion,
+        tamano_poblacion=alg_params['tamano_poblacion'],
+        num_generaciones=alg_params['num_generaciones'],
+        prob_cruce=alg_params['prob_cruce'],
+        prob_mutacion=alg_params['prob_mutacion'],
+        verbose=True
+    )
+    # Para estándar, historial puede ser None, crear uno básico
+    if historial is None:
+        historial = [len(frente_pareto)] * alg_params['num_generaciones']
 
 print(f"\nFrente de Pareto obtenido: {len(frente_pareto)} soluciones")
 
@@ -113,19 +170,20 @@ scatter = ax.scatter(
 ax.set_xlabel('Makespan (s)', fontsize=12, labelpad=10)
 ax.set_ylabel('Balance (Desv. Std)', fontsize=12, labelpad=10)
 ax.set_zlabel('Energía (kWh)', fontsize=12, labelpad=10)
-ax.set_title('Frente de Pareto Memético (3 objetivos)\nMakespan vs Balance vs Energía', 
+ax.set_title(f'Frente de Pareto {version_seleccionada.capitalize()} (3 objetivos)\nMakespan vs Balance vs Energía', 
              fontsize=14, fontweight='bold', pad=20)
 
 plt.tight_layout()
-plt.savefig('tesis3/results/frente_pareto_memetico_3d.png', dpi=300, bbox_inches='tight')
-print("   Guardado: frente_pareto_memetico_3d.png")
+nombre_archivo_3d = f'tesis3/results/frente_pareto_{version_seleccionada.lower()}_3d.png'
+plt.savefig(nombre_archivo_3d, dpi=300, bbox_inches='tight')
+print(f"   Guardado: frente_pareto_{version_seleccionada.lower()}_3d.png")
 plt.close()
 
 # ============================================================
 # GRÁFICO 2: PROYECCIONES 2D (3 combinaciones)
 # ============================================================
 fig, axes = plt.subplots(1, 3, figsize=(16, 5))
-fig.suptitle('Proyecciones 2D del Frente de Pareto Memético', 
+fig.suptitle(f'Proyecciones 2D del Frente de Pareto {version_seleccionada.capitalize()}', 
              fontsize=16, fontweight='bold')
 
 # Makespan vs Balance
@@ -153,8 +211,9 @@ axes[2].set_title('Balance vs Consumo Energético', fontweight='bold')
 axes[2].grid(True, alpha=0.3)
 
 plt.tight_layout()
-plt.savefig('tesis3/results/frente_pareto_memetico_2d.png', dpi=300, bbox_inches='tight')
-print("   Guardado: frente_pareto_memetico_2d.png")
+nombre_archivo_2d = f'tesis3/results/frente_pareto_{version_seleccionada.lower()}_2d.png'
+plt.savefig(nombre_archivo_2d, dpi=300, bbox_inches='tight')
+print(f"   Guardado: frente_pareto_{version_seleccionada.lower()}_2d.png")
 plt.close()
 
 # ============================================================
@@ -164,13 +223,14 @@ fig, ax = plt.subplots(figsize=(10, 6))
 ax.plot(historial, linewidth=2, color='#2E86AB')
 ax.set_xlabel('Generación', fontsize=12)
 ax.set_ylabel('Tamaño del Frente de Pareto', fontsize=12)
-ax.set_title('Evolución del Frente de Pareto (Algoritmo Memético)', 
+ax.set_title(f'Evolución del Frente de Pareto (Algoritmo {version_seleccionada.capitalize()})', 
              fontsize=14, fontweight='bold')
 ax.grid(True, alpha=0.3)
 
 plt.tight_layout()
-plt.savefig('tesis3/results/evolucion_frente_memetico.png', dpi=300, bbox_inches='tight')
-print("   Guardado: evolucion_frente_memetico.png")
+nombre_archivo_evol = f'tesis3/results/evolucion_frente_{version_seleccionada.lower()}.png'
+plt.savefig(nombre_archivo_evol, dpi=300, bbox_inches='tight')
+print(f"   Guardado: evolucion_frente_{version_seleccionada.lower()}.png")
 plt.close()
 
 # ============================================================
@@ -178,19 +238,20 @@ plt.close()
 # ============================================================
 import csv
 
-with open('tesis3/results/frente_pareto_memetico.csv', 'w', newline='') as f:
+nombre_archivo_csv = f'tesis3/results/frente_pareto_{version_seleccionada.lower()}.csv'
+with open(nombre_archivo_csv, 'w', newline='') as f:
     writer = csv.writer(f)
     writer.writerow(['ID', 'Makespan', 'Balance', 'Energia'])
     for i, (mk, bal, eng) in enumerate(metricas, 1):
         writer.writerow([i, f"{mk:.2f}", f"{bal:.2f}", f"{eng:.2f}"])
 
-print("   Guardado: frente_pareto_memetico.csv")
+print(f"   Guardado: frente_pareto_{version_seleccionada.lower()}.csv")
 
 # ============================================================
 # TOP 10 SOLUCIONES
 # ============================================================
 print("\n" + "="*60)
-print("TOP 10 SOLUCIONES DEL FRENTE DE PARETO MEMÉTICO")
+print(f"TOP 10 SOLUCIONES DEL FRENTE DE PARETO {version_seleccionada.upper()}")
 print("="*60)
 
 indices_top10 = sorted(range(len(makespans)), key=lambda i: makespans[i])[:10]
@@ -205,8 +266,8 @@ print("\n" + "="*60)
 print("VISUALIZACIONES COMPLETADAS")
 print("="*60)
 print("\nArchivos generados en tesis3/results/:")
-print("  1. frente_pareto_memetico_3d.png (3D: Makespan vs Balance vs Energía)")
-print("  2. frente_pareto_memetico_2d.png (3 proyecciones 2D)")
-print("  3. evolucion_frente_memetico.png (evolución del frente)")
-print("  4. frente_pareto_memetico.csv (datos)")
+print(f"  1. frente_pareto_{version_seleccionada.lower()}_3d.png (3D: Makespan vs Balance vs Energía)")
+print(f"  2. frente_pareto_{version_seleccionada.lower()}_2d.png (3 proyecciones 2D)")
+print(f"  3. evolucion_frente_{version_seleccionada.lower()}.png (evolución del frente)")
+print(f"  4. frente_pareto_{version_seleccionada.lower()}.csv (datos)")
 print("="*60)

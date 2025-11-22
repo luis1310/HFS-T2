@@ -1,9 +1,10 @@
-"""Analiza las mejores soluciones del frente de Pareto"""
+"""Analiza las mejores soluciones del frente de Pareto usando la mejor versión (estándar o memético)"""
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from tesis3.src.core.problem import ProblemConfig
+from tesis3.src.algorithms.nsga2 import nsga2
 from tesis3.src.algorithms.nsga2_memetic import nsga2_memetic
 from tesis3.src.operators.crossover import aplicar_cruce
 from tesis3.src.operators.mutation import aplicar_mutacion
@@ -12,10 +13,52 @@ import matplotlib.pyplot as plt
 import numpy as np
 import yaml
 import os
+import glob
 
 print("="*70)
 print("ANÁLISIS DE LAS MEJORES SOLUCIONES DEL FRENTE DE PARETO")
 print("="*70)
+
+# 🔍 DETERMINAR QUÉ VERSIÓN USAR (basado en resultados de Fase 4)
+print("\n🔍 Determinando qué versión usar (estándar o memético)...")
+print("   Buscando resultados de la Fase 4 (comparacion_memetica_resumen_*.yaml)...")
+
+archivos_resumen = glob.glob('tesis3/results/comparacion_memetica_resumen_*.yaml')
+usar_memetico = True  # Por defecto usar memético
+version_seleccionada = "memético"
+
+if archivos_resumen:
+    # Ordenar por fecha (más reciente primero)
+    archivos_resumen.sort(reverse=True)
+    archivo_mas_reciente = archivos_resumen[0]
+    
+    try:
+        with open(archivo_mas_reciente, 'r') as f:
+            resumen = yaml.safe_load(f)
+        
+        if 'comparacion' in resumen and 'mejora_score_pct' in resumen['comparacion']:
+            mejora_score = resumen['comparacion']['mejora_score_pct']
+            
+            if mejora_score > 0:
+                usar_memetico = True
+                version_seleccionada = "memético"
+                print(f"   ✅ Memético es MEJOR (mejora: {mejora_score:+.2f}%)")
+                print(f"   → Usando algoritmo MEMÉTICO para análisis")
+            else:
+                usar_memetico = False
+                version_seleccionada = "estándar"
+                print(f"   ⚠️  Memético NO mejora (mejora: {mejora_score:+.2f}%)")
+                print(f"   → Usando algoritmo ESTÁNDAR para análisis")
+        else:
+            print(f"   ⚠️  No se encontró información de mejora en el resumen")
+            print(f"   → Usando algoritmo MEMÉTICO por defecto")
+    except Exception as e:
+        print(f"   ⚠️  Error al leer resumen: {e}")
+        print(f"   → Usando algoritmo MEMÉTICO por defecto")
+else:
+    print(f"   ⚠️  No se encontraron archivos de resumen de la Fase 4")
+    print(f"   → Usando algoritmo MEMÉTICO por defecto")
+    print(f"   → Ejecuta primero la Fase 4 para determinar la mejor versión")
 
 # Cargar configuración
 config = ProblemConfig.from_yaml("tesis3/config/config.yaml")
@@ -26,27 +69,53 @@ with open("tesis3/config/config.yaml") as f:
 
 alg_params = full_config['algorithm']['nsga2']
 memetic_params = full_config['algorithm']['memetic']
+operators_params = full_config['algorithm']['operators']
+
+# Cargar operadores desde config.yaml (optimizados tras comparacion_operadores.py)
+tipo_cruce = operators_params['cruce']
+tipo_mutacion = operators_params['mutacion']
+
+print(f"\nParámetros del algoritmo (desde config.yaml):")
+print(f"   Población: {alg_params['tamano_poblacion']}")
+print(f"   Generaciones: {alg_params['num_generaciones']}")
+print(f"   Prob. cruce: {alg_params['prob_cruce']}")
+print(f"   Prob. mutación: {alg_params['prob_mutacion']}")
+print(f"   Operador cruce: {tipo_cruce}")
+print(f"   Operador mutación: {tipo_mutacion}")
+print(f"   Memético - cada_k_gen: {memetic_params['cada_k_generaciones']}")
+print(f"   Memético - max_iter_local: {memetic_params['max_iteraciones_local']}")
 
 def cruce(p1, p2, cfg, prob):
-    return aplicar_cruce(p1, p2, cfg, metodo='uniforme', prob_cruce=prob)
+    return aplicar_cruce(p1, p2, cfg, metodo=tipo_cruce, prob_cruce=prob)
 
 def mutacion(pob, cfg, prob):
-    return aplicar_mutacion(pob, cfg, metodo='invert', tasa_mut=prob)
+    return aplicar_mutacion(pob, cfg, metodo=tipo_mutacion, tasa_mut=prob)
 
-print("Ejecutando NSGA-II Memético para obtener frente de Pareto...")
-print("(Esto puede tomar unos minutos)\n")
+print(f"\nEjecutando NSGA-II {version_seleccionada.capitalize()} para obtener frente de Pareto...")
+print(f"(Esto puede tomar ~{alg_params['num_generaciones'] * 0.05:.0f} segundos)\n")
 
-# Ejecutar algoritmo con parámetros más pequeños para análisis rápido
-frente_pareto, fitness_pareto, _ = nsga2_memetic(
-    config, cruce, mutacion,
-    tamano_poblacion=100,  # Reducido para análisis
-    num_generaciones=200,  # Reducido para análisis
-    prob_cruce=alg_params['prob_cruce'],
-    prob_mutacion=alg_params['prob_mutacion'],
-    cada_k_gen=memetic_params['cada_k_generaciones'],
-    max_iter_local=memetic_params['max_iteraciones_local'],
-    verbose=False  # Sin output detallado
-)
+# Ejecutar algoritmo con parámetros optimizados desde config.yaml
+if usar_memetico:
+    frente_pareto, fitness_pareto, _ = nsga2_memetic(
+        config, cruce, mutacion,
+        tamano_poblacion=alg_params['tamano_poblacion'],  # Usar parámetros optimizados
+        num_generaciones=alg_params['num_generaciones'],  # Usar parámetros optimizados
+        prob_cruce=alg_params['prob_cruce'],
+        prob_mutacion=alg_params['prob_mutacion'],
+        cada_k_gen=memetic_params['cada_k_generaciones'],
+        max_iter_local=memetic_params['max_iteraciones_local'],
+        verbose=False  # Sin output detallado
+    )
+else:
+    # Usar versión estándar (sin búsqueda local)
+    frente_pareto, fitness_pareto, _ = nsga2(
+        config, cruce, mutacion,
+        tamano_poblacion=alg_params['tamano_poblacion'],
+        num_generaciones=alg_params['num_generaciones'],
+        prob_cruce=alg_params['prob_cruce'],
+        prob_mutacion=alg_params['prob_mutacion'],
+        verbose=False
+    )
 
 print(f"Frente de Pareto obtenido: {len(frente_pareto)} soluciones")
 
