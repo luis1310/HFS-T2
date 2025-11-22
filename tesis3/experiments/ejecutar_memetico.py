@@ -32,101 +32,126 @@ def ejecutar_semilla_version(version, semilla, config_yaml_path='tesis3/config/c
     Returns:
         dict con resultados de la ejecución
     """
-    # Inicializar semillas para reproducibilidad
-    random.seed(semilla)
-    np.random.seed(semilla)
-    
-    # Cargar configuración del problema
-    config = ProblemConfig.from_yaml(config_yaml_path)
-    
-    # Cargar parámetros del algoritmo desde config.yaml
-    with open(config_yaml_path, 'r') as f:
-        config_completa = yaml.safe_load(f)
-    
-    alg_params = config_completa['algorithm']['nsga2']
-    memetic_params = config_completa['algorithm']['memetic']
-    operators_params = config_completa['algorithm']['operators']
-    
-    # Usar parámetros desde config.yaml (optimizados tras el tunning)
-    tamano_poblacion = alg_params['tamano_poblacion']
-    num_generaciones = alg_params['num_generaciones']
-    prob_cruce = alg_params['prob_cruce']
-    prob_mutacion = alg_params['prob_mutacion']
-    cada_k_gen = memetic_params['cada_k_generaciones']
-    max_iter_local = memetic_params['max_iteraciones_local']
-    
-    # Cargar operadores desde config.yaml
-    tipo_cruce = operators_params['cruce']
-    tipo_mutacion = operators_params['mutacion']
-    
-    # Crear funciones de operadores con los tipos cargados
-    def cruce(p1, p2, cfg, prob):
-        return aplicar_cruce(p1, p2, cfg, metodo=tipo_cruce, prob_cruce=prob)
-    
-    def mutacion(pob, cfg, prob):
-        return aplicar_mutacion(pob, cfg, metodo=tipo_mutacion, tasa_mut=prob)
-    
-    inicio = time.time()
-    
-    if version == 'estandar':
-        frente, fitness, _ = nsga2(
-            config, cruce, mutacion,
-            tamano_poblacion=tamano_poblacion,
-            num_generaciones=num_generaciones,
-            prob_cruce=prob_cruce,
-            prob_mutacion=prob_mutacion,
-            verbose=False
-        )
-    else:  # memético
-        frente, fitness, _ = nsga2_memetic(
-        config, cruce, mutacion,
-            tamano_poblacion=tamano_poblacion,
-            num_generaciones=num_generaciones,
-            prob_cruce=prob_cruce,
-            prob_mutacion=prob_mutacion,
-            cada_k_gen=cada_k_gen,
-            max_iter_local=max_iter_local,
-        verbose=False
-    )
-    
-    tiempo_ejecucion = time.time() - inicio
-    
-    # Cargar valores de referencia desde config.yaml
-    with open(config_yaml_path, 'r') as f:
-        config_completa = yaml.safe_load(f)
-    valores_ref = config_completa['experiments']['valores_referencia']
-    
-    # Convertir fitness a métricas reales (3 objetivos)
-    metricas = [(1/f[0], 1/f[1]-1, 1/f[2]-1) for f in fitness]
-    
-    # Calcular métricas del frente de Pareto
-    makespans = [m[0] for m in metricas]
-    balances = [m[1] for m in metricas]
-    energias = [m[2] for m in metricas]
-    
-    # Promedios del frente de Pareto
-    prom_mk = np.mean(makespans)
-    prom_bal = np.mean(balances)
-    prom_eng = np.mean(energias)
-    
-    # Score agregado con normalización (igual que tunning y comparacion_operadores)
-    # Los valores de referencia se leen desde config.yaml
-    ref_mk = valores_ref['makespan']
-    ref_bal = valores_ref['balance']
-    ref_eng = valores_ref['energia']
-    
-    score_agregado = (prom_mk / ref_mk) + (prom_bal / ref_bal) + (prom_eng / ref_eng)
-    
-    return {
-        'version': version,
-        'semilla': semilla,
-        'makespan': prom_mk,
-        'balance': prom_bal,
-        'energia': prom_eng,
-        'score_agregado': score_agregado,
-        'tamano_frente': len(frente),
-        'tiempo_ejecucion': tiempo_ejecucion
-    }
+    try:
+        # Mensaje de inicio para debug (se verá en el output)
+        import os
+        print(f"[DEBUG] PID {os.getpid()}: Iniciando {version} semilla {semilla}...", flush=True)
+        
+        # Verificar que el archivo de configuración existe
+        if not os.path.exists(config_yaml_path):
+            raise FileNotFoundError(f"No se encontró el archivo de configuración: {config_yaml_path}")
+        
+        print(f"[DEBUG] PID {os.getpid()}: Archivo config encontrado, cargando...", flush=True)
+        
+        # Inicializar semillas para reproducibilidad
+        random.seed(semilla)
+        np.random.seed(semilla)
+        
+        # Cargar configuración del problema
+        print(f"[DEBUG] PID {os.getpid()}: Cargando ProblemConfig...", flush=True)
+        config = ProblemConfig.from_yaml(config_yaml_path)
+        print(f"[DEBUG] PID {os.getpid()}: ProblemConfig cargado", flush=True)
+        
+        # Cargar parámetros del algoritmo desde config.yaml
+        with open(config_yaml_path, 'r') as f:
+            config_completa = yaml.safe_load(f)
+        
+        alg_params = config_completa['algorithm']['nsga2']
+        memetic_params = config_completa['algorithm']['memetic']
+        operators_params = config_completa['algorithm']['operators']
+        
+        # Usar parámetros desde config.yaml (optimizados tras el tunning)
+        tamano_poblacion = alg_params['tamano_poblacion']
+        num_generaciones = alg_params['num_generaciones']
+        prob_cruce = alg_params['prob_cruce']
+        prob_mutacion = alg_params['prob_mutacion']
+        cada_k_gen = memetic_params['cada_k_generaciones']
+        max_iter_local = memetic_params['max_iteraciones_local']
+        
+        # Cargar operadores desde config.yaml
+        tipo_cruce = operators_params['cruce']
+        tipo_mutacion = operators_params['mutacion']
+        
+        print(f"[DEBUG] PID {os.getpid()}: Parámetros cargados - Pob:{tamano_poblacion}, Gen:{num_generaciones}", flush=True)
+        
+        # Crear funciones de operadores con los tipos cargados
+        def cruce(p1, p2, cfg, prob):
+            return aplicar_cruce(p1, p2, cfg, metodo=tipo_cruce, prob_cruce=prob)
+        
+        def mutacion(pob, cfg, prob):
+            return aplicar_mutacion(pob, cfg, metodo=tipo_mutacion, tasa_mut=prob)
+        
+        print(f"[DEBUG] PID {os.getpid()}: Iniciando ejecución del algoritmo {version}...", flush=True)
+        inicio = time.time()
+        
+        if version == 'estandar':
+            frente, fitness, _ = nsga2(
+                config, cruce, mutacion,
+                tamano_poblacion=tamano_poblacion,
+                num_generaciones=num_generaciones,
+                prob_cruce=prob_cruce,
+                prob_mutacion=prob_mutacion,
+                verbose=False
+            )
+        else:  # memético
+            frente, fitness, _ = nsga2_memetic(
+                config, cruce, mutacion,
+                tamano_poblacion=tamano_poblacion,
+                num_generaciones=num_generaciones,
+                prob_cruce=prob_cruce,
+                prob_mutacion=prob_mutacion,
+                cada_k_gen=cada_k_gen,
+                max_iter_local=max_iter_local,
+                verbose=False
+            )
+        
+        tiempo_ejecucion = time.time() - inicio
+        print(f"[DEBUG] PID {os.getpid()}: Algoritmo {version} completado en {tiempo_ejecucion:.1f}s", flush=True)
+        
+        # Cargar valores de referencia desde config.yaml
+        with open(config_yaml_path, 'r') as f:
+            config_completa = yaml.safe_load(f)
+        valores_ref = config_completa['experiments']['valores_referencia']
+        print(f"[DEBUG] PID {os.getpid()}: Calculando métricas...", flush=True)
+        
+        # Convertir fitness a métricas reales (3 objetivos)
+        metricas = [(1/f[0], 1/f[1]-1, 1/f[2]-1) for f in fitness]
+        
+        # Calcular métricas del frente de Pareto
+        makespans = [m[0] for m in metricas]
+        balances = [m[1] for m in metricas]
+        energias = [m[2] for m in metricas]
+        
+        # Promedios del frente de Pareto
+        prom_mk = np.mean(makespans)
+        prom_bal = np.mean(balances)
+        prom_eng = np.mean(energias)
+        
+        # Score agregado con normalización (igual que tunning y comparacion_operadores)
+        # Los valores de referencia se leen desde config.yaml
+        ref_mk = valores_ref['makespan']
+        ref_bal = valores_ref['balance']
+        ref_eng = valores_ref['energia']
+        
+        score_agregado = (prom_mk / ref_mk) + (prom_bal / ref_bal) + (prom_eng / ref_eng)
+        
+        print(f"[DEBUG] Completado {version} semilla {semilla} en {tiempo_ejecucion:.1f}s", flush=True)
+        
+        return {
+            'version': version,
+            'semilla': semilla,
+            'makespan': prom_mk,
+            'balance': prom_bal,
+            'energia': prom_eng,
+            'score_agregado': score_agregado,
+            'tamano_frente': len(frente),
+            'tiempo_ejecucion': tiempo_ejecucion
+        }
+    except Exception as e:
+        import traceback
+        error_msg = f"ERROR en {version} semilla {semilla}: {str(e)}\n{traceback.format_exc()}"
+        print(f"[ERROR] {error_msg}", flush=True)
+        raise  # Re-lanzar para que el proceso principal lo capture
 
 def detectar_capacidades_sistema():
     """Detecta capacidades del sistema (núcleos y RAM)"""
@@ -307,14 +332,20 @@ def main():
     inicio_total = time.time()
     
     # Ejecutar en paralelo
+    print(f"\n🚀 INICIANDO {len(tareas)} TAREAS EN {num_nucleos} NÚCLEOS...")
+    print(f"   Esto puede tomar varios minutos. Los procesos se ejecutan en paralelo.\n")
+    
     with ProcessPoolExecutor(max_workers=num_nucleos) as executor:
-        print(f"INICIANDO {len(tareas)} TAREAS EN {num_nucleos} NÚCLEOS...")
-        
         # Enviar todas las tareas
+        print(f"📤 Enviando {len(tareas)} tareas al pool de procesos...")
         futures = {}
-        for version, semilla in tareas:
+        for i, (version, semilla) in enumerate(tareas, 1):
             future = executor.submit(ejecutar_semilla_version, version, semilla)
             futures[future] = (version, semilla)
+            if i % 10 == 0 or i == len(tareas):
+                print(f"   [{i}/{len(tareas)}] Tareas enviadas...", flush=True)
+        
+        print(f"\n⏳ Esperando resultados (los procesos están ejecutándose)...\n")
         
         # Procesar resultados conforme se completan
         for future in as_completed(futures):
