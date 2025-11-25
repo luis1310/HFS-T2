@@ -48,6 +48,9 @@ tesis3/config/config.local.yaml
 .DS_Store
 .AppleDouble
 .LSOverride
+
+!/INFORME_DE_TESIS_3/Figures/**
+
 /INFORME_DE_TESIS_3/main.aux
 /INFORME_DE_TESIS_3/main.bbl
 /INFORME_DE_TESIS_3/main.blg

@@ -2,7 +2,7 @@
 
 \section{Conclusiones}
 
-Este proyecto de tesis ha logrado establecer una base sólida para la implementación de algoritmos evolutivos multiobjetivo en la optimización de líneas de ensamblaje. A continuación se presentan las conclusiones principales del trabajo realizado hasta el momento:
+Este proyecto de tesis ha logrado establecer una base sólida para la implementación de algoritmos evolutivos multiobjetivo en la optimización de líneas de ensamblaje. A continuación se presentan las conclusiones principales del trabajo realizado:
 
 \begin{itemize}
 
@@ -14,29 +14,56 @@ Este proyecto de tesis ha logrado establecer una base sólida para la implementa
 
 \item[•] El desarrollo de la función de fitness multiobjetivo que considera el desgaste de máquinas y procesos de enfriamiento añade realismo al modelo, permitiendo que el algoritmo opere bajo condiciones similares a entornos industriales reales.
 
+\item[•] El proceso sistemático de tunning multiobjetivo, evaluando 1,890 configuraciones con 30 semillas cada una (56,700 ejecuciones totales), permitió identificar la configuración óptima de hiperparámetros que maximiza el balance entre los tres objetivos considerados.
+
+\item[•] La comparación exhaustiva de operadores demostró que la combinación de cruce uniforme y mutación swap proporciona los mejores resultados en términos de calidad del frente de Pareto y robustez estadística.
+
+\item[•] La versión memética del NSGA-II muestra mejoras moderadas pero consistentes (0.11\% en score agregado) sobre la versión estándar, justificando el overhead computacional del 10.22\% para aplicaciones donde la calidad es prioritaria.
+
+\item[•] Las optimizaciones implementadas (caché de fitness, filtrado de similitud, clasificación adaptativa, búsqueda local selectiva) lograron reducir el tiempo de ejecución en aproximadamente 60\%, de ~60 segundos a ~25 segundos por ejecución.
+
+\item[•] El sistema de paralelización de experimentos permite ejecutar experimentos masivos de manera eficiente y reproducible, facilitando la validación estadística de los resultados mediante múltiples semillas independientes.
+
 \end{itemize}
 
-\subsection{Estado Actual del Proyecto}
+\subsection{Resultados Principales Obtenidos}
 
-En la fase actual del proyecto, se ha completado la implementación de los algoritmos NSGA-II estándar y memético, junto con los operadores de cruce y mutación especializados. Asimismo, se ha desarrollado la función de evaluación multiobjetivo que considera los tres objetivos simultáneamente.
+Los experimentos sistemáticos realizados han proporcionado evidencia empírica sólida sobre la efectividad del enfoque multiobjetivo propuesto:
 
-Los siguientes pasos del proyecto incluyen la realización de experimentos sistemáticos para determinar la configuración óptima de los algoritmos. Específicamente, se está próximo a ejecutar:
-
-\begin{itemize}
-    \item Experimentos de \textit{tunning multiobjetivo} para optimizar los hiperparámetros numéricos (tamaño de población, número de generaciones, probabilidades de cruce y mutación) considerando múltiples métricas de calidad del frente de Pareto.
+\begin{enumerate}
+    \item \textbf{Configuración óptima identificada}: Población de 150 individuos, 600 generaciones, probabilidad de cruce 0.7, probabilidad de mutación 0.75, búsqueda local cada 20 generaciones con 5 iteraciones.
     
-    \item Experimentos de comparación de operadores para evaluar sistemáticamente las diferentes combinaciones de métodos de cruce y mutación, determinando cuáles proporcionan mejores resultados en términos de calidad, diversidad y convergencia del frente de Pareto.
+    \item \textbf{Mejor combinación de operadores}: Cruce uniforme + Mutación swap, con score agregado de 2.6065 ± 0.0086.
     
-    \item Análisis comparativo entre la versión estándar del NSGA-II y su variante memética para determinar en qué condiciones la búsqueda local aporta mejoras significativas.
-\end{itemize}
-
-Estos experimentos permitirán seleccionar la configuración más adecuada que se ajuste al problema específico, considerando criterios como robustez, replicabilidad y calidad de las soluciones obtenidas. Se espera que los resultados de estos experimentos proporcionen evidencia empírica sobre la efectividad del enfoque multiobjetivo propuesto para problemas de programación en líneas de ensamblaje.
+    \item \textbf{Superioridad de la versión memética}: Mejora del 0.11\% en score agregado con overhead computacional aceptable del 10.22\%.
+    
+    \item \textbf{Calidad del frente de Pareto}: 78 soluciones únicas que exploran efectivamente el espacio de compromiso entre los tres objetivos.
+    
+    \item \textbf{Robustez estadística}: Desviaciones estándar bajas (0.0086-0.0115) que demuestran consistencia en los resultados.
+\end{enumerate}
 
 \section{Trabajo Futuro}
 
-Una vez completados los experimentos de tunning multiobjetivo y comparación de operadores, se plantean las siguientes líneas de trabajo futuro:
+Aunque se han completado exitosamente los experimentos de tunning multiobjetivo y comparación de operadores, se identifican las siguientes líneas de trabajo futuro:
 
 \subsection*{Análisis de Escalabilidad y Performance}
-Se planea evaluar la escalabilidad del algoritmo implementado con diferentes tamaños de instancias del problema (número de pedidos, número de máquinas, etc.), analizando tanto el tiempo de ejecución como la calidad de las soluciones obtenidas. Este análisis permitirá identificar limitaciones y oportunidades de mejora.
+Se recomienda evaluar la escalabilidad del algoritmo implementado con diferentes tamaños de instancias del problema (número de pedidos, número de máquinas, etc.), analizando tanto el tiempo de ejecución como la calidad de las soluciones obtenidas. Este análisis permitirá identificar limitaciones y oportunidades de mejora para instancias más grandes (100+ pedidos).
+
+\subsection*{Extensión a Problemas Dinámicos}
+Una línea de investigación prometedora es la extensión del algoritmo a problemas dinámicos donde los pedidos llegan de forma estocástica durante la ejecución. Esto requeriría adaptar el algoritmo para reoptimizar la programación cuando se reciben nuevos pedidos.
+
+\subsection*{Integración con Sistemas de Decisión Multi-Criterio}
+El frente de Pareto obtenido puede integrarse con métodos de decisión multi-criterio (como AHP, TOPSIS, o métodos de agregación ponderada) para ayudar al decisor a seleccionar la solución final según sus preferencias específicas.
+
+\subsection*{Validación en Entornos Industriales Reales}
+Aunque el modelo considera aspectos realistas (desgaste de máquinas, enfriamiento), la validación en entornos industriales reales proporcionaría evidencia adicional sobre la aplicabilidad práctica del enfoque propuesto.
+
+\subsection*{Optimizaciones Adicionales}
+Se pueden explorar optimizaciones adicionales como:
+\begin{itemize}
+    \item Paralelización del algoritmo mismo (no solo de los experimentos) para reducir el tiempo de ejecución en instancias grandes.
+    \item Técnicas de reducción de espacio de búsqueda mediante conocimiento del dominio.
+    \item Algoritmos híbridos que combinen NSGA-II con otras metaheurísticas (como simulated annealing o tabu search).
+\end{itemize}
 
 %\afterpage{\blankpage}

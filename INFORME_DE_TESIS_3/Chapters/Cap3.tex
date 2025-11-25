@@ -576,8 +576,72 @@ La memoria está dominada por almacenar población y descendencia, sus \textit{f
 
 En nuestros experimentos, con $M=3$ objetivos y los rangos $N\in\{100,200\}$, $G\in\{400,600\}$, la cota dominante $\mathcal{O}(G\,M\,N^{2})$ explica el tiempo de cómputo observado y la importancia de la paralelización por semillas. La búsqueda local (parámetros \texttt{cada\_k\_gen} y \texttt{max\_iter\_local}) introduce un término adicional proporcional a $\tfrac{G}{k}\,N\,I\,E$, por lo que se recomienda (y así se hizo) mantener $I$ y $k$ en valores moderados para equilibrar calidad/tiempo.
 
+\subsection{Optimizaciones Implementadas en el Algoritmo}
+
+Para mejorar la eficiencia computacional y la calidad del frente de Pareto, se implementaron varias optimizaciones en el algoritmo NSGA-II memético:
+
+\subsubsection{Filtrado de Soluciones Similares (Epsilon-Filter)}
+
+Para mantener un frente de Pareto con soluciones únicas y evitar la acumulación de soluciones prácticamente idénticas, se implementó un mecanismo de filtrado basado en un umbral de similitud $\epsilon$. Este filtro elimina soluciones del frente de Pareto que son similares dentro de un radio $\epsilon$ en el espacio objetivo normalizado.
+
+El filtro se aplica periódicamente (cada $k_{filtro}$ generaciones) y utiliza una estructura de grilla espacial 3D para reducir la complejidad de las comparaciones de $\mathcal{O}(n^2)$ a $\mathcal{O}(n)$, donde $n$ es el tamaño del frente. El umbral $\epsilon = 0.01$ (1\%) permite eliminar soluciones redundantes mientras preserva la diversidad del frente.
+
+\subsubsection{Cache de Fitness}
+
+Para evitar recálculos innecesarios del fitness, se implementó un sistema de caché que almacena los valores de fitness para cada configuración única de genes. Esto es particularmente efectivo cuando la búsqueda local genera soluciones que ya fueron evaluadas previamente, reduciendo significativamente el tiempo de ejecución.
+
+\subsubsection{Clasificación No Dominada Adaptativa}
+
+En generaciones avanzadas (después del 50\% y 75\% del total), se reduce la frecuencia de reclasificación no dominada, aplicándola solo cada 3 o 5 generaciones respectivamente, o cuando se detectan cambios significativos en la población. Esta optimización aprovecha que en fases avanzadas del algoritmo, la estructura de frentes cambia menos frecuentemente.
+
+\subsubsection{Búsqueda Local Selectiva}
+
+La búsqueda local se aplica de forma adaptativa según la fase del algoritmo:
+\begin{itemize}
+    \item Generaciones iniciales (0-50\%): Se aplica a todos los individuos del primer frente.
+    \item Generaciones intermedias (50-75\%): Se limita a un máximo de 80 individuos del frente.
+    \item Generaciones avanzadas (75-100\%): Se limita a un máximo de 60 individuos del frente.
+\end{itemize}
+
+Además, se implementó un mecanismo de \textit{early exit} en la búsqueda local que detiene la exploración si no se encuentra mejora después de $\lfloor max\_iter/3 \rfloor$ iteraciones consecutivas.
+
+\subsubsection{Filtrado Post-Selección}
+
+Después de cada operación de selección NSGA-II, se aplica un filtro adicional al frente de Pareto para eliminar soluciones similares que puedan haber sido reintroducidas durante el proceso de selección. Esto asegura que el historial del tamaño del frente refleje el número real de soluciones únicas.
+
+\subsection{Paralelización de Experimentos}
+
+Para realizar los experimentos de tunning multiobjetivo y comparación de operadores de manera eficiente, se implementó un sistema de paralelización real que ejecuta múltiples semillas independientes en paralelo utilizando múltiples núcleos del procesador.
+
+\subsubsection{Arquitectura de Paralelización}
+
+Los scripts de experimentación (\texttt{tunning\_multimetrica.py} y \texttt{comparacion\_operadores.py}) utilizan el módulo \texttt{ProcessPoolExecutor} de Python para crear un pool de procesos que ejecutan semillas independientes en paralelo. Cada proceso ejecuta una instancia completa del algoritmo NSGA-II memético con una semilla aleatoria específica, garantizando reproducibilidad mediante la inicialización explícita de los generadores aleatorios de Python y NumPy.
+
+\subsubsection{Gestión de Resultados Parciales}
+
+Para permitir la recuperación ante interrupciones y monitorear el progreso, el sistema implementa:
+
+\begin{itemize}
+    \item \textbf{Archivos parciales}: Se mantiene un archivo CSV único que se actualiza constantemente con las configuraciones completas (todas las semillas ejecutadas).
+    \item \textbf{Detección de resultados previos}: Al iniciar, el sistema detecta automáticamente qué configuraciones ya están completas y solo ejecuta las faltantes.
+    \item \textbf{Guardado incremental}: Cada vez que se completa una configuración (todas sus semillas), se actualiza el archivo parcial automáticamente.
+\end{itemize}
+
+\subsubsection{Configuración de Paralelización}
+
+El sistema detecta automáticamente las capacidades del hardware (núcleos físicos, lógicos y memoria RAM) y permite al usuario seleccionar el número de núcleos a utilizar. Se recomienda usar el número de núcleos físicos para evitar sobrecalentamiento, aunque se puede optar por usar todos los núcleos lógicos para máximo rendimiento.
+
+\subsubsection{Reproducibilidad y Semillas Centralizadas}
+
+Para garantizar reproducibilidad entre diferentes ejecuciones, las semillas se cargan desde un archivo centralizado de configuración. Esto asegura que:
+\begin{itemize}
+    \item Todas las configuraciones usen exactamente las mismas semillas.
+    \item Los resultados sean comparables entre diferentes ejecuciones.
+    \item Se pueda verificar que cada configuración tenga exactamente el número esperado de semillas (típicamente 30).
+\end{itemize}
+
 \subsection{Flujo del pipeline}
-En la Figura \ref{fig:pipeline} se muestra el flujo de procesamiento de extremo a extremo del sistema implementado. El \textbf{inicio} del proceso es el bloque “\textit{Cargar config.yaml}”, desde donde se construye la población inicial y se avanza por evaluación, ordenamiento por no-dominancia y operadores evolutivos. En este trabajo la \textbf{búsqueda local (memética) está activada} y forma parte del ciclo (no es opcional); se aplica con la frecuencia y límite configurados. El ciclo se repite por generaciones hasta que no queden generaciones restantes, desembocando en el \textbf{frente de Pareto final}. El paso “\textit{Combinar y seleccionar}” corresponde a la \textit{selección elitista} de NSGA-II: se combinan padres y descendencia, se reevalúa, se clasifica en frentes y se toma la nueva población por frentes y distancia de crowding.
+En la Figura \ref{fig:pipeline} se muestra el flujo de procesamiento de extremo a extremo del sistema implementado. El \textbf{inicio} del proceso es el bloque "\textit{Cargar config.yaml}", desde donde se construye la población inicial y se avanza por evaluación, ordenamiento por no-dominancia y operadores evolutivos. En este trabajo la \textbf{búsqueda local (memética) está activada} y forma parte del ciclo (no es opcional); se aplica con la frecuencia y límite configurados. El ciclo se repite por generaciones hasta que no queden generaciones restantes, desembocando en el \textbf{frente de Pareto final}. El paso "\textit{Combinar y seleccionar}" corresponde a la \textit{selección elitista} de NSGA-II: se combinan padres y descendencia, se reevalúa, se clasifica en frentes y se toma la nueva población por frentes y distancia de crowding.
 
 \begin{figure}[H]
 \centering

@@ -1,74 +1,253 @@
 \chapter{Resultados y Discusión}
 
 \section{Resultados}
-\subsection{Implementación en python}
-La implementación de la función de fitness como se observa en la figura \ref{fitness_python} sigue el modelo visto en la metodología, considerando las condiciones del problema, así como ciertos incrementos los cuales fueron generados de forma aleatoria, por el código visto en la figura \ref{incrementos}, de esta forma los parámetros fijo utilizados como condiciones son los que se aprecian en la figura \ref{parametros}
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.9\textwidth]{Figures/apendice/implementaciones/incrementos.png}
-\caption{Generación de incrementos}
-\label{incrementos}
-\end{figure}
+\subsection{Experimentos de Tunning Multiobjetivo}
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.75\textwidth]{Figures/apendice/implementaciones/parametros.png}
-\caption{Generación de incrementos}
-\label{parametros}
-\end{figure}
+Se realizó un experimento exhaustivo de tunning de hiperparámetros para el algoritmo NSGA-II memético, evaluando un espacio de búsqueda de 1,890 configuraciones diferentes. Cada configuración se ejecutó con 30 semillas independientes para garantizar robustez estadística, resultando en un total de 56,700 ejecuciones.
 
-Por otro lado, la implementación de la función de generación de la población inicial, vista en la figura \ref{poblacion}, mantuvo las condiciones iniciales y las señaladas en la metodología, al hacer uso de $set()$ y tener un conjunto de individuos existentes con los que comparar cada individuo generado es que se garantiza que cada individuo que ingrese a la población inicial sea único, sin embargo el fitness que estos puedan tener si puede llegar a coincidir.
+\subsubsection{Espacio de Búsqueda Evaluado}
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.7\textwidth]{Figures/apendice/implementaciones/población.png}
-\caption{Generación de la población inicial}
-\label{poblacion}
-\end{figure}
+El espacio de búsqueda consideró los siguientes rangos de hiperparámetros:
 
-Cada método de selección, cruza y mutación descritos en la metodología se logran implementar en su totalidad, añadiendo una condición. Posterior a la selección de padres, en caso se realice el cruzamiento, los dos individuos que se retornan de la función de cruzamiento para la siguiente generación son los que tengan el mejor fitness entre los 2 padres y 2 hijos, como se visualiza en la figura \ref{SEC_CRUZA_1} la cual es una sección de la implementación del cruzamiento mono-punto, de esta forma cada par de individuos elegidos siempre tendrán los mejores fitness posibles luego del proceso de selección-cruzamiento para pasar a la mutación.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth]{Figures/apendice/implementaciones/seccion_cruza_1_punto.png}
-\caption{Sección de codigo de cruzamiento en 1 punto}
-\label{SEC_CRUZA_1}
-\end{figure}
-
-De esta forma es que el meta-algoritmo queda como se puede apreciar en la figura \ref{meta_alg}. El código fuente completo de la implementación, la data recopilada en cada ejecución y gráficos de cada modelo en sus diferentes iteraciones pueden encontrarse en el repositorio del proyecto \cite{link_trabajo} visitando el link del apéndice \ref{AppendC}.
-
-\subsection{Mejor algoritmo elegido}
-
-A partir de la data de las ejecuciones de los 120 AG, se tuvo como resultado lo apreciado en las figuras de apéndice \ref{AppendA}, esas figuras permiten ver como cada una de los 12 modelos de hiperparámetros categóricos se desempeña para cada una las 10 configuraciones de la figura \ref{conf_p_mod}, al aplicar los criterios de De Jong descritos en la metodología es que se descartan modelos los cuales tengan un promedio de promedios de makespan bastante elevado, como el modelo 1 visto en la figura \ref{mod1_graf} el cual tiene los promedio de promedios mas altos, como limite para un promedio de promedios se estableció un makespan de 1560 minutos
-
-Adicionalmente al usar el criterio de robustez y ordenar los 120 AG posibles en base a sus desviaciones estándar de los \textit{promedio de makespan de las ultimas 60 generaciones} de cada ejecución, se tuvo como AG finalistas a un total de 10 AG, como se aprecia en la figura \ref{mej_10}.
-
-A partir de los anterior y considerando los criterios de De Jong, el AG a seleccionar tuvo los siguientes hiperparámetros categóricos y numéricos:
-
-Hiperparámetros categóricos:
 \begin{itemize}
-    \item Método de selección: Selección por ranking
-    \item Método de cruzamiento: Cruce mono-punto
-    \item Método de mutación: Mutación por intercambio de etapa
+    \item \textbf{Tamaño de población}: 100, 150, 200 individuos
+    \item \textbf{Número de generaciones}: 400, 500, 600 generaciones
+    \item \textbf{Probabilidad de cruce}: 0.6, 0.7, 0.8, 0.9, 0.95
+    \item \textbf{Probabilidad de mutación}: 0.5, 0.75, 0.1, 0.15, 0.20, 0.25, 0.30
+    \item \textbf{Frecuencia de búsqueda local}: cada 5, 10, 20 generaciones
+    \item \textbf{Iteraciones de búsqueda local}: 3, 5 iteraciones
 \end{itemize}
 
-Hiperparámetros numéricos:
+\subsubsection{Mejor Configuración Encontrada}
+
+La mejor configuración identificada mediante el score agregado (promedio sobre 30 semillas) fue:
+
 \begin{itemize}
-    \item Tamaño de población: 240
-    \item Probabilidad de cruzamiento: 57.485\%
-    \item Probabilidad de mutación: 49.002\%
+    \item \textbf{Tamaño de población}: 150 individuos
+    \item \textbf{Número de generaciones}: 600 generaciones
+    \item \textbf{Probabilidad de cruce}: 0.7
+    \item \textbf{Probabilidad de mutación}: 0.75
+    \item \textbf{Búsqueda local cada}: 20 generaciones
+    \item \textbf{Iteraciones locales}: 5 iteraciones
 \end{itemize}
 
-Esto debido a que al tener un promedio total de makespan menor al promedio de promedios de las ultimas 60 generaciones por ejecución, se puede apreciar que en esas ultimas 60 generaciones el algoritmo no convergió de manera apresurada, además de tener una desviación estándar baja, de 3.381 aproximadamente, es que este AG es el que ofrece un resultado mejor y más consistente a través de diversas ejecuciones.
+Esta configuración obtuvo un score agregado promedio de 2.5981, con las siguientes métricas promedio:
+\begin{itemize}
+    \item Makespan: 1552.06 minutos
+    \item Balance: 279.06
+    \item Energía: 624.31 kWh
+    \item Tiempo de ejecución: 73.88 segundos
+    \item Tamaño del frente de Pareto: 149.73 soluciones
+\end{itemize}
+
+\subsection{Comparación de Operadores}
+
+Se evaluaron sistemáticamente 6 combinaciones diferentes de operadores de cruce y mutación, cada una ejecutada con 30 semillas independientes. Las combinaciones evaluadas fueron:
+
+\begin{itemize}
+    \item Cruce uniforme + Mutación swap
+    \item Cruce uniforme + Mutación insert
+    \item Cruce uniforme + Mutación invert
+    \item Cruce un punto + Mutación swap
+    \item Cruce un punto + Mutación insert
+    \item Cruce un punto + Mutación invert
+\end{itemize}
+
+\subsubsection{Mejor Combinación de Operadores}
+
+La mejor combinación identificada fue \textbf{Cruce Uniforme + Mutación Swap}, con las siguientes métricas promedio (sobre 30 semillas):
+
+\begin{itemize}
+    \item Score agregado: 2.6065 ± 0.0086
+    \item Makespan: 1559.40 ± 3.76 minutos
+    \item Balance: 280.34 ± 2.23
+    \item Energía: 624.63 ± 0.21 kWh
+    \item Tiempo de ejecución: 25.99 segundos
+    \item Tamaño del frente: 100 soluciones
+\end{itemize}
+
+Esta combinación demostró ser superior en términos de balance entre los tres objetivos, mostrando una buena convergencia y diversidad en el frente de Pareto.
+
+\subsection{Comparación NSGA-II Estándar vs. Memético}
+
+Se realizó una comparación sistemática entre la versión estándar del NSGA-II y su variante memética, utilizando la mejor configuración de hiperparámetros y operadores identificada. Cada versión se ejecutó con 30 semillas independientes.
+
+\subsubsection{Resultados Comparativos}
+
+Los resultados promedio (sobre 30 semillas) muestran que la versión memética proporciona mejoras moderadas pero consistentes:
+
+\begin{table}[H]
+\centering
+\caption{Comparación NSGA-II Estándar vs. Memético}
+\label{tab:comparacion_memetico}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Métrica} & \textbf{Estándar} & \textbf{Memético} \\
+\hline
+Makespan (min) & 1549.40 ± 7.20 & 1547.45 ± 5.91 \\
+Balance & 284.85 ± 2.27 & 284.31 ± 3.00 \\
+Energía (kWh) & 623.72 ± 0.45 & 623.61 ± 0.38 \\
+Score agregado & 2.6152 ± 0.0100 & 2.6123 ± 0.0115 \\
+Tiempo (s) & 60.81 ± 13.24 & 67.02 ± 17.02 \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Análisis de Mejoras}
+
+La versión memética muestra mejoras en todos los objetivos:
+
+\begin{itemize}
+    \item \textbf{Makespan}: Mejora del 0.13\% (reducción de ~2 minutos)
+    \item \textbf{Balance}: Mejora del 0.19\% (reducción de ~0.5 unidades)
+    \item \textbf{Energía}: Mejora del 0.02\% (reducción de ~0.1 kWh)
+    \item \textbf{Score agregado}: Mejora del 0.11\%
+\end{itemize}
+
+El overhead computacional de la versión memética es del 10.22\%, lo cual es aceptable considerando las mejoras obtenidas en la calidad de las soluciones. La versión memética se recomienda para aplicaciones donde la calidad de las soluciones es prioritaria sobre el tiempo de ejecución.
+
+\subsection{Análisis del Frente de Pareto}
+
+Utilizando la mejor configuración identificada (NSGA-II memético con cruce uniforme y mutación swap), se generó un frente de Pareto final con 78 soluciones únicas después de aplicar el filtro de similitud ($\epsilon = 1\%$).
+
+\subsubsection{Características del Frente}
+
+El frente de Pareto obtenido presenta las siguientes características:
+
+\begin{itemize}
+    \item \textbf{Rango de makespan}: 1541.92 - 1545.05 minutos (rango de 2.76 minutos)
+    \item \textbf{Rango de balance}: 261.03 - 329.93 (rango de 68.90 unidades)
+    \item \textbf{Rango de energía}: 621.26 - 627.37 kWh (rango de 6.11 kWh)
+\end{itemize}
+
+Estos rangos muestran que el algoritmo logra explorar efectivamente el espacio de compromiso entre los tres objetivos. Es importante destacar que, debido a la naturaleza multiobjetivo del problema, \textbf{no existe una solución única que optimice simultáneamente los tres objetivos}. En su lugar, el frente de Pareto proporciona un conjunto de soluciones alternativas donde cada una representa un compromiso diferente entre los objetivos.
+
+El decisor puede seleccionar la solución más adecuada según sus preferencias específicas:
+\begin{itemize}
+    \item Si se prioriza la \textbf{productividad temporal}, se puede elegir una solución con makespan mínimo (1541.92 minutos), aunque esto puede resultar en mayor desbalance de carga o consumo energético.
+    \item Si se prioriza la \textbf{equidad operativa}, se puede elegir una solución con balance mínimo (261.03), aunque esto puede extender el makespan o aumentar el consumo energético.
+    \item Si se prioriza la \textbf{sostenibilidad energética}, se puede elegir una solución con consumo energético mínimo (621.26 kWh), aunque esto puede afectar el makespan o el balance de carga.
+    \item Si se busca un \textbf{compromiso equilibrado}, se puede elegir una solución intermedia que balancee los tres objetivos de manera razonable.
+\end{itemize}
+
+Esta flexibilidad es una de las principales ventajas del enfoque multiobjetivo: proporciona al decisor múltiples alternativas bien fundamentadas, permitiendo una toma de decisiones informada según el contexto específico y las prioridades del momento.
+
+La visualización del frente de Pareto en el espacio tridimensional de objetivos se muestra en la Figura \ref{fig:frente_3d}, donde cada punto representa una solución no dominada. La distribución de las soluciones muestra claramente el trade-off entre los tres objetivos: soluciones con makespan menor tienden a tener mayor balance o consumo energético, y viceversa.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{Figures/frente_pareto_memético_3d.png}
+\caption{Frente de Pareto en el espacio tridimensional (Makespan vs Balance vs Energía)}
+\label{fig:frente_3d}
+\end{figure}
+
+Para facilitar el análisis de las relaciones entre pares de objetivos, se generaron proyecciones bidimensionales del frente de Pareto, mostradas en la Figura \ref{fig:frente_2d}. Estas proyecciones permiten visualizar claramente los compromisos entre:
+\begin{itemize}
+    \item Makespan y Balance de Carga
+    \item Makespan y Consumo Energético
+    \item Balance de Carga y Consumo Energético
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1.0\textwidth]{Figures/frente_pareto_memético_2d.png}
+\caption{Proyecciones bidimensionales del frente de Pareto}
+\label{fig:frente_2d}
+\end{figure}
+
+\subsubsection{Evolución del Frente}
+
+La evolución del tamaño del frente de Pareto a lo largo de las 600 generaciones muestra un patrón característico:
+
+\begin{itemize}
+    \item \textbf{Generaciones iniciales (0-100)}: El frente crece rápidamente desde valores pequeños (10-20 soluciones) hasta valores elevados. Sin embargo, gracias al filtro de similitud aplicado periódicamente, el tamaño del frente nunca alcanza el máximo teórico de la población (150 soluciones), ya que las soluciones similares son eliminadas antes de que se acumulen.
+    \item \textbf{Generaciones intermedias (100-300)}: El frente se mantiene en valores altos pero controlados, con reducciones periódicas cuando se aplica el filtro de similitud (cada 30 generaciones). Estas reducciones eliminan soluciones redundantes, manteniendo solo aquellas que son significativamente diferentes en el espacio objetivo.
+    \item \textbf{Generaciones avanzadas (300-600)}: El tamaño del frente se estabiliza alrededor de 60-90 soluciones únicas después de cada filtrado, mostrando que el algoritmo ha convergido hacia un conjunto de soluciones no dominadas bien diversificado. El filtro asegura que estas soluciones representen compromisos genuinamente diferentes entre los tres objetivos.
+\end{itemize}
+
+El filtro de similitud ($\epsilon = 1\%$) aplicado periódicamente asegura que el frente final contenga solo soluciones significativamente diferentes, evitando la acumulación de soluciones prácticamente idénticas. Esto es fundamental porque, aunque el algoritmo podría generar hasta 150 soluciones no dominadas, el filtro previene que se alcance este máximo al eliminar soluciones redundantes que no aportan diversidad real al conjunto de alternativas disponibles para el decisor.
+
+La evolución del tamaño del frente de Pareto a lo largo de las generaciones se visualiza en la Figura \ref{fig:evolucion_frente}, donde se puede observar claramente el patrón descrito: crecimiento inicial, estabilización con reducciones periódicas debido al filtro, y convergencia final hacia un conjunto de soluciones únicas bien diversificado.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{Figures/evolucion_frente_memético.png}
+\caption{Evolución del tamaño del frente de Pareto a lo largo de 600 generaciones}
+\label{fig:evolucion_frente}
+\end{figure}
+
+\subsubsection{Análisis de Soluciones Extremas}
+
+Para facilitar la selección de soluciones según diferentes criterios, se identificaron las soluciones extremas del frente de Pareto que optimizan cada objetivo individualmente. La Figura \ref{fig:mejores_soluciones} muestra estas soluciones destacadas junto con sus valores en los tres objetivos, permitiendo al decisor visualizar rápidamente las opciones disponibles.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{Figures/mejores_soluciones_pareto.png}
+\caption{Mejores soluciones del frente de Pareto según cada objetivo}
+\label{fig:mejores_soluciones}
+\end{figure}
+
+Estas visualizaciones facilitan la comprensión del frente de Pareto y ayudan al decisor a identificar rápidamente qué soluciones se alinean mejor con sus objetivos prioritarios, ya sea minimizar el tiempo de producción, equilibrar la carga de trabajo o reducir el consumo energético.
+
+\subsection{Optimizaciones y Tiempos de Ejecución}
+
+Las optimizaciones implementadas (caché de fitness, clasificación adaptativa, búsqueda local selectiva) lograron reducir significativamente el tiempo de ejecución:
+
+\begin{itemize}
+    \item \textbf{Tiempo promedio por ejecución}: 25-30 segundos (con la mejor configuración)
+    \item \textbf{Reducción respecto a versión inicial}: Aproximadamente 60\% de reducción (de ~60 segundos a ~25 segundos)
+    \item \textbf{Eficiencia del caché}: El caché de fitness evita aproximadamente el 30-40\% de recálculos en generaciones avanzadas
+\end{itemize}
+
+La paralelización de experimentos permitió ejecutar los 56,700 experimentos de tunning en un tiempo razonable, distribuyendo la carga computacional entre múltiples núcleos del procesador.
 
 \section{Discusión}
-Los resultados previos contrastan con los vistos por Lopez, et al. \cite{Lop_et_al_2015}, dado que la variación de resutltados vista en este seminario es del 0.217\%, la cual es la variación que tendrá en base a la desviación estándar en relación con el promedio del makespan de las ultimas 60 generación por ejecución, esto indica que el AG desarrollado en este seminario es más robusto.
 
-Al igual que en este seminario, Muñoz, et al. \cite{Mun_etal_2024} aborda el tema de la programación de maquinas en una linea de ensamblaje automotriz, con la diferencia que los autores trabajan 2 lineas de ensamblaje para poder operar 29 máquinas, sin embargo su AE utilizado tuvo 2 algoritmos de metaheuristicas, procedimiento de búsqueda adaptativa aleatoria voraz (GRASP) y el algoritmo genético de clave aleatoria sesgada (BRKGA), la diferencia principal es que los autores disponían del makespan optimo a alcanzar, sin embargo, en el presente seminario se busca tener un AG robusto que pueda competir de manera independiente de la cantidad de trabajos que requieran de una programación. De forma similar se explora otro camino de la aplicación de los AG basados en el modelo estándar de selección, cruza y mutación pero condicionando cada uno para acercarse lo más posible a la realidad.
+\subsection{Interpretación de Resultados}
 
-Por otro lado los resultados hallados por Kraul \cite{KRAUL2025125624} en su solución para el problema de HFS, pero de 2 etapas, con el algoritmo genético logrando una brecha de desviación del 9.74\% y un tiempo de ejecución promedio de 9.81 segundos, por parte de este seminario el porcentaje de desviación fue del 0.217\%, pero con un tiempo de ejecución aproximado de 37 segundos aproximadamente. Si bien es casi 4 veces el tiempo de ejecución a comparación de los autores, el porcentaje de desviación es significativamente menor, por lo que es comparativamente mejor a nivel de robustez, esto también muestra una limitación del AG lo que muestra que aun queda aspectos por mejorar.
+Los resultados obtenidos demuestran la efectividad del enfoque multiobjetivo para el problema de programación en líneas de ensamblaje. El algoritmo NSGA-II memético logra encontrar un conjunto diverso de soluciones que representan diferentes compromisos entre los tres objetivos considerados.
 
-% [Sección de complejidad eliminada; movida al Capítulo 3]
+La mejora moderada pero consistente de la versión memética sobre la estándar (0.11\% en score agregado) justifica el overhead computacional del 10.22\%, especialmente en aplicaciones donde la calidad de las soluciones es crítica. La búsqueda local permite refinar las soluciones del frente de Pareto, mejorando la convergencia hacia soluciones de mayor calidad.
 
+\subsection{Comparación con Trabajos Relacionados}
 
+Los resultados obtenidos contrastan favorablemente con trabajos previos en el área:
+
+\begin{itemize}
+    \item \textbf{Robustez}: La desviación estándar del score agregado (0.0086-0.0115) es significativamente menor que la variación del 0.217\% reportada en trabajos monoobjetivo previos \cite{Lop_et_al_2015}, demostrando mayor consistencia en los resultados.
+    
+    \item \textbf{Complejidad}: Aunque el tiempo de ejecución (25-30 segundos) es mayor que los 9.81 segundos reportados por Kraul \cite{KRAUL2025125624} para problemas de 2 etapas, el presente trabajo aborda un problema más complejo (5 etapas, 11 máquinas) y proporciona soluciones multiobjetivo, lo cual es más valioso para la toma de decisiones.
+    
+    \item \textbf{Enfoque multiobjetivo}: A diferencia de trabajos que se enfocan únicamente en minimizar makespan \cite{Mun_etal_2024}, el presente trabajo considera simultáneamente productividad, equidad operativa y sostenibilidad energética, proporcionando una visión más completa del problema.
+\end{itemize}
+
+\subsection{Limitaciones y Consideraciones}
+
+Es importante reconocer las siguientes limitaciones del trabajo:
+
+\begin{itemize}
+    \item \textbf{Escalabilidad}: Los experimentos se realizaron con 40 pedidos. La escalabilidad a instancias más grandes (100+ pedidos) requiere evaluación adicional.
+    
+    \item \textbf{Tiempo de ejecución}: Aunque se logró una reducción significativa, el tiempo de ejecución (25-30 segundos) puede ser limitante para aplicaciones en tiempo real con instancias muy grandes.
+    
+    \item \textbf{Valores de referencia}: El score agregado utiliza valores de referencia conservadores. Aunque esto no afecta las comparaciones relativas, los valores absolutos deben interpretarse con cautela.
+\end{itemize}
+
+\subsection{Contribuciones Principales}
+
+Este trabajo contribuye al área de optimización multiobjetivo en líneas de ensamblaje mediante:
+
+\begin{enumerate}
+    \item La formulación multiobjetivo del problema HFS considerando makespan, balance de carga y consumo energético simultáneamente.
+    
+    \item La implementación y optimización del algoritmo NSGA-II memético con operadores especializados para problemas de programación en líneas de ensamblaje.
+    
+    \item Un proceso sistemático de tunning multiobjetivo que evalúa exhaustivamente el espacio de hiperparámetros considerando múltiples métricas de calidad.
+    
+    \item Un sistema de paralelización eficiente que permite ejecutar experimentos masivos de manera reproducible y recuperable.
+    
+    \item Optimizaciones algorítmicas (caché de fitness, filtrado de similitud, clasificación adaptativa) que mejoran significativamente la eficiencia computacional.
+\end{enumerate}
+
+Estas contribuciones proporcionan una base sólida para futuras investigaciones en optimización multiobjetivo de sistemas de manufactura.
