@@ -91,7 +91,10 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
         print(f"Iniciando NSGA-II Memético: {tamano_poblacion} ind, {num_generaciones} gen")
         print(f"Búsqueda local cada {cada_k_gen} generaciones ({max_iter_local} iter)")
         if epsilon_filtro > 0:
-            print(f"Filtro de similitud: epsilon={epsilon_filtro*100:.1f}%, cada {cada_k_filtro} generaciones")
+            print(
+                f"Filtro de similitud: epsilon={epsilon_filtro*100:.1f}%, "
+                f"cada {cada_k_filtro} generaciones"
+            )
     
     poblacion = inicializar_poblacion(config, tamano_poblacion)
     historial_frentes = []
@@ -107,11 +110,13 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
         fitness_cache[genes_key] = fit
     frentes = clasificacion_no_dominada(poblacion, fitness_inicial)
     frente_size = len(frentes[0])
-    
+
     for gen in range(num_generaciones):
         # OPTIMIZACIÓN: En generaciones avanzadas, reducir operaciones costosas
-        es_generacion_avanzada = gen >= num_generaciones * 0.5  # Después de 50% de generaciones
-        es_generacion_muy_avanzada = gen >= num_generaciones * 0.75  # Después de 75% de generaciones
+        # Después de 50% de generaciones
+        es_generacion_avanzada = gen >= num_generaciones * 0.5
+        # Después de 75% de generaciones
+        es_generacion_muy_avanzada = gen >= num_generaciones * 0.75
         
         # OPTIMIZACIÓN: Solo evaluar fitness completo si no hay cache previo
         # En generaciones avanzadas, asumir que la mayoría de individuos no cambiaron
@@ -163,7 +168,11 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
             
             if verbose:
                 print(f"Gen {gen+1:3d} | Búsqueda local al frente")
-                print(f"   Frente tamaño: {frente_size} ind, mejorando: {len(indices_a_mejorar)} ind, iteraciones: {max_iter_local}")
+                print(
+                    f"   Frente tamaño: {frente_size} ind, "
+                    f"mejorando: {len(indices_a_mejorar)} ind, "
+                    f"iteraciones: {max_iter_local}"
+                )
             
             # Mejorar subconjunto del frente usando hiperparámetros optimizados
             for idx in indices_a_mejorar:
@@ -195,7 +204,11 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
             
             # OPTIMIZACIÓN: Solo reclasificar si hubo mejoras significativas
             # En generaciones avanzadas, evitar reclasificación frecuente
-            if not es_generacion_avanzada or len(indices_a_mejorar) >= frente_size * 0.6:
+            debe_reclasificar = (
+                not es_generacion_avanzada
+                or len(indices_a_mejorar) >= frente_size * 0.6
+            )
+            if debe_reclasificar:
                 frentes = clasificacion_no_dominada(poblacion, fitness_poblacion)
                 frente_size = len(frentes[0])
         
@@ -218,17 +231,25 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
             if len(frente_filtrado) < len(frente_original):
                 if verbose:
                     eliminadas = len(frente_original) - len(frente_filtrado)
-                    print(f"Gen {gen+1:3d} | Filtro aplicado: {eliminadas} soluciones similares eliminadas "
-                          f"({len(frente_original)} -> {len(frente_filtrado)})")
+                    print(
+                        f"Gen {gen+1:3d} | Filtro aplicado: {eliminadas} "
+                        f"soluciones similares eliminadas "
+                        f"({len(frente_original)} -> {len(frente_filtrado)})"
+                    )
                 
                 # CORRECCIÓN: NO rellenar la población después del filtro
-                # El filtro solo limpia el frente, pero la población completa se mantiene
-                # Las soluciones eliminadas del frente permanecen en la población pero fuera del frente
-                # Esto permite que el algoritmo evolucione naturalmente sin forzar rellenado
+                # El filtro solo limpia el frente, pero la población completa
+                # se mantiene. Las soluciones eliminadas del frente permanecen
+                # en la población pero fuera del frente.
+                # Esto permite que el algoritmo evolucione naturalmente
+                # sin forzar rellenado
                 
                 # Actualizar el frente con las soluciones filtradas
                 # Crear conjunto de genes del frente filtrado para identificación rápida
-                genes_filtrados = {tuple(tuple(row) for row in sol.genes) for sol in frente_filtrado}
+                genes_filtrados = {
+                    tuple(tuple(row) for row in sol.genes)
+                    for sol in frente_filtrado
+                }
                 
                 # Reconstruir el primer frente con solo las soluciones filtradas
                 # Las soluciones eliminadas permanecen en la población pero no en el frente
@@ -256,13 +277,19 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
                     print(f"Gen {gen:3d} | Frente Pareto: {frente_size:3d} individuos")
             else:
                 if gen % 50 == 0 or gen == 0:
-                    print(f"Gen {gen:3d} | Frente Pareto: {frente_size:3d} individuos")
+                    print(
+                        f"Gen {gen:3d} | Frente Pareto: {frente_size:3d} individuos"
+                    )
         
         # Generar descendencia (igual que NSGA-II estándar)
         descendencia = []
         while len(descendencia) < tamano_poblacion:
-            padre1 = torneo_binario_nsga2(poblacion, fitness_poblacion, frentes)
-            padre2 = torneo_binario_nsga2(poblacion, fitness_poblacion, frentes)
+            padre1 = torneo_binario_nsga2(
+                poblacion, fitness_poblacion, frentes
+            )
+            padre2 = torneo_binario_nsga2(
+                poblacion, fitness_poblacion, frentes
+            )
             
             hijo1, hijo2 = metodo_cruce(padre1, padre2, config, prob_cruce)
             descendencia.extend([hijo1, hijo2])
@@ -284,12 +311,31 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
                 fitness_cache[genes_key] = fit
                 fitness_combinada.append(fit)
         # Aplicar filtro durante la selección para mantener solo soluciones únicas dominantes
-        poblacion = seleccion_nsga2(poblacion_combinada, fitness_combinada, tamano_poblacion,
-                                    epsilon_filtro=epsilon_filtro)
+        poblacion = seleccion_nsga2(
+            poblacion_combinada,
+            fitness_combinada,
+            tamano_poblacion,
+            epsilon_filtro=epsilon_filtro,
+        )
         
-        # NOTA: El filtro ya se aplica en seleccion_nsga2 al frente de Pareto
-        # No es necesario aplicar un filtro adicional post-selección que rellene la población
-        # Esto previene que el frente se rellene constantemente con soluciones similares
+        # Recalcular frentes después de la selección para actualizar frente_size
+        # Esto asegura que el historial refleje el tamaño real del frente filtrado
+        if gen == num_generaciones - 1 or (gen + 1) % 10 == 0:
+            # Recalcular frentes periódicamente para mantener frente_size actualizado
+            fitness_poblacion_actual = []
+            for ind in poblacion:
+                genes_key = tuple(tuple(row) for row in ind.genes)
+                if genes_key in fitness_cache:
+                    fitness_poblacion_actual.append(fitness_cache[genes_key])
+                else:
+                    fit = fitness_multiobjetivo(ind, config)
+                    fitness_cache[genes_key] = fit
+                    fitness_poblacion_actual.append(fit)
+            frentes = clasificacion_no_dominada(poblacion, fitness_poblacion_actual)
+            frente_size = len(frentes[0])
+            # Actualizar historial con el tamaño real del frente después de selección
+            if len(historial_frentes) > 0:
+                historial_frentes[-1] = frente_size
     
     # Frente final (usar cache)
     fitness_final = []

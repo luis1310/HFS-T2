@@ -296,7 +296,8 @@ def seleccion_nsga2(poblacion, fitness_poblacion, tamano_seleccion, epsilon_filt
         poblacion: Lista de Chromosome
         fitness_poblacion: Lista de tuplas de fitness
         tamano_seleccion: Tamaño de población a seleccionar
-        epsilon_filtro: Si > 0, aplica filtro de similitud al frente de Pareto (por defecto 0.0 = desactivado)
+        epsilon_filtro: Si > 0, aplica filtro de similitud al frente de Pareto
+            (por defecto 0.0 = desactivado)
     
     Returns:
         List[Chromosome]: Población seleccionada
@@ -317,9 +318,15 @@ def seleccion_nsga2(poblacion, fitness_poblacion, tamano_seleccion, epsilon_filt
             )
             
             # Crear mapeo de índices filtrados a índices originales (optimizado con dict)
-            genes_filtrados = {tuple(tuple(row) for row in sol.genes) for sol in frente_filtrado}
-            frente_idx_filtrado = [idx for idx in frente_idx 
-                                  if tuple(tuple(row) for row in poblacion[idx].genes) in genes_filtrados]
+            genes_filtrados = {
+                tuple(tuple(row) for row in sol.genes) for sol in frente_filtrado
+            }
+            frente_idx_filtrado = [
+                idx
+                for idx in frente_idx
+                if tuple(tuple(row) for row in poblacion[idx].genes)
+                in genes_filtrados
+            ]
             
             frente_idx = frente_idx_filtrado
         
@@ -387,7 +394,10 @@ def nsga2(config, metodo_cruce, metodo_mutacion,
     if verbose:
         print(f"Iniciando NSGA-II: {tamano_poblacion} ind, {num_generaciones} gen")
         if epsilon_filtro > 0:
-            print(f"Filtro de similitud: epsilon={epsilon_filtro*100:.1f}%, cada {cada_k_filtro} generaciones")
+            print(
+                f"Filtro de similitud: epsilon={epsilon_filtro*100:.1f}%, "
+                f"cada {cada_k_filtro} generaciones"
+            )
     
     poblacion = inicializar_poblacion(config, tamano_poblacion)
     historial_frentes = []
@@ -409,17 +419,25 @@ def nsga2(config, metodo_cruce, metodo_mutacion,
             if len(frente_filtrado) < len(frente_original):
                 if verbose:
                     eliminadas = len(frente_original) - len(frente_filtrado)
-                    print(f"Gen {gen+1:3d} | Filtro aplicado: {eliminadas} soluciones similares eliminadas "
-                          f"({len(frente_original)} -> {len(frente_filtrado)})")
+                    print(
+                        f"Gen {gen+1:3d} | Filtro aplicado: {eliminadas} "
+                        f"soluciones similares eliminadas "
+                        f"({len(frente_original)} -> {len(frente_filtrado)})"
+                    )
                 
                 # Crear conjunto de genes del frente filtrado para identificación rápida
-                genes_filtrados = {tuple(tuple(row) for row in sol.genes) for sol in frente_filtrado}
+                genes_filtrados = {
+                    tuple(tuple(row) for row in sol.genes)
+                    for sol in frente_filtrado
+                }
                 
                 # Identificar índices del frente original que se mantienen
                 indices_mantener = []
                 indices_eliminar = []
                 for idx in frentes[0]:
-                    genes_sol = tuple(tuple(row) for row in poblacion[idx].genes)
+                    genes_sol = tuple(
+                        tuple(row) for row in poblacion[idx].genes
+                    )
                     if genes_sol in genes_filtrados:
                         indices_mantener.append(idx)
                     else:
@@ -449,7 +467,9 @@ def nsga2(config, metodo_cruce, metodo_mutacion,
         historial_frentes.append(len(frentes[0]))
         
         if verbose and (gen % 50 == 0 or gen == 0):
-            print(f"Gen {gen:3d} | Frente Pareto: {len(frentes[0]):3d} individuos")
+            print(
+                f"Gen {gen:3d} | Frente Pareto: {len(frentes[0]):3d} individuos"
+            )
         
         descendencia = []
         while len(descendencia) < tamano_poblacion:
@@ -474,7 +494,8 @@ def nsga2(config, metodo_cruce, metodo_mutacion,
         # NOTA: El filtro durante selección ya se aplica siempre, este es solo limpieza adicional
         aplicar_filtro_post = (epsilon_filtro > 0 and 
                               (gen + 1) % cada_k_filtro == 0 and 
-                              len(poblacion) > 80)  # Solo si hay más de 80 soluciones (más restrictivo)
+                              len(poblacion) > 80
+                              )  # Solo si hay más de 80 soluciones
         
         if aplicar_filtro_post:
             # Mapear población seleccionada a fitness ya calculado (evitar recálculo)
@@ -501,14 +522,18 @@ def nsga2(config, metodo_cruce, metodo_mutacion,
             if len(poblacion_filtrada) < tamano_poblacion:
                 # Usar fitness ya calculado de población_combinada (no recalcular)
                 candidatos = []
-                genes_filtrados = {tuple(tuple(row) for row in ind.genes) for ind in poblacion_filtrada}
+                genes_filtrados = {
+                    tuple(tuple(row) for row in ind.genes)
+                    for ind in poblacion_filtrada
+                }
                 
                 for ind, fit in zip(poblacion_combinada, fitness_combinada):
                     genes_sol = tuple(tuple(row) for row in ind.genes)
                     if genes_sol not in genes_filtrados:
                         candidatos.append((ind, fit))
                 
-                # Agregar candidatos hasta completar población (sin filtrar nuevamente para ahorrar tiempo)
+                # Agregar candidatos hasta completar población
+                # (sin filtrar nuevamente para ahorrar tiempo)
                 faltantes = tamano_poblacion - len(poblacion_filtrada)
                 for i in range(min(faltantes, len(candidatos))):
                     poblacion_filtrada.append(candidatos[i][0])
