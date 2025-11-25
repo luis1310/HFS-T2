@@ -28,7 +28,8 @@ def busqueda_local(individuo, config, max_iter=5):
     mejor_fitness = fitness_multiobjetivo(mejor, config)
     
     sin_mejora = 0
-    max_sin_mejora = max(1, max_iter // 3)  # Early exit más agresivo: si no mejora en 1/3 de iteraciones
+    # Early exit más agresivo: si no mejora en 1/3 de iteraciones
+    max_sin_mejora = max(1, max_iter // 3)
     
     for iteracion in range(max_iter):
         # Generar vecino modificando una asignación aleatoria
@@ -262,7 +263,8 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
                 frentes[0] = indices_frente_filtrado
                 frente_size = len(frentes[0])
                 
-                # El historial se actualizará al final de la generación después de todos los filtros
+                # El historial se actualizará al final de la generación
+                # después de todos los filtros
         
         # Generar descendencia (igual que NSGA-II estándar)
         # CRÍTICO: Recalcular frentes antes de generar descendencia
@@ -452,6 +454,10 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
         if len(historial_frentes) > 0:
             print(f"Historial: primeros 10 valores: {historial_frentes[:10]}")
             print(f"Historial: últimos 10 valores: {historial_frentes[-10:]}")
-            print(f"Historial: min={min(historial_frentes)}, max={max(historial_frentes)}, promedio={sum(historial_frentes)/len(historial_frentes):.1f}")
+            prom_hist = sum(historial_frentes) / len(historial_frentes)
+            print(
+                f"Historial: min={min(historial_frentes)}, "
+                f"max={max(historial_frentes)}, promedio={prom_hist:.1f}"
+            )
     
     return frente_pareto, fitness_pareto, historial_frentes
