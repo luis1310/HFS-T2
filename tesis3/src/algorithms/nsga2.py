@@ -9,6 +9,191 @@ Analizar el cruding distance dentro del nsga2 memetico
 """
 
 
+def convertir_fitness_a_metricas(fitness):
+    """
+    Convierte fitness (objetivos) a métricas reales (makespan, balance, energía)
+    
+    Args:
+        fitness: tuple (obj_makespan, obj_balance, obj_energia)
+    
+    Returns:
+        tuple: (makespan, balance, energia) en unidades reales
+    """
+    obj_mk, obj_bal, obj_eng = fitness
+    makespan = 1 / obj_mk if obj_mk > 0 else float('inf')
+    balance = 1 / obj_bal - 1 if obj_bal > 0 else float('inf')
+    energia = 1 / obj_eng - 1 if obj_eng > 0 else float('inf')
+    return makespan, balance, energia
+
+
+def filtrar_soluciones_similares(poblacion, fitness_poblacion, epsilon=0.01):
+    """
+    Filtra soluciones similares del frente de Pareto manteniendo solo soluciones únicas dominantes.
+    Versión ultra-optimizada usando grid espacial para reducir complejidad de O(n²) a ~O(n).
+    
+    Si dos soluciones son muy similares (distancia normalizada < epsilon), se elimina:
+    1. La dominada (si una domina a la otra)
+    2. La peor en términos generales (si ninguna domina pero son muy similares)
+    
+    Args:
+        poblacion: Lista de Chromosome
+        fitness_poblacion: Lista de tuplas de fitness (objetivos a maximizar)
+        epsilon: Umbral de similitud (por defecto 0.01 = 1%)
+    
+    Returns:
+        tuple: (poblacion_filtrada, fitness_filtrado) con soluciones únicas dominantes
+    """
+    if len(poblacion) <= 1:
+        return poblacion, fitness_poblacion
+    
+    # Optimización: si el frente es pequeño, no filtrar (ahorro de tiempo)
+    if len(poblacion) <= 20:
+        return poblacion, fitness_poblacion
+    
+    # Optimización: si el frente es muy grande, usar epsilon más estricto para reducir más
+    if len(poblacion) > 50:
+        epsilon_efectivo = epsilon * 0.8  # 20% más estricto para frentes grandes
+    else:
+        epsilon_efectivo = epsilon
+    
+    # Convertir fitness a métricas reales para calcular distancias (una sola vez)
+    metricas = [convertir_fitness_a_metricas(f) for f in fitness_poblacion]
+    
+    # Calcular rangos de cada objetivo para normalización (una sola vez)
+    makespans = [m[0] for m in metricas]
+    balances = [m[1] for m in metricas]
+    energias = [m[2] for m in metricas]
+    
+    rango_mk = max(makespans) - min(makespans) if max(makespans) > min(makespans) else 1.0
+    rango_bal = max(balances) - min(balances) if max(balances) > min(balances) else 1.0
+    rango_eng = max(energias) - min(energias) if max(energias) > min(energias) else 1.0
+    
+    # OPTIMIZACIÓN: Usar grid espacial para agrupar soluciones similares
+    # Dividir el espacio en celdas de tamaño epsilon para comparar solo vecinos cercanos
+    num_celdas = max(10, int(1.0 / epsilon_efectivo))  # Al menos 10 celdas
+    grid = {}
+    
+    # Pre-calcular scores normalizados
+    scores_normalizados = []
+    for f in fitness_poblacion:
+        obj_norm = [o / max(abs(o), 1e-10) for o in f]
+        scores_normalizados.append(sum(obj_norm))
+    
+    # Asignar soluciones a celdas del grid
+    for i, (mk, bal, eng) in enumerate(metricas):
+        # Normalizar y discretizar a celdas
+        mk_norm = (mk - min(makespans)) / rango_mk if rango_mk > 0 else 0
+        bal_norm = (bal - min(balances)) / rango_bal if rango_bal > 0 else 0
+        eng_norm = (eng - min(energias)) / rango_eng if rango_eng > 0 else 0
+        
+        celda_mk = int(mk_norm * num_celdas)
+        celda_bal = int(bal_norm * num_celdas)
+        celda_eng = int(eng_norm * num_celdas)
+        
+        celda_key = (celda_mk, celda_bal, celda_eng)
+        if celda_key not in grid:
+            grid[celda_key] = []
+        grid[celda_key].append(i)
+    
+    # Filtrar soluciones: comparar solo dentro de la misma celda y celdas adyacentes
+    # OPTIMIZACIÓN: Pre-calcular celdas para evitar recalcular en el bucle
+    celdas_soluciones = []
+    for i, (mk, bal, eng) in enumerate(metricas):
+        mk_norm = (mk - min(makespans)) / rango_mk if rango_mk > 0 else 0
+        bal_norm = (bal - min(balances)) / rango_bal if rango_bal > 0 else 0
+        eng_norm = (eng - min(energias)) / rango_eng if rango_eng > 0 else 0
+        celdas_soluciones.append((
+            int(mk_norm * num_celdas),
+            int(bal_norm * num_celdas),
+            int(eng_norm * num_celdas)
+        ))
+    
+    indices_eliminar = set()
+    indices_mantener = []
+    epsilon_sq = epsilon_efectivo ** 2
+    
+    for i in range(len(poblacion)):
+        if i in indices_eliminar:
+            continue
+        
+        mk_i, bal_i, eng_i = metricas[i]
+        obj_i = fitness_poblacion[i]
+        i_eliminado = False
+        
+        celda_mk_i, celda_bal_i, celda_eng_i = celdas_soluciones[i]
+        
+        # Comparar solo con soluciones en celdas adyacentes (máximo 27 celdas: 3x3x3)
+        # OPTIMIZACIÓN: Usar set para evitar duplicados y comparaciones innecesarias
+        celdas_visitadas = set()
+        for dm in [-1, 0, 1]:
+            for db in [-1, 0, 1]:
+                for de in [-1, 0, 1]:
+                    celda_key = (celda_mk_i + dm, celda_bal_i + db, celda_eng_i + de)
+                    if celda_key in celdas_visitadas or celda_key not in grid:
+                        continue
+                    celdas_visitadas.add(celda_key)
+                    
+                    for j in grid[celda_key]:
+                        if j <= i or j in indices_eliminar or i_eliminado:
+                            continue
+                        
+                        mk_j, bal_j, eng_j = metricas[j]
+                        
+                        # Verificación rápida de similitud (early exit si no es similar)
+                        diff_mk_norm = abs(mk_i - mk_j) / rango_mk if rango_mk > 0 else 0
+                        if diff_mk_norm > epsilon_efectivo:  # Early exit si diferencia grande
+                            continue
+                        
+                        diff_bal_norm = abs(bal_i - bal_j) / rango_bal if rango_bal > 0 else 0
+                        if diff_bal_norm > epsilon_efectivo:  # Early exit
+                            continue
+                        
+                        diff_eng_norm = abs(eng_i - eng_j) / rango_eng if rango_eng > 0 else 0
+                        if diff_eng_norm > epsilon_efectivo:  # Early exit
+                            continue
+                        
+                        distancia_sq = diff_mk_norm**2 + diff_bal_norm**2 + diff_eng_norm**2
+                        
+                        if distancia_sq <= epsilon_sq:
+                            obj_j = fitness_poblacion[j]
+                            
+                            # Verificar dominancia
+                            i_domina_j = dominancia(obj_i, obj_j)
+                            if i_domina_j:
+                                indices_eliminar.add(j)
+                                continue
+                            
+                            j_domina_i = dominancia(obj_j, obj_i)
+                            if j_domina_i:
+                                indices_eliminar.add(i)
+                                i_eliminado = True
+                                break
+                            
+                            # Ninguna domina, usar scores pre-calculados
+                            if scores_normalizados[i] >= scores_normalizados[j]:
+                                indices_eliminar.add(j)
+                            else:
+                                indices_eliminar.add(i)
+                                i_eliminado = True
+                                break
+                    
+                    if i_eliminado:
+                        break
+                if i_eliminado:
+                    break
+            if i_eliminado:
+                break
+        
+        if not i_eliminado and i not in indices_eliminar:
+            indices_mantener.append(i)
+    
+    # Filtrar poblaciones
+    poblacion_filtrada = [poblacion[i] for i in indices_mantener]
+    fitness_filtrado = [fitness_poblacion[i] for i in indices_mantener]
+    
+    return poblacion_filtrada, fitness_filtrado
+
+
 def dominancia(obj1, obj2):
     """
     Verifica si obj1 domina a obj2 (Pareto dominance)
@@ -103,9 +288,15 @@ def distancia_crowding(fitness_frente):
     return distancias
 
 
-def seleccion_nsga2(poblacion, fitness_poblacion, tamano_seleccion):
+def seleccion_nsga2(poblacion, fitness_poblacion, tamano_seleccion, epsilon_filtro=0.0):
     """
     Selección basada en frentes y crowding distance
+    
+    Args:
+        poblacion: Lista de Chromosome
+        fitness_poblacion: Lista de tuplas de fitness
+        tamano_seleccion: Tamaño de población a seleccionar
+        epsilon_filtro: Si > 0, aplica filtro de similitud al frente de Pareto (por defecto 0.0 = desactivado)
     
     Returns:
         List[Chromosome]: Población seleccionada
@@ -114,6 +305,24 @@ def seleccion_nsga2(poblacion, fitness_poblacion, tamano_seleccion):
     seleccionados = []
     
     for frente_idx in frentes:
+        # Aplicar filtro al primer frente SIEMPRE si está activado (no condicional)
+        # Esto previene que el frente se rellene con soluciones similares
+        if len(frente_idx) > 0 and epsilon_filtro > 0 and len(seleccionados) == 0:
+            frente_original = [poblacion[i] for i in frente_idx]
+            fitness_frente = [fitness_poblacion[i] for i in frente_idx]
+            
+            # Filtrar soluciones similares del frente de Pareto (optimizado con grid espacial)
+            frente_filtrado, fitness_filtrado = filtrar_soluciones_similares(
+                frente_original, fitness_frente, epsilon_filtro
+            )
+            
+            # Crear mapeo de índices filtrados a índices originales (optimizado con dict)
+            genes_filtrados = {tuple(tuple(row) for row in sol.genes) for sol in frente_filtrado}
+            frente_idx_filtrado = [idx for idx in frente_idx 
+                                  if tuple(tuple(row) for row in poblacion[idx].genes) in genes_filtrados]
+            
+            frente_idx = frente_idx_filtrado
+        
         if len(seleccionados) + len(frente_idx) <= tamano_seleccion:
             seleccionados.extend([poblacion[i] for i in frente_idx])
         else:
@@ -155,6 +364,7 @@ def torneo_binario_nsga2(poblacion, fitness_poblacion, frentes):
 def nsga2(config, metodo_cruce, metodo_mutacion, 
           tamano_poblacion=100, num_generaciones=500,
           prob_cruce=0.95, prob_mutacion=0.3,
+          epsilon_filtro=0.01, cada_k_filtro=30,
           verbose=True):
     """
     Algoritmo NSGA-II principal
@@ -167,6 +377,8 @@ def nsga2(config, metodo_cruce, metodo_mutacion,
         num_generaciones: número de generaciones
         prob_cruce: probabilidad de cruce
         prob_mutacion: probabilidad de mutación
+        epsilon_filtro: umbral de similitud para filtrado (por defecto 0.01 = 1%)
+        cada_k_filtro: aplicar filtro cada k generaciones (por defecto 30)
         verbose: imprimir progreso
     
     Returns:
@@ -174,6 +386,8 @@ def nsga2(config, metodo_cruce, metodo_mutacion,
     """
     if verbose:
         print(f"Iniciando NSGA-II: {tamano_poblacion} ind, {num_generaciones} gen")
+        if epsilon_filtro > 0:
+            print(f"Filtro de similitud: epsilon={epsilon_filtro*100:.1f}%, cada {cada_k_filtro} generaciones")
     
     poblacion = inicializar_poblacion(config, tamano_poblacion)
     historial_frentes = []
@@ -181,6 +395,57 @@ def nsga2(config, metodo_cruce, metodo_mutacion,
     for gen in range(num_generaciones):
         fitness_poblacion = [fitness_multiobjetivo(ind, config) for ind in poblacion]
         frentes = clasificacion_no_dominada(poblacion, fitness_poblacion)
+        
+        # Aplicar filtro de similitud cada k generaciones al frente de Pareto
+        # Esto mantiene el frente limpio eliminando soluciones similares
+        if epsilon_filtro > 0 and (gen + 1) % cada_k_filtro == 0 and len(frentes[0]) > 1:
+            frente_original = [poblacion[i] for i in frentes[0]]
+            fitness_frente = [fitness_poblacion[i] for i in frentes[0]]
+            
+            frente_filtrado, fitness_filtrado = filtrar_soluciones_similares(
+                frente_original, fitness_frente, epsilon_filtro
+            )
+            
+            if len(frente_filtrado) < len(frente_original):
+                if verbose:
+                    eliminadas = len(frente_original) - len(frente_filtrado)
+                    print(f"Gen {gen+1:3d} | Filtro aplicado: {eliminadas} soluciones similares eliminadas "
+                          f"({len(frente_original)} -> {len(frente_filtrado)})")
+                
+                # Crear conjunto de genes del frente filtrado para identificación rápida
+                genes_filtrados = {tuple(tuple(row) for row in sol.genes) for sol in frente_filtrado}
+                
+                # Identificar índices del frente original que se mantienen
+                indices_mantener = []
+                indices_eliminar = []
+                for idx in frentes[0]:
+                    genes_sol = tuple(tuple(row) for row in poblacion[idx].genes)
+                    if genes_sol in genes_filtrados:
+                        indices_mantener.append(idx)
+                    else:
+                        indices_eliminar.append(idx)
+                
+                # Reemplazar soluciones eliminadas con mutaciones de las mejores del frente filtrado
+                # o con soluciones del siguiente frente si existe
+                num_eliminadas = len(indices_eliminar)
+                if len(frentes) > 1 and len(frentes[1]) >= num_eliminadas:
+                    # Usar soluciones del siguiente frente
+                    for i, idx_eliminar in enumerate(indices_eliminar):
+                        idx_siguiente = frentes[1][i]
+                        poblacion[idx_eliminar] = poblacion[idx_siguiente].copy()
+                else:
+                    # Generar nuevas soluciones mediante mutación de las mejores del frente filtrado
+                    for i, idx_eliminar in enumerate(indices_eliminar):
+                        sol_base = frente_filtrado[i % len(frente_filtrado)]
+                        nueva_sol = sol_base.copy()
+                        # Aplicar mutación ligera
+                        metodo_mutacion([nueva_sol], config, prob_mutacion)
+                        poblacion[idx_eliminar] = nueva_sol
+                
+                # Recalcular fitness y frentes después del filtrado
+                fitness_poblacion = [fitness_multiobjetivo(ind, config) for ind in poblacion]
+                frentes = clasificacion_no_dominada(poblacion, fitness_poblacion)
+        
         historial_frentes.append(len(frentes[0]))
         
         if verbose and (gen % 50 == 0 or gen == 0):
@@ -200,13 +465,71 @@ def nsga2(config, metodo_cruce, metodo_mutacion,
         poblacion_combinada = poblacion + descendencia
         fitness_combinada = [fitness_multiobjetivo(ind, config) for ind in poblacion_combinada]
         
-        poblacion = seleccion_nsga2(poblacion_combinada, fitness_combinada, tamano_poblacion)
+        # Aplicar filtro durante la selección para mantener solo soluciones únicas dominantes
+        poblacion = seleccion_nsga2(poblacion_combinada, fitness_combinada, tamano_poblacion, 
+                                    epsilon_filtro=epsilon_filtro)
+        
+        # Aplicar filtro adicional solo cada k generaciones y solo si el frente es grande
+        # Esto reduce el costo computacional mientras mantiene el frente limpio
+        # NOTA: El filtro durante selección ya se aplica siempre, este es solo limpieza adicional
+        aplicar_filtro_post = (epsilon_filtro > 0 and 
+                              (gen + 1) % cada_k_filtro == 0 and 
+                              len(poblacion) > 80)  # Solo si hay más de 80 soluciones (más restrictivo)
+        
+        if aplicar_filtro_post:
+            # Mapear población seleccionada a fitness ya calculado (evitar recálculo)
+            # Usar diccionario para búsqueda O(1) en lugar de O(n)
+            genes_a_fitness = {}
+            for ind, fit in zip(poblacion_combinada, fitness_combinada):
+                genes_key = tuple(tuple(row) for row in ind.genes)
+                genes_a_fitness[genes_key] = fit
+            
+            fitness_poblacion_actual = []
+            for ind in poblacion:
+                genes_key = tuple(tuple(row) for row in ind.genes)
+                if genes_key in genes_a_fitness:
+                    fitness_poblacion_actual.append(genes_a_fitness[genes_key])
+                else:
+                    # Solo recalcular si no está en el diccionario (caso raro)
+                    fitness_poblacion_actual.append(fitness_multiobjetivo(ind, config))
+            
+            poblacion_filtrada, fitness_filtrado = filtrar_soluciones_similares(
+                poblacion, fitness_poblacion_actual, epsilon_filtro
+            )
+            
+            # Si el filtro eliminó soluciones, rellenar solo con soluciones realmente distintas
+            if len(poblacion_filtrada) < tamano_poblacion:
+                # Usar fitness ya calculado de población_combinada (no recalcular)
+                candidatos = []
+                genes_filtrados = {tuple(tuple(row) for row in ind.genes) for ind in poblacion_filtrada}
+                
+                for ind, fit in zip(poblacion_combinada, fitness_combinada):
+                    genes_sol = tuple(tuple(row) for row in ind.genes)
+                    if genes_sol not in genes_filtrados:
+                        candidatos.append((ind, fit))
+                
+                # Agregar candidatos hasta completar población (sin filtrar nuevamente para ahorrar tiempo)
+                faltantes = tamano_poblacion - len(poblacion_filtrada)
+                for i in range(min(faltantes, len(candidatos))):
+                    poblacion_filtrada.append(candidatos[i][0])
+                
+                poblacion = poblacion_filtrada[:tamano_poblacion]
+            else:
+                poblacion = poblacion_filtrada[:tamano_poblacion]
     
     fitness_final = [fitness_multiobjetivo(ind, config) for ind in poblacion]
     frentes_final = clasificacion_no_dominada(poblacion, fitness_final)
     
     frente_pareto = [poblacion[i] for i in frentes_final[0]]
     fitness_pareto = [fitness_final[i] for i in frentes_final[0]]
+    
+    # Aplicar filtro final al frente de Pareto
+    if epsilon_filtro > 0 and len(frente_pareto) > 1:
+        frente_pareto, fitness_pareto = filtrar_soluciones_similares(
+            frente_pareto, fitness_pareto, epsilon_filtro
+        )
+        if verbose:
+            print(f"Filtro final aplicado. Frente final: {len(frente_pareto)} soluciones únicas")
     
     if verbose:
         print(f"Optimización completada. Frente final: {len(frente_pareto)} soluciones")

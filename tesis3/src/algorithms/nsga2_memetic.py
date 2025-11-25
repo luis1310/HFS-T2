@@ -7,12 +7,14 @@ from tesis3.src.algorithms.nsga2 import (
     clasificacion_no_dominada,
     seleccion_nsga2,
     torneo_binario_nsga2,
+    filtrar_soluciones_similares,
 )
 
 
 def busqueda_local(individuo, config, max_iter=5):
     """
     Mejora local por ascenso de colina en espacio multiobjetivo
+    OPTIMIZADO: Early exit si no hay mejora después de varias iteraciones
     
     Args:
         individuo: Chromosome a mejorar
@@ -25,7 +27,10 @@ def busqueda_local(individuo, config, max_iter=5):
     mejor = individuo.copy()
     mejor_fitness = fitness_multiobjetivo(mejor, config)
     
-    for _ in range(max_iter):
+    sin_mejora = 0
+    max_sin_mejora = max(1, max_iter // 3)  # Early exit más agresivo: si no mejora en 1/3 de iteraciones
+    
+    for iteracion in range(max_iter):
         # Generar vecino modificando una asignación aleatoria
         vecino = mejor.copy()
         pedido_idx = random.randint(0, len(vecino.genes) - 1)
@@ -46,6 +51,12 @@ def busqueda_local(individuo, config, max_iter=5):
         if dominancia(vecino_fitness, mejor_fitness) or vecino_fitness == mejor_fitness:
             mejor = vecino
             mejor_fitness = vecino_fitness
+            sin_mejora = 0  # Resetear contador
+        else:
+            sin_mejora += 1
+            # Early exit si no hay mejora después de varias iteraciones
+            if sin_mejora >= max_sin_mejora:
+                break
     
     return mejor
 
@@ -54,6 +65,7 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
                   tamano_poblacion=100, num_generaciones=300,
                   prob_cruce=0.95, prob_mutacion=0.3,
                   cada_k_gen=10, max_iter_local=5,
+                  epsilon_filtro=0.01, cada_k_filtro=30,
                   verbose=True):
     """
     NSGA-II con búsqueda local aplicada cada k generaciones
@@ -68,6 +80,8 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
         prob_mutacion: probabilidad mutación
         cada_k_gen: aplicar búsqueda local cada k generaciones
         max_iter_local: iteraciones de búsqueda local
+        epsilon_filtro: umbral de similitud para filtrado (por defecto 0.01 = 1%)
+        cada_k_filtro: aplicar filtro cada k generaciones (por defecto 30)
         verbose: imprimir progreso
     
     Returns:
@@ -76,44 +90,173 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
     if verbose:
         print(f"Iniciando NSGA-II Memético: {tamano_poblacion} ind, {num_generaciones} gen")
         print(f"Búsqueda local cada {cada_k_gen} generaciones ({max_iter_local} iter)")
+        if epsilon_filtro > 0:
+            print(f"Filtro de similitud: epsilon={epsilon_filtro*100:.1f}%, cada {cada_k_filtro} generaciones")
     
     poblacion = inicializar_poblacion(config, tamano_poblacion)
     historial_frentes = []
     aplicaciones_local = 0
     
+    # OPTIMIZACIÓN: Cache de fitness para evitar recálculos
+    fitness_cache = {}
+    
+    # Inicializar frentes en la primera generación
+    fitness_inicial = [fitness_multiobjetivo(ind, config) for ind in poblacion]
+    for ind, fit in zip(poblacion, fitness_inicial):
+        genes_key = tuple(tuple(row) for row in ind.genes)
+        fitness_cache[genes_key] = fit
+    frentes = clasificacion_no_dominada(poblacion, fitness_inicial)
+    frente_size = len(frentes[0])
+    
     for gen in range(num_generaciones):
-        # Evaluar fitness
-        fitness_poblacion = [
-            fitness_multiobjetivo(ind, config)
-            for ind in poblacion
-        ]
-        frentes = clasificacion_no_dominada(poblacion, fitness_poblacion)
-        historial_frentes.append(len(frentes[0]))
+        # OPTIMIZACIÓN: En generaciones avanzadas, reducir operaciones costosas
+        es_generacion_avanzada = gen >= num_generaciones * 0.5  # Después de 50% de generaciones
+        es_generacion_muy_avanzada = gen >= num_generaciones * 0.75  # Después de 75% de generaciones
+        
+        # OPTIMIZACIÓN: Solo evaluar fitness completo si no hay cache previo
+        # En generaciones avanzadas, asumir que la mayoría de individuos no cambiaron
+        fitness_poblacion = []
+        poblacion_cambio = False
+        for ind in poblacion:
+            genes_key = tuple(tuple(row) for row in ind.genes)
+            if genes_key in fitness_cache:
+                fitness_poblacion.append(fitness_cache[genes_key])
+            else:
+                fit = fitness_multiobjetivo(ind, config)
+                fitness_cache[genes_key] = fit
+                fitness_poblacion.append(fit)
+                poblacion_cambio = True
+        
+        # OPTIMIZACIÓN: Solo reclasificar si hubo cambios significativos o cada N generaciones
+        # En generaciones muy avanzadas, reducir frecuencia de clasificación
+        reclasificar = True
+        if es_generacion_muy_avanzada:
+            # Solo reclasificar cada 5 generaciones o si hubo cambios significativos
+            reclasificar = (gen % 5 == 0) or poblacion_cambio or (gen == num_generaciones - 1)
+        elif es_generacion_avanzada:
+            # Solo reclasificar cada 3 generaciones o si hubo cambios
+            reclasificar = (gen % 3 == 0) or poblacion_cambio or (gen == num_generaciones - 1)
+        
+        if reclasificar:
+            frentes = clasificacion_no_dominada(poblacion, fitness_poblacion)
+            frente_size = len(frentes[0])
+        
+        # Guardar tamaño del frente en el historial (se actualizará después del filtro si se aplica)
+        historial_frentes.append(frente_size)
         
         # Aplicar búsqueda local cada k generaciones al frente de Pareto
-        if (gen + 1) % cada_k_gen == 0:
+        # RESPETANDO HIPERPARÁMETROS OPTIMIZADOS: cada_k_gen y max_iter_local del config
+        aplicar_busqueda_local = (gen + 1) % cada_k_gen == 0
+        
+        if aplicar_busqueda_local:
             aplicaciones_local += 1
+            
+            # OPTIMIZACIÓN CRÍTICA: En generaciones avanzadas, limitar búsqueda local
+            # Esto reduce significativamente el tiempo de ejecución
+            indices_a_mejorar = frentes[0]
+            if es_generacion_muy_avanzada and frente_size > 60:
+                # En generaciones muy avanzadas, solo mejorar 60 individuos
+                indices_a_mejorar = indices_a_mejorar[:60]
+            elif es_generacion_avanzada and frente_size > 80:
+                # En generaciones avanzadas, mejorar máximo 80 individuos
+                indices_a_mejorar = indices_a_mejorar[:80]
+            
             if verbose:
                 print(f"Gen {gen+1:3d} | Búsqueda local al frente")
-                print(f"   Frente tamaño: {len(frentes[0])} ind")
+                print(f"   Frente tamaño: {frente_size} ind, mejorando: {len(indices_a_mejorar)} ind, iteraciones: {max_iter_local}")
             
-            # Mejorar individuos del primer frente
-            for idx in frentes[0]:
+            # Mejorar subconjunto del frente usando hiperparámetros optimizados
+            for idx in indices_a_mejorar:
+                individuo_original = poblacion[idx]
                 poblacion[idx] = busqueda_local(
-                    poblacion[idx],
+                    individuo_original,
                     config,
-                    max_iter_local,
+                    max_iter_local,  # Usar valor optimizado del config
                 )
+                # Actualizar cache
+                genes_key_nuevo = tuple(tuple(row) for row in poblacion[idx].genes)
+                if genes_key_nuevo not in fitness_cache:
+                    fitness_cache[genes_key_nuevo] = fitness_multiobjetivo(poblacion[idx], config)
             
-            # Recalcular fitness después de búsqueda local
-            fitness_poblacion = [
-                fitness_multiobjetivo(ind, config)
-                for ind in poblacion
-            ]
-            frentes = clasificacion_no_dominada(poblacion, fitness_poblacion)
+            # Recalcular fitness solo para los individuos mejorados
+            fitness_actualizado = {}
+            for idx in indices_a_mejorar:
+                genes_key = tuple(tuple(row) for row in poblacion[idx].genes)
+                if genes_key in fitness_cache:
+                    fitness_actualizado[idx] = fitness_cache[genes_key]
+                else:
+                    fit = fitness_multiobjetivo(poblacion[idx], config)
+                    fitness_cache[genes_key] = fit
+                    fitness_actualizado[idx] = fit
+            
+            # Actualizar fitness_poblacion solo para los mejorados
+            for idx, fit in fitness_actualizado.items():
+                fitness_poblacion[idx] = fit
+            
+            # OPTIMIZACIÓN: Solo reclasificar si hubo mejoras significativas
+            # En generaciones avanzadas, evitar reclasificación frecuente
+            if not es_generacion_avanzada or len(indices_a_mejorar) >= frente_size * 0.6:
+                frentes = clasificacion_no_dominada(poblacion, fitness_poblacion)
+                frente_size = len(frentes[0])
         
-        if verbose and (gen % 50 == 0 or gen == 0):
-            print(f"Gen {gen:3d} | Frente Pareto: {len(frentes[0]):3d} individuos")
+        # Aplicar filtro de similitud cada k_filtro generaciones al frente de Pareto
+        # OPTIMIZACIÓN: En generaciones avanzadas, aplicar filtro menos frecuentemente
+        if es_generacion_muy_avanzada:
+            frecuencia_filtro = cada_k_filtro * 3  # Cada 90 generaciones
+        elif es_generacion_avanzada:
+            frecuencia_filtro = cada_k_filtro * 2  # Cada 60 generaciones
+        else:
+            frecuencia_filtro = cada_k_filtro
+        if epsilon_filtro > 0 and (gen + 1) % frecuencia_filtro == 0 and len(frentes[0]) > 1:
+            frente_original = [poblacion[i] for i in frentes[0]]
+            fitness_frente = [fitness_poblacion[i] for i in frentes[0]]
+            
+            frente_filtrado, fitness_filtrado = filtrar_soluciones_similares(
+                frente_original, fitness_frente, epsilon_filtro
+            )
+            
+            if len(frente_filtrado) < len(frente_original):
+                if verbose:
+                    eliminadas = len(frente_original) - len(frente_filtrado)
+                    print(f"Gen {gen+1:3d} | Filtro aplicado: {eliminadas} soluciones similares eliminadas "
+                          f"({len(frente_original)} -> {len(frente_filtrado)})")
+                
+                # CORRECCIÓN: NO rellenar la población después del filtro
+                # El filtro solo limpia el frente, pero la población completa se mantiene
+                # Las soluciones eliminadas del frente permanecen en la población pero fuera del frente
+                # Esto permite que el algoritmo evolucione naturalmente sin forzar rellenado
+                
+                # Actualizar el frente con las soluciones filtradas
+                # Crear conjunto de genes del frente filtrado para identificación rápida
+                genes_filtrados = {tuple(tuple(row) for row in sol.genes) for sol in frente_filtrado}
+                
+                # Reconstruir el primer frente con solo las soluciones filtradas
+                # Las soluciones eliminadas permanecen en la población pero no en el frente
+                indices_frente_filtrado = []
+                for idx in frentes[0]:
+                    genes_sol = tuple(tuple(row) for row in poblacion[idx].genes)
+                    if genes_sol in genes_filtrados:
+                        indices_frente_filtrado.append(idx)
+                
+                # Actualizar frentes con el frente filtrado
+                frentes[0] = indices_frente_filtrado
+                frente_size = len(frentes[0])
+                
+                # Actualizar historial con el tamaño REAL del frente filtrado
+                if len(historial_frentes) > 0:
+                    historial_frentes[-1] = frente_size
+        
+        # OPTIMIZACIÓN: Reducir frecuencia de mensajes en generaciones avanzadas
+        if verbose:
+            if es_generacion_muy_avanzada:
+                if gen % 100 == 0 or gen == 0:
+                    print(f"Gen {gen:3d} | Frente Pareto: {frente_size:3d} individuos")
+            elif es_generacion_avanzada:
+                if gen % 75 == 0 or gen == 0:
+                    print(f"Gen {gen:3d} | Frente Pareto: {frente_size:3d} individuos")
+            else:
+                if gen % 50 == 0 or gen == 0:
+                    print(f"Gen {gen:3d} | Frente Pareto: {frente_size:3d} individuos")
         
         # Generar descendencia (igual que NSGA-II estándar)
         descendencia = []
@@ -129,21 +272,47 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
         
         # Combinar y seleccionar
         poblacion_combinada = poblacion + descendencia
-        fitness_combinada = [
-            fitness_multiobjetivo(ind, config)
-            for ind in poblacion_combinada
-        ]
-        poblacion = seleccion_nsga2(poblacion_combinada, fitness_combinada, tamano_poblacion)
+        
+        # OPTIMIZACIÓN: Usar cache para fitness de descendencia
+        fitness_combinada = []
+        for ind in poblacion_combinada:
+            genes_key = tuple(tuple(row) for row in ind.genes)
+            if genes_key in fitness_cache:
+                fitness_combinada.append(fitness_cache[genes_key])
+            else:
+                fit = fitness_multiobjetivo(ind, config)
+                fitness_cache[genes_key] = fit
+                fitness_combinada.append(fit)
+        # Aplicar filtro durante la selección para mantener solo soluciones únicas dominantes
+        poblacion = seleccion_nsga2(poblacion_combinada, fitness_combinada, tamano_poblacion,
+                                    epsilon_filtro=epsilon_filtro)
+        
+        # NOTA: El filtro ya se aplica en seleccion_nsga2 al frente de Pareto
+        # No es necesario aplicar un filtro adicional post-selección que rellene la población
+        # Esto previene que el frente se rellene constantemente con soluciones similares
     
-    # Frente final
-    fitness_final = [
-        fitness_multiobjetivo(ind, config)
-        for ind in poblacion
-    ]
+    # Frente final (usar cache)
+    fitness_final = []
+    for ind in poblacion:
+        genes_key = tuple(tuple(row) for row in ind.genes)
+        if genes_key in fitness_cache:
+            fitness_final.append(fitness_cache[genes_key])
+        else:
+            fit = fitness_multiobjetivo(ind, config)
+            fitness_cache[genes_key] = fit
+            fitness_final.append(fit)
     frentes_final = clasificacion_no_dominada(poblacion, fitness_final)
     
     frente_pareto = [poblacion[i] for i in frentes_final[0]]
     fitness_pareto = [fitness_final[i] for i in frentes_final[0]]
+    
+    # Aplicar filtro final al frente de Pareto
+    if epsilon_filtro > 0 and len(frente_pareto) > 1:
+        frente_pareto, fitness_pareto = filtrar_soluciones_similares(
+            frente_pareto, fitness_pareto, epsilon_filtro
+        )
+        if verbose:
+            print(f"Filtro final aplicado. Frente final: {len(frente_pareto)} soluciones únicas")
     
     if verbose:
         print(f"Optimización completada. Frente final: {len(frente_pareto)} soluciones")

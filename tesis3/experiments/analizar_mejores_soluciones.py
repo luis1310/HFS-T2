@@ -17,6 +17,10 @@ import glob
 import pickle
 import json
 from datetime import datetime
+import time
+
+# Iniciar medición de tiempo total
+tiempo_inicio_total = time.time()
 
 print("="*70)
 print("ANÁLISIS DE LAS MEJORES SOLUCIONES DEL FRENTE DE PARETO")
@@ -109,8 +113,10 @@ def cruce(p1, p2, cfg, prob):
 def mutacion(pob, cfg, prob):
     return aplicar_mutacion(pob, cfg, metodo=tipo_mutacion, tasa_mut=prob)
 
-print(f"\nEjecutando NSGA-II {version_seleccionada.capitalize()} para obtener frente de Pareto...")
-print(f"(Esto puede tomar ~{alg_params['num_generaciones'] * 0.05:.0f} segundos)\n")
+print(f"\nEjecutando NSGA-II {version_seleccionada.capitalize()} para obtener frente de Pareto...\n")
+
+# Medir tiempo de ejecución del algoritmo
+tiempo_inicio_algoritmo = time.time()
 
 # Ejecutar algoritmo con parámetros optimizados desde config.yaml
 if usar_memetico:
@@ -135,7 +141,11 @@ else:
         verbose=False
     )
 
+tiempo_fin_algoritmo = time.time()
+tiempo_ejecucion_algoritmo = tiempo_fin_algoritmo - tiempo_inicio_algoritmo
+
 print(f"Frente de Pareto obtenido: {len(frente_pareto)} soluciones")
+print(f"Tiempo de ejecución del algoritmo: {tiempo_ejecucion_algoritmo:.2f} segundos ({tiempo_ejecucion_algoritmo/60:.2f} minutos)")
 
 # Convertir fitness a métricas reales
 metricas = []
@@ -323,6 +333,9 @@ print("\n" + "="*70)
 print("GENERANDO VISUALIZACIÓN")
 print("="*70)
 
+# Medir tiempo de generación de visualizaciones y análisis
+tiempo_inicio_analisis = time.time()
+
 fig, axes = plt.subplots(1, 3, figsize=(16, 5))
 fig.suptitle('Las 3 Mejores Soluciones del Frente de Pareto', 
              fontsize=16, fontweight='bold')
@@ -397,6 +410,9 @@ print("   Guardado: mejores_soluciones.csv")
 print("\n" + "="*70)
 print("GUARDANDO SOLUCIONES COMPLETAS")
 print("="*70)
+
+# Crear timestamp para los archivos (debe estar antes de usarse)
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
 # Guardar cromosomas usando pickle (formato binario, preserva objetos completos)
 pickle_file = f'tesis3/results/mejores_soluciones_cromosomas_{timestamp}.pkl'
@@ -509,8 +525,7 @@ recomendaciones = {
     }
 }
 
-# Crear resumen estructurado
-timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+# Crear resumen estructurado (timestamp ya fue creado arriba)
 resumen_yaml = {
     'metadata': {
         'fecha_analisis': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -591,6 +606,10 @@ with open(yaml_file, 'w', encoding='utf-8') as f:
 
 print(f"   Guardado: mejores_soluciones_resumen_{timestamp}.yaml")
 
+tiempo_fin_analisis = time.time()
+tiempo_analisis_visualizaciones = tiempo_fin_analisis - tiempo_inicio_analisis
+print(f"Tiempo de análisis y generación de visualizaciones: {tiempo_analisis_visualizaciones:.2f} segundos ({tiempo_analisis_visualizaciones/60:.2f} minutos)")
+
 # ============================================================
 # RESUMEN EJECUTIVO EN CONSOLA
 # ============================================================
@@ -619,9 +638,20 @@ print(f"   Balance:  {solucion_3['balance']:.2f}")
 print(f"   Energia:  {solucion_3['energia']:.2f} kWh (MEJOR)")
 print(f"   Cuando usar: {recomendaciones['solucion_3']['cuando_usar']}")
 
+# Calcular tiempo total
+tiempo_fin_total = time.time()
+tiempo_total = tiempo_fin_total - tiempo_inicio_total
+
 print("\n" + "="*70)
 print("ANALISIS COMPLETADO")
 print("="*70)
+print("\nRESUMEN DE TIEMPOS DE EJECUCIÓN:")
+print(f"   • Ejecución del algoritmo:              {tiempo_ejecucion_algoritmo:.2f}s ({tiempo_ejecucion_algoritmo/60:.2f} min)")
+print(f"   • Análisis y visualizaciones:           {tiempo_analisis_visualizaciones:.2f}s ({tiempo_analisis_visualizaciones/60:.2f} min)")
+print(f"   • Tiempo total:                          {tiempo_total:.2f}s ({tiempo_total/60:.2f} min)")
+print(f"\n   Porcentaje del tiempo:")
+print(f"   • Algoritmo:                             {(tiempo_ejecucion_algoritmo/tiempo_total)*100:.1f}%")
+print(f"   • Análisis y visualizaciones:            {(tiempo_analisis_visualizaciones/tiempo_total)*100:.1f}%")
 print("\nArchivos generados:")
 print("  1. mejores_soluciones_pareto.png (visualizacion grafica)")
 print("  2. mejores_soluciones.csv (datos tabulares)")

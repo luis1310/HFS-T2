@@ -15,13 +15,17 @@ import numpy as np
 import yaml
 import os
 import glob
+import time
+
+# Iniciar medición de tiempo total
+tiempo_inicio_total = time.time()
 
 print("="*60)
 print("VISUALIZACIÓN DEL FRENTE DE PARETO")
 print("="*60)
 
-# 🔍 DETERMINAR QUÉ VERSIÓN USAR (basado en resultados de Fase 4)
-print("\n🔍 Determinando qué versión usar (estándar o memético)...")
+# DETERMINAR QUÉ VERSIÓN USAR (basado en resultados de Fase 4)
+print("\nDeterminando qué versión usar (estándar o memético)...")
 print("   Buscando resultados de la Fase 4 (comparacion_memetica_resumen_*.yaml)...")
 
 archivos_resumen = glob.glob('tesis3/results/comparacion_memetica_resumen_*.yaml')
@@ -44,13 +48,13 @@ if archivos_resumen:
             if version_recomendada == 'memetico':
                 usar_memetico = True
                 version_seleccionada = "memético"
-                print(f"   ✅ Versión recomendada: MEMÉTICO")
-                print(f"   → Razón: {razon}")
+                print(f"   Versión recomendada: MEMÉTICO")
+                print(f"   Razón: {razon}")
             else:
                 usar_memetico = False
                 version_seleccionada = "estándar"
-                print(f"   ✅ Versión recomendada: ESTÁNDAR")
-                print(f"   → Razón: {razon}")
+                print(f"   Versión recomendada: ESTÁNDAR")
+                print(f"   Razón: {razon}")
         elif 'comparacion' in resumen and 'mejora_score_pct' in resumen['comparacion']:
             # Fallback: inferir de mejora_score_pct (para compatibilidad con archivos antiguos)
             mejora_score = resumen['comparacion']['mejora_score_pct']
@@ -58,23 +62,23 @@ if archivos_resumen:
             if mejora_score > 0:
                 usar_memetico = True
                 version_seleccionada = "memético"
-                print(f"   ✅ Memético es MEJOR (mejora: {mejora_score:+.2f}%)")
-                print(f"   → Usando algoritmo MEMÉTICO para visualizaciones")
+                print(f"   Memético es MEJOR (mejora: {mejora_score:+.2f}%)")
+                print(f"   Usando algoritmo MEMÉTICO para visualizaciones")
             else:
                 usar_memetico = False
                 version_seleccionada = "estándar"
-                print(f"   ⚠️  Memético NO mejora (mejora: {mejora_score:+.2f}%)")
-                print(f"   → Usando algoritmo ESTÁNDAR para visualizaciones")
+                print(f"   AVISO: Memético NO mejora (mejora: {mejora_score:+.2f}%)")
+                print(f"   Usando algoritmo ESTÁNDAR para visualizaciones")
         else:
-            print(f"   ⚠️  No se encontró información de versión recomendada en el resumen")
-            print(f"   → Usando algoritmo MEMÉTICO por defecto")
+            print(f"   AVISO: No se encontró información de versión recomendada en el resumen")
+            print(f"   Usando algoritmo MEMÉTICO por defecto")
     except Exception as e:
-        print(f"   ⚠️  Error al leer resumen: {e}")
-        print(f"   → Usando algoritmo MEMÉTICO por defecto")
+        print(f"   AVISO: Error al leer resumen: {e}")
+        print(f"   Usando algoritmo MEMÉTICO por defecto")
 else:
-    print(f"   ⚠️  No se encontraron archivos de resumen de la Fase 4")
-    print(f"   → Usando algoritmo MEMÉTICO por defecto")
-    print(f"   → Ejecuta primero la Fase 4 para determinar la mejor versión")
+    print(f"   AVISO: No se encontraron archivos de resumen de la Fase 4")
+    print(f"   Usando algoritmo MEMÉTICO por defecto")
+    print(f"   Ejecuta primero la Fase 4 para determinar la mejor versión")
 
 # Cargar configuración completa
 config = ProblemConfig.from_yaml("tesis3/config/config.yaml")
@@ -108,8 +112,10 @@ def cruce(p1, p2, cfg, prob):
 def mutacion(pob, cfg, prob):
     return aplicar_mutacion(pob, cfg, metodo=tipo_mutacion, tasa_mut=prob)
 
-print(f"\nEjecutando NSGA-II {version_seleccionada.capitalize()} ({tipo_cruce.capitalize()} + {tipo_mutacion.capitalize()})...")
-print(f"   Esto tomará ~{alg_params['num_generaciones'] * 0.05:.0f} segundos\n")
+print(f"\nEjecutando NSGA-II {version_seleccionada.capitalize()} ({tipo_cruce.capitalize()} + {tipo_mutacion.capitalize()})...\n")
+
+# Medir tiempo de ejecución del algoritmo
+tiempo_inicio_algoritmo = time.time()
 
 if usar_memetico:
     frente_pareto, fitness_pareto, historial = nsga2_memetic(
@@ -136,7 +142,11 @@ else:
     if historial is None:
         historial = [len(frente_pareto)] * alg_params['num_generaciones']
 
+tiempo_fin_algoritmo = time.time()
+tiempo_ejecucion_algoritmo = tiempo_fin_algoritmo - tiempo_inicio_algoritmo
+
 print(f"\nFrente de Pareto obtenido: {len(frente_pareto)} soluciones")
+print(f"Tiempo de ejecución del algoritmo: {tiempo_ejecucion_algoritmo:.2f} segundos ({tiempo_ejecucion_algoritmo/60:.2f} minutos)")
 
 # Convertir fitness a métricas reales
 metricas = []
@@ -170,16 +180,20 @@ print(f"   Energía:      {rango_eng:.2f} kWh")
 # ============================================================
 print("\nGenerando visualizaciones...")
 
+# Medir tiempo de generación de visualizaciones
+tiempo_inicio_visualizaciones = time.time()
+
 # Asegurar que el directorio existe
 os.makedirs('tesis3/results', exist_ok=True)
 
 fig = plt.figure(figsize=(12, 10))
 ax = fig.add_subplot(111, projection='3d')
 
+# Optimización: reducir tamaño de puntos y sin bordes para más velocidad
 scatter = ax.scatter(
     makespans, balances, energias,
-    c='#2E86AB', s=100, alpha=0.7,
-    edgecolors='black', linewidth=0.5
+    c='#2E86AB', s=50, alpha=0.7,
+    edgecolors='none'  # Sin bordes para más velocidad
 )
 
 ax.set_xlabel('Makespan (s)', fontsize=12, labelpad=10)
@@ -190,7 +204,7 @@ ax.set_title(f'Frente de Pareto {version_seleccionada.capitalize()} (3 objetivos
 
 plt.tight_layout()
 nombre_archivo_3d = f'tesis3/results/frente_pareto_{version_seleccionada.lower()}_3d.png'
-plt.savefig(nombre_archivo_3d, dpi=300, bbox_inches='tight')
+plt.savefig(nombre_archivo_3d, dpi=150, bbox_inches='tight')  # Reducido de 300 a 150 para más velocidad
 print(f"   Guardado: frente_pareto_{version_seleccionada.lower()}_3d.png")
 plt.close()
 
@@ -202,24 +216,24 @@ fig.suptitle(f'Proyecciones 2D del Frente de Pareto {version_seleccionada.capita
              fontsize=16, fontweight='bold')
 
 # Makespan vs Balance
-axes[0].scatter(makespans, balances, c='#2E86AB', s=80, alpha=0.7, 
-               edgecolors='black', linewidth=0.5)
+axes[0].scatter(makespans, balances, c='#2E86AB', s=40, alpha=0.7, 
+               edgecolors='none')  # Sin bordes para más velocidad
 axes[0].set_xlabel('Makespan (s)', fontsize=11)
 axes[0].set_ylabel('Balance (Desv. Std)', fontsize=11)
 axes[0].set_title('Makespan vs Balance de Carga', fontweight='bold')
 axes[0].grid(True, alpha=0.3)
 
 # Makespan vs Energía
-axes[1].scatter(makespans, energias, c='#A23B72', s=80, alpha=0.7, 
-               edgecolors='black', linewidth=0.5)
+axes[1].scatter(makespans, energias, c='#A23B72', s=40, alpha=0.7, 
+               edgecolors='none')  # Sin bordes para más velocidad
 axes[1].set_xlabel('Makespan (s)', fontsize=11)
 axes[1].set_ylabel('Energía (kWh)', fontsize=11)
 axes[1].set_title('Makespan vs Consumo Energético', fontsize=11, fontweight='bold')
 axes[1].grid(True, alpha=0.3)
 
 # Balance vs Energía
-axes[2].scatter(balances, energias, c='#F18F01', s=80, alpha=0.7, 
-               edgecolors='black', linewidth=0.5)
+axes[2].scatter(balances, energias, c='#F18F01', s=40, alpha=0.7, 
+               edgecolors='none')  # Sin bordes para más velocidad
 axes[2].set_xlabel('Balance (Desv. Std)', fontsize=11)
 axes[2].set_ylabel('Energía (kWh)', fontsize=11)
 axes[2].set_title('Balance vs Consumo Energético', fontweight='bold')
@@ -227,7 +241,7 @@ axes[2].grid(True, alpha=0.3)
 
 plt.tight_layout()
 nombre_archivo_2d = f'tesis3/results/frente_pareto_{version_seleccionada.lower()}_2d.png'
-plt.savefig(nombre_archivo_2d, dpi=300, bbox_inches='tight')
+plt.savefig(nombre_archivo_2d, dpi=150, bbox_inches='tight')  # Reducido de 300 a 150 para más velocidad
 print(f"   Guardado: frente_pareto_{version_seleccionada.lower()}_2d.png")
 plt.close()
 
@@ -244,7 +258,7 @@ ax.grid(True, alpha=0.3)
 
 plt.tight_layout()
 nombre_archivo_evol = f'tesis3/results/evolucion_frente_{version_seleccionada.lower()}.png'
-plt.savefig(nombre_archivo_evol, dpi=300, bbox_inches='tight')
+plt.savefig(nombre_archivo_evol, dpi=150, bbox_inches='tight')  # Reducido de 300 a 150 para más velocidad
 print(f"   Guardado: evolucion_frente_{version_seleccionada.lower()}.png")
 plt.close()
 
@@ -262,6 +276,10 @@ with open(nombre_archivo_csv, 'w', newline='') as f:
 
 print(f"   Guardado: frente_pareto_{version_seleccionada.lower()}.csv")
 
+tiempo_fin_visualizaciones = time.time()
+tiempo_generacion_visualizaciones = tiempo_fin_visualizaciones - tiempo_inicio_visualizaciones
+print(f"Tiempo de generación de visualizaciones: {tiempo_generacion_visualizaciones:.2f} segundos")
+
 # ============================================================
 # TOP 10 SOLUCIONES
 # ============================================================
@@ -277,9 +295,20 @@ for rank, idx in enumerate(indices_top10, 1):
     mk, bal, eng = metricas[idx]
     print(f"{rank:<4} {mk:<12.2f} {bal:<12.2f} {eng:<12.2f}")
 
+# Calcular tiempo total
+tiempo_fin_total = time.time()
+tiempo_total = tiempo_fin_total - tiempo_inicio_total
+
 print("\n" + "="*60)
 print("VISUALIZACIONES COMPLETADAS")
 print("="*60)
+print("\nRESUMEN DE TIEMPOS DE EJECUCIÓN:")
+print(f"   • Ejecución del algoritmo:     {tiempo_ejecucion_algoritmo:.2f}s ({tiempo_ejecucion_algoritmo/60:.2f} min)")
+print(f"   • Generación de visualizaciones: {tiempo_generacion_visualizaciones:.2f}s ({tiempo_generacion_visualizaciones/60:.2f} min)")
+print(f"   • Tiempo total:                 {tiempo_total:.2f}s ({tiempo_total/60:.2f} min)")
+print(f"\n   Porcentaje del tiempo:")
+print(f"   • Algoritmo:                    {(tiempo_ejecucion_algoritmo/tiempo_total)*100:.1f}%")
+print(f"   • Visualizaciones:              {(tiempo_generacion_visualizaciones/tiempo_total)*100:.1f}%")
 print("\nArchivos generados en tesis3/results/:")
 print(f"  1. frente_pareto_{version_seleccionada.lower()}_3d.png (3D: Makespan vs Balance vs Energía)")
 print(f"  2. frente_pareto_{version_seleccionada.lower()}_2d.png (3 proyecciones 2D)")
