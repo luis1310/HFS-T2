@@ -9,3 +9,6 @@
 - metricas usada para asumir el balance por etapas por maquina
 - pumpline visible
 - ¿Qué checks meterías en CI como gates (tiempo máximo por test, cobertura mínima por paquetes, lint estricto en algorithms/ y operators/)?
+
+# Cambios a realizar: (24 - 11 - 12)
+Ablacion: que partes son mas relevantes a ambos algoritmos (como se afecta la complejidad dependiendo a la base)
