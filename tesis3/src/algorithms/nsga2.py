@@ -356,8 +356,20 @@ def torneo_binario_nsga2(poblacion, fitness_poblacion, frentes):
     """
     idx1, idx2 = random.sample(range(len(poblacion)), 2)
     
-    frente1 = next(i for i, f in enumerate(frentes) if idx1 in f)
-    frente2 = next(i for i, f in enumerate(frentes) if idx2 in f)
+    # Encontrar el frente de cada índice de forma segura
+    frente1 = None
+    frente2 = None
+    for i, f in enumerate(frentes):
+        if idx1 in f:
+            frente1 = i
+        if idx2 in f:
+            frente2 = i
+    
+    # Si algún índice no está en ningún frente, usar el último frente
+    if frente1 is None:
+        frente1 = len(frentes) - 1 if frentes else 0
+    if frente2 is None:
+        frente2 = len(frentes) - 1 if frentes else 0
     
     if frente1 != frente2:
         return poblacion[idx1] if frente1 < frente2 else poblacion[idx2]

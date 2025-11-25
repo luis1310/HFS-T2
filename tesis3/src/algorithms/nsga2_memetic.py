@@ -146,8 +146,7 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
             frentes = clasificacion_no_dominada(poblacion, fitness_poblacion)
             frente_size = len(frentes[0])
         
-        # Guardar tamaño del frente en el historial (se actualizará después del filtro si se aplica)
-        historial_frentes.append(frente_size)
+        # NO guardar historial aquí - se guardará al final después de todos los filtros
         
         # Aplicar búsqueda local cada k generaciones al frente de Pareto
         # RESPETANDO HIPERPARÁMETROS OPTIMIZADOS: cada_k_gen y max_iter_local del config
@@ -263,25 +262,16 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
                 frentes[0] = indices_frente_filtrado
                 frente_size = len(frentes[0])
                 
-                # Actualizar historial con el tamaño REAL del frente filtrado
-                if len(historial_frentes) > 0:
-                    historial_frentes[-1] = frente_size
-        
-        # OPTIMIZACIÓN: Reducir frecuencia de mensajes en generaciones avanzadas
-        if verbose:
-            if es_generacion_muy_avanzada:
-                if gen % 100 == 0 or gen == 0:
-                    print(f"Gen {gen:3d} | Frente Pareto: {frente_size:3d} individuos")
-            elif es_generacion_avanzada:
-                if gen % 75 == 0 or gen == 0:
-                    print(f"Gen {gen:3d} | Frente Pareto: {frente_size:3d} individuos")
-            else:
-                if gen % 50 == 0 or gen == 0:
-                    print(
-                        f"Gen {gen:3d} | Frente Pareto: {frente_size:3d} individuos"
-                    )
+                # El historial se actualizará al final de la generación después de todos los filtros
         
         # Generar descendencia (igual que NSGA-II estándar)
+        # CRÍTICO: Recalcular frentes antes de generar descendencia
+        # para asegurar que los índices sean válidos después del filtro
+        if not reclasificar or aplicar_busqueda_local:
+            # Si no se reclasificó o se aplicó búsqueda local, recalcular frentes
+            frentes = clasificacion_no_dominada(poblacion, fitness_poblacion)
+            frente_size = len(frentes[0])
+        
         descendencia = []
         while len(descendencia) < tamano_poblacion:
             padre1 = torneo_binario_nsga2(
@@ -318,24 +308,119 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
             epsilon_filtro=epsilon_filtro,
         )
         
-        # Recalcular frentes después de la selección para actualizar frente_size
-        # Esto asegura que el historial refleje el tamaño real del frente filtrado
-        if gen == num_generaciones - 1 or (gen + 1) % 10 == 0:
-            # Recalcular frentes periódicamente para mantener frente_size actualizado
-            fitness_poblacion_actual = []
-            for ind in poblacion:
-                genes_key = tuple(tuple(row) for row in ind.genes)
-                if genes_key in fitness_cache:
-                    fitness_poblacion_actual.append(fitness_cache[genes_key])
-                else:
-                    fit = fitness_multiobjetivo(ind, config)
-                    fitness_cache[genes_key] = fit
-                    fitness_poblacion_actual.append(fit)
-            frentes = clasificacion_no_dominada(poblacion, fitness_poblacion_actual)
-            frente_size = len(frentes[0])
-            # Actualizar historial con el tamaño real del frente después de selección
-            if len(historial_frentes) > 0:
-                historial_frentes[-1] = frente_size
+        # Recalcular frentes después de la selección para obtener tamaño real
+        fitness_poblacion_actual = []
+        for ind in poblacion:
+            genes_key = tuple(tuple(row) for row in ind.genes)
+            if genes_key in fitness_cache:
+                fitness_poblacion_actual.append(fitness_cache[genes_key])
+            else:
+                fit = fitness_multiobjetivo(ind, config)
+                fitness_cache[genes_key] = fit
+                fitness_poblacion_actual.append(fit)
+        frentes = clasificacion_no_dominada(poblacion, fitness_poblacion_actual)
+        frente_size = len(frentes[0])
+        
+        # Aplicar filtro adicional al frente después de selección SIEMPRE
+        # Esto previene que el frente se rellene con soluciones similares
+        # CRÍTICO: Aplicar siempre después de cada selección para mantener frente limpio
+        frente_size_antes_filtro = frente_size
+        if epsilon_filtro > 0 and frente_size > 1:
+            frente_actual = [poblacion[i] for i in frentes[0]]
+            fitness_frente_actual = [fitness_poblacion_actual[i] for i in frentes[0]]
+            
+            frente_filtrado, fitness_filtrado = filtrar_soluciones_similares(
+                frente_actual, fitness_frente_actual, epsilon_filtro
+            )
+            
+            if len(frente_filtrado) < frente_size:
+                # Actualizar el frente con las soluciones filtradas
+                genes_filtrados = {
+                    tuple(tuple(row) for row in sol.genes)
+                    for sol in frente_filtrado
+                }
+                indices_frente_filtrado = []
+                for idx in frentes[0]:
+                    genes_sol = tuple(
+                        tuple(row) for row in poblacion[idx].genes
+                    )
+                    if genes_sol in genes_filtrados:
+                        indices_frente_filtrado.append(idx)
+                
+                # CRÍTICO: Actualizar frentes y frente_size con el tamaño REAL del frente filtrado
+                frentes[0] = indices_frente_filtrado
+                frente_size_nuevo = len(frentes[0])
+                
+                # Verificar que el tamaño sea correcto
+                if frente_size_nuevo != len(frente_filtrado):
+                    # Si no coincide, usar el tamaño del frente filtrado directamente
+                    frente_size_nuevo = len(frente_filtrado)
+                    # Reconstruir indices_frente_filtrado para que coincida
+                    # Mapear soluciones filtradas a índices originales
+                    genes_a_indices = {}
+                    for idx in frentes[0]:
+                        genes_sol = tuple(
+                            tuple(row) for row in poblacion[idx].genes
+                        )
+                        genes_a_indices[genes_sol] = idx
+                    
+                    indices_frente_filtrado = []
+                    for sol in frente_filtrado:
+                        genes_sol = tuple(tuple(row) for row in sol.genes)
+                        if genes_sol in genes_a_indices:
+                            indices_frente_filtrado.append(genes_a_indices[genes_sol])
+                    
+                    frentes[0] = indices_frente_filtrado
+                
+                frente_size = len(frentes[0])
+                
+                # Log de depuración (solo en generaciones clave)
+                if verbose and (gen % 50 == 0 or gen < 10):
+                    eliminadas_post = len(frente_actual) - len(frente_filtrado)
+                    if eliminadas_post > 0:
+                        print(
+                            f"Gen {gen+1:3d} | Filtro post-selección: "
+                            f"{eliminadas_post} soluciones eliminadas "
+                            f"({len(frente_actual)} -> {len(frente_filtrado)}), "
+                            f"frente_size={frente_size}"
+                        )
+            else:
+                # Debug: si el filtro no eliminó nada, puede ser que realmente sean distintas
+                if verbose and gen % 100 == 0:
+                    print(
+                        f"Gen {gen+1:3d} | Filtro post-selección: "
+                        f"no se eliminaron soluciones (frente_size={frente_size})"
+                    )
+        
+        # CRÍTICO: Guardar historial AL FINAL de cada generación, después de TODOS los filtros
+        # Esto asegura que el historial refleje el tamaño REAL del frente filtrado
+        # Debug: verificar que frente_size sea el correcto
+        if verbose and gen % 100 == 0:
+            print(
+                f"Gen {gen+1:3d} | Guardando historial: frente_size={frente_size} "
+                f"(antes filtro post-selección: {frente_size_antes_filtro})"
+            )
+        historial_frentes.append(frente_size)
+        
+        # OPTIMIZACIÓN: Reducir frecuencia de mensajes en generaciones avanzadas
+        # NOTA: frente_size ya está actualizado después del filtro post-selección
+        # CRÍTICO: Imprimir DESPUÉS del filtro post-selección para mostrar tamaño correcto
+        if verbose:
+            if es_generacion_muy_avanzada:
+                if gen % 100 == 0 or gen == 0:
+                    print(
+                        f"Gen {gen:3d} | Frente Pareto: {frente_size:3d} individuos"
+                    )
+            elif es_generacion_avanzada:
+                if gen % 75 == 0 or gen == 0:
+                    print(
+                        f"Gen {gen:3d} | Frente Pareto: {frente_size:3d} individuos"
+                    )
+            else:
+                if gen % 50 == 0 or gen == 0:
+                    print(
+                        f"Gen {gen:3d} | Frente Pareto: {frente_size:3d} individuos"
+                    )
     
     # Frente final (usar cache)
     fitness_final = []
@@ -363,5 +448,10 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
     if verbose:
         print(f"Optimización completada. Frente final: {len(frente_pareto)} soluciones")
         print(f"Búsqueda local aplicada {aplicaciones_local} veces")
+        # Debug: mostrar algunos valores del historial para verificar
+        if len(historial_frentes) > 0:
+            print(f"Historial: primeros 10 valores: {historial_frentes[:10]}")
+            print(f"Historial: últimos 10 valores: {historial_frentes[-10:]}")
+            print(f"Historial: min={min(historial_frentes)}, max={max(historial_frentes)}, promedio={sum(historial_frentes)/len(historial_frentes):.1f}")
     
     return frente_pareto, fitness_pareto, historial_frentes
