@@ -9,6 +9,7 @@ from tesis3.src.operators.mutation import aplicar_mutacion
 from tesis3.src.algorithms.nsga2 import nsga2
 from tesis3.src.algorithms.nsga2_memetic import nsga2_memetic
 from tesis3.src.fitness.multi_objective import fitness_multiobjetivo
+from tesis3.src.utils.seeds import cargar_semillas
 import numpy as np
 import random
 import time
@@ -361,15 +362,23 @@ def main():
     config, algoritmo_config = cargar_configuracion()
     variantes = generar_variantes()
     
-    # Número de semillas: usar 30 como en el tunning para resultados estadísticamente significativos
-    num_semillas = 30
-    semillas = list(range(42, 42 + num_semillas))
+    # Cargar semillas centralizadas desde archivo de configuración
+    # Esto garantiza que se usen las mismas semillas que en otros experimentos
+    try:
+        semillas = cargar_semillas(tipo="estandar")
+        num_semillas = len(semillas)
+        print(f"\n[OK] Semillas cargadas desde archivo centralizado: {num_semillas} semillas")
+        print(f"   Semillas a usar: {semillas}")
+    except (FileNotFoundError, KeyError) as e:
+        print(f"\n[ADVERTENCIA] No se pudo cargar semillas centralizadas: {e}")
+        print(f"   Usando semillas estándar (42-71) como fallback")
+        num_semillas = 30
+        semillas = list(range(42, 42 + num_semillas))
     
     print(f"\nConfiguración del estudio:")
     print(f"  Variantes a probar: {len(variantes)}")
     print(f"  Semillas por variante: {num_semillas}")
     print(f"  Total ejecuciones: {len(variantes) * num_semillas}")
-    print(f"  Semillas: {semillas}")
     
     # Crear todas las tareas (variante, semilla)
     tareas = []
