@@ -497,17 +497,49 @@ def main():
         else:
             print(f"   El overhead computacional es ALTO ({overhead:+.2f}%)")
         
-        # 🎯 DETERMINAR VERSIÓN RECOMENDADA USANDO SCORE BALANCEADO
+        # 🎯 DETERMINAR VERSIÓN RECOMENDADA USANDO SCORE BALANCEADO + RATIO EFICIENCIA
         # El score balanceado considera tanto calidad como tiempo de ejecución
+        # PERO también consideramos el ratio de eficiencia para evitar recomendaciones engañosas
+        
+        # Calcular ratio de eficiencia
+        ratio_eficiencia = abs(mejora_score) / abs(overhead) if overhead != 0 else 0
+        
+        # Umbrales para considerar si el overhead se justifica
+        umbral_mejora_minima = 0.1  # Mejora mínima del 0.1% para justificar overhead
+        umbral_overhead_maximo = 20.0  # Overhead máximo del 20% aceptable
+        umbral_ratio_eficiencia = 0.01  # Ratio mínimo de 0.01 (1% mejora por 1% overhead)
+        
+        # Decisión basada en múltiples criterios
         if mejora_score_balanceado > 0:
-            version_recomendada = "memetico"
-            if mejora_score_balanceado > 2:
-                razon = f"El algoritmo memético es RECOMENDADO según score balanceado ({mejora_score_balanceado:+.2f}%). Mejora el score agregado en {mejora_score:+.2f}% con overhead computacional de {overhead:+.2f}%. El balance calidad/tiempo favorece al memético."
+            # Memético tiene mejor score balanceado, PERO verificar si se justifica
+            if (mejora_score < umbral_mejora_minima and 
+                overhead > umbral_overhead_maximo and 
+                ratio_eficiencia < umbral_ratio_eficiencia):
+                # El overhead NO se justifica: mejora muy pequeña, overhead grande, ratio bajo
+                version_recomendada = "estandar"
+                razon = (f"El algoritmo ESTÁNDAR es RECOMENDADO. Aunque el memético tiene mejor "
+                        f"score balanceado ({mejora_score_balanceado:+.2f}%), el overhead computacional "
+                        f"({overhead:+.2f}%) NO se justifica porque la mejora en calidad es muy pequeña "
+                        f"({mejora_score:+.3f}%) y el ratio de eficiencia es muy bajo ({ratio_eficiencia:.4f}). "
+                        f"El estándar ofrece mejor eficiencia con calidad prácticamente igual.")
+            elif mejora_score_balanceado > 2:
+                version_recomendada = "memetico"
+                razon = (f"El algoritmo memético es RECOMENDADO según score balanceado "
+                        f"({mejora_score_balanceado:+.2f}%). Mejora el score agregado en {mejora_score:+.2f}% "
+                        f"con overhead computacional de {overhead:+.2f}%. El balance calidad/tiempo "
+                        f"favorece al memético.")
             else:
-                razon = f"El algoritmo memético es RECOMENDADO según score balanceado ({mejora_score_balanceado:+.2f}%). Mejora el score agregado en {mejora_score:+.2f}% con overhead computacional de {overhead:+.2f}%. Aunque la mejora es pequeña, el balance calidad/tiempo favorece al memético."
+                version_recomendada = "memetico"
+                razon = (f"El algoritmo memético es RECOMENDADO según score balanceado "
+                        f"({mejora_score_balanceado:+.2f}%). Mejora el score agregado en {mejora_score:+.2f}% "
+                        f"con overhead computacional de {overhead:+.2f}%. Aunque la mejora es pequeña, "
+                        f"el balance calidad/tiempo favorece al memético.")
         else:
             version_recomendada = "estandar"
-            razon = f"El algoritmo ESTÁNDAR es RECOMENDADO según score balanceado ({mejora_score_balanceado:+.2f}%). El memético mejora el score en {mejora_score:+.2f}% pero el overhead computacional ({overhead:+.2f}%) no justifica su uso. El estándar ofrece mejor balance calidad/tiempo."
+            razon = (f"El algoritmo ESTÁNDAR es RECOMENDADO según score balanceado "
+                    f"({mejora_score_balanceado:+.2f}%). El memético mejora el score en {mejora_score:+.2f}% "
+                    f"pero el overhead computacional ({overhead:+.2f}%) no justifica su uso. "
+                    f"El estándar ofrece mejor balance calidad/tiempo.")
         
         print(f"\n🎯 VERSIÓN RECOMENDADA: {version_recomendada.upper()}")
         print(f"   Razón: {razon}")
