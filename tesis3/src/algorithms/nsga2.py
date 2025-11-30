@@ -596,7 +596,11 @@ def nsga2(config, metodo_cruce, metodo_mutacion,
                 frente_actual, fitness_frente_actual, epsilon_filtro
             )
             
-            if len(frente_filtrado) < frente_size:
+            # CRÍTICO: Actualizar frente_size SIEMPRE con el tamaño del frente filtrado
+            # incluso si no se eliminaron soluciones (para asegurar consistencia)
+            frente_size_nuevo = len(frente_filtrado)
+            
+            if frente_size_nuevo < frente_size:
                 # Actualizar el frente con las soluciones filtradas
                 genes_filtrados = {
                     tuple(tuple(row) for row in sol.genes)
@@ -612,6 +616,27 @@ def nsga2(config, metodo_cruce, metodo_mutacion,
                 
                 # CRÍTICO: Actualizar frentes y frente_size con el tamaño REAL del frente filtrado
                 frentes[0] = indices_frente_filtrado
+                
+                # Verificar que el tamaño sea correcto
+                if len(frentes[0]) != frente_size_nuevo:
+                    # Si no coincide, usar el tamaño del frente filtrado directamente
+                    frente_size_nuevo = len(frente_filtrado)
+                    # Reconstruir indices_frente_filtrado para que coincida
+                    genes_a_indices = {}
+                    for idx in frentes[0]:
+                        genes_sol = tuple(
+                            tuple(row) for row in poblacion[idx].genes
+                        )
+                        genes_a_indices[genes_sol] = idx
+                    
+                    indices_frente_filtrado = []
+                    for sol in frente_filtrado:
+                        genes_sol = tuple(tuple(row) for row in sol.genes)
+                        if genes_sol in genes_a_indices:
+                            indices_frente_filtrado.append(genes_a_indices[genes_sol])
+                    
+                    frentes[0] = indices_frente_filtrado
+                
                 frente_size = len(frentes[0])
                 
                 if verbose and (gen % 50 == 0 or gen < 10):
@@ -623,10 +648,13 @@ def nsga2(config, metodo_cruce, metodo_mutacion,
                             f"({len(frente_actual)} -> {len(frente_filtrado)}), "
                             f"frente_size={frente_size}"
                         )
+            else:
+                # Aunque no se eliminaron soluciones, asegurar que frente_size sea correcto
+                frente_size = frente_size_nuevo
         
-        # CRÍTICO: Guardar historial DESPUÉS del filtro del frente (que se aplica siempre)
-        # pero ANTES del filtro post-selección de población (que es opcional)
+        # CRÍTICO: Guardar historial AL FINAL de cada generación, después de TODOS los filtros
         # Esto asegura que el historial refleje el tamaño REAL del frente filtrado
+        # NOTA: frente_size ya está actualizado después del filtro post-selección del frente
         historial_frentes.append(frente_size)
         
         # Aplicar filtro post-selección adicional para mantener población limpia (opcional)
