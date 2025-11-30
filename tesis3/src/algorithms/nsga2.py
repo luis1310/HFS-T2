@@ -571,7 +571,65 @@ def nsga2(config, metodo_cruce, metodo_mutacion,
         poblacion = seleccion_nsga2(poblacion_combinada, fitness_combinada, tamano_poblacion, 
                                     epsilon_filtro=epsilon_filtro)
         
-        # Aplicar filtro post-selección para mantener población limpia
+        # Recalcular frentes después de la selección para obtener tamaño real
+        fitness_poblacion_actual = []
+        for ind in poblacion:
+            genes_key = tuple(tuple(row) for row in ind.genes)
+            if genes_key in fitness_cache:
+                fitness_poblacion_actual.append(fitness_cache[genes_key])
+            else:
+                fit = fitness_multiobjetivo(ind, config)
+                fitness_cache[genes_key] = fit
+                fitness_poblacion_actual.append(fit)
+        frentes = clasificacion_no_dominada(poblacion, fitness_poblacion_actual)
+        frente_size = len(frentes[0])
+        
+        # Aplicar filtro adicional al frente después de selección SIEMPRE
+        # Esto previene que el frente se rellene con soluciones similares
+        # CRÍTICO: Aplicar siempre después de cada selección para mantener frente limpio
+        frente_size_antes_filtro = frente_size
+        if epsilon_filtro > 0 and frente_size > 1:
+            frente_actual = [poblacion[i] for i in frentes[0]]
+            fitness_frente_actual = [fitness_poblacion_actual[i] for i in frentes[0]]
+            
+            frente_filtrado, fitness_filtrado = filtrar_soluciones_similares(
+                frente_actual, fitness_frente_actual, epsilon_filtro
+            )
+            
+            if len(frente_filtrado) < frente_size:
+                # Actualizar el frente con las soluciones filtradas
+                genes_filtrados = {
+                    tuple(tuple(row) for row in sol.genes)
+                    for sol in frente_filtrado
+                }
+                indices_frente_filtrado = []
+                for idx in frentes[0]:
+                    genes_sol = tuple(
+                        tuple(row) for row in poblacion[idx].genes
+                    )
+                    if genes_sol in genes_filtrados:
+                        indices_frente_filtrado.append(idx)
+                
+                # CRÍTICO: Actualizar frentes y frente_size con el tamaño REAL del frente filtrado
+                frentes[0] = indices_frente_filtrado
+                frente_size = len(frentes[0])
+                
+                if verbose and (gen % 50 == 0 or gen < 10):
+                    eliminadas_post = len(frente_actual) - len(frente_filtrado)
+                    if eliminadas_post > 0:
+                        print(
+                            f"Gen {gen+1:3d} | Filtro post-selección: "
+                            f"{eliminadas_post} soluciones eliminadas "
+                            f"({len(frente_actual)} -> {len(frente_filtrado)}), "
+                            f"frente_size={frente_size}"
+                        )
+        
+        # CRÍTICO: Guardar historial DESPUÉS del filtro del frente (que se aplica siempre)
+        # pero ANTES del filtro post-selección de población (que es opcional)
+        # Esto asegura que el historial refleje el tamaño REAL del frente filtrado
+        historial_frentes.append(frente_size)
+        
+        # Aplicar filtro post-selección adicional para mantener población limpia (opcional)
         # OPTIMIZACIÓN: Usar frecuencia adaptativa (igual que filtro del frente)
         aplicar_filtro_post = (epsilon_filtro > 0 and 
                               (gen + 1) % frecuencia_filtro == 0 and 
@@ -622,18 +680,32 @@ def nsga2(config, metodo_cruce, metodo_mutacion,
                 poblacion = poblacion_filtrada[:tamano_poblacion]
             else:
                 poblacion = poblacion_filtrada[:tamano_poblacion]
-        
-        # Actualizar historial después de todos los filtros
-        # Recalcular frentes para obtener tamaño real del frente
-        if reclasificar or aplicar_filtro_post:
-            fitness_actual = []
-            for ind in poblacion:
-                genes_key = tuple(tuple(row) for row in ind.genes)
-                fitness_actual.append(fitness_cache[genes_key])
-            frentes_actual = clasificacion_no_dominada(poblacion, fitness_actual)
-            frente_size = len(frentes_actual[0])
-        
-        historial_frentes.append(frente_size)
+                # Recalcular frentes después del filtro post-selección de población
+                fitness_actual = []
+                for ind in poblacion:
+                    genes_key = tuple(tuple(row) for row in ind.genes)
+                    fitness_actual.append(fitness_cache[genes_key])
+                frentes = clasificacion_no_dominada(poblacion, fitness_actual)
+                frente_size = len(frentes[0])
+                
+                # Aplicar filtro al frente nuevamente después del filtro de población
+                if epsilon_filtro > 0 and frente_size > 1:
+                    frente_actual = [poblacion[i] for i in frentes[0]]
+                    fitness_frente_actual = [fitness_actual[i] for i in frentes[0]]
+                    frente_filtrado, _ = filtrar_soluciones_similares(
+                        frente_actual, fitness_frente_actual, epsilon_filtro
+                    )
+                    genes_filtrados = {
+                        tuple(tuple(row) for row in sol.genes)
+                        for sol in frente_filtrado
+                    }
+                    indices_frente_filtrado = []
+                    for idx in frentes[0]:
+                        genes_sol = tuple(tuple(row) for row in poblacion[idx].genes)
+                        if genes_sol in genes_filtrados:
+                            indices_frente_filtrado.append(idx)
+                    frentes[0] = indices_frente_filtrado
+                    frente_size = len(frentes[0])
     
     # Calcular fitness final usando cache
     fitness_final = []
