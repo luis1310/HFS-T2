@@ -21,25 +21,27 @@ El espacio de búsqueda consideró los siguientes rangos de hiperparámetros:
 
 \subsubsection{Mejor Configuración Encontrada}
 
-La mejor configuración identificada mediante el score agregado (promedio sobre 30 semillas) fue:
+La mejor configuración identificada mediante el score balanceado (que considera tanto el score agregado como el tiempo de ejecución) fue:
 
 \begin{itemize}
-    \item \textbf{Tamaño de población}: 150 individuos
-    \item \textbf{Número de generaciones}: 600 generaciones
-    \item \textbf{Probabilidad de cruce}: 0.7
+    \item \textbf{Tamaño de población}: 100 individuos
+    \item \textbf{Número de generaciones}: 400 generaciones
+    \item \textbf{Probabilidad de cruce}: 0.6
     \item \textbf{Probabilidad de mutación}: 0.75
     \item \textbf{Búsqueda local cada}: 20 generaciones
     \item \textbf{Iteraciones locales}: 5 iteraciones
 \end{itemize}
 
-Esta configuración obtuvo un score agregado promedio de 2.5981, con las siguientes métricas promedio:
+Esta configuración obtuvo un score agregado promedio de 2.5997, con las siguientes métricas promedio:
 \begin{itemize}
-    \item Makespan: 1552.06 minutos
-    \item Balance: 279.06
-    \item Energía: 624.31 kWh
-    \item Tiempo de ejecución: 73.88 segundos
-    \item Tamaño del frente de Pareto: 149.73 soluciones
+    \item Makespan: 1556.77 minutos
+    \item Balance: 278.65
+    \item Energía: 624.73 kWh
+    \item Tiempo de ejecución: 27.23 segundos
+    \item Tamaño del frente de Pareto: 100 soluciones
 \end{itemize}
+
+Esta configuración fue seleccionada considerando un balance entre la calidad de las soluciones (score agregado) y el tiempo de ejecución, proporcionando un rendimiento óptimo con un tiempo de ejecución significativamente menor (27.23 segundos vs. 73.88 segundos) comparado con configuraciones que priorizan únicamente el score agregado, manteniendo una calidad de soluciones comparable.
 
 \subsection{Comparación de Operadores}
 
@@ -158,15 +160,15 @@ Para facilitar el análisis de las relaciones entre pares de objetivos, se gener
 
 \subsubsection{Evolución del Frente}
 
-La evolución del tamaño del frente de Pareto a lo largo de las 600 generaciones muestra un patrón característico:
+La evolución del tamaño del frente de Pareto a lo largo de las 400 generaciones muestra un patrón característico:
 
 \begin{itemize}
-    \item \textbf{Generaciones iniciales (0-100)}: El frente crece rápidamente desde valores pequeños (10-20 soluciones) hasta valores elevados. Sin embargo, gracias al filtro de similitud aplicado periódicamente, el tamaño del frente nunca alcanza el máximo teórico de la población (150 soluciones), ya que las soluciones similares son eliminadas antes de que se acumulen.
-    \item \textbf{Generaciones intermedias (100-300)}: El frente se mantiene en valores altos pero controlados, con reducciones periódicas cuando se aplica el filtro de similitud (cada 30 generaciones). Estas reducciones eliminan soluciones redundantes, manteniendo solo aquellas que son significativamente diferentes en el espacio objetivo.
-    \item \textbf{Generaciones avanzadas (300-600)}: El tamaño del frente se estabiliza alrededor de 60-90 soluciones únicas después de cada filtrado, mostrando que el algoritmo ha convergido hacia un conjunto de soluciones no dominadas bien diversificado. El filtro asegura que estas soluciones representen compromisos genuinamente diferentes entre los tres objetivos.
+    \item \textbf{Generaciones iniciales (0-100)}: El frente crece rápidamente desde valores pequeños (10-20 soluciones) hasta valores elevados. Sin embargo, gracias al filtro de similitud aplicado periódicamente, el tamaño del frente nunca alcanza el máximo teórico de la población (100 soluciones), ya que las soluciones similares son eliminadas antes de que se acumulen.
+    \item \textbf{Generaciones intermedias (100-250)}: El frente se mantiene en valores altos pero controlados, con reducciones periódicas cuando se aplica el filtro de similitud (cada 30 generaciones). Estas reducciones eliminan soluciones redundantes, manteniendo solo aquellas que son significativamente diferentes en el espacio objetivo.
+    \item \textbf{Generaciones avanzadas (250-400)}: El tamaño del frente se estabiliza alrededor de 60-90 soluciones únicas después de cada filtrado, mostrando que el algoritmo ha convergido hacia un conjunto de soluciones no dominadas bien diversificado. El filtro asegura que estas soluciones representen compromisos genuinamente diferentes entre los tres objetivos.
 \end{itemize}
 
-El filtro de similitud ($\epsilon = 1\%$) aplicado periódicamente asegura que el frente final contenga solo soluciones significativamente diferentes, evitando la acumulación de soluciones prácticamente idénticas. Esto es fundamental porque, aunque el algoritmo podría generar hasta 150 soluciones no dominadas, el filtro previene que se alcance este máximo al eliminar soluciones redundantes que no aportan diversidad real al conjunto de alternativas disponibles para el decisor.
+El filtro de similitud ($\epsilon = 1\%$) aplicado periódicamente asegura que el frente final contenga solo soluciones significativamente diferentes, evitando la acumulación de soluciones prácticamente idénticas. Esto es fundamental porque, aunque el algoritmo podría generar hasta 100 soluciones no dominadas, el filtro previene que se alcance este máximo al eliminar soluciones redundantes que no aportan diversidad real al conjunto de alternativas disponibles para el decisor.
 
 La evolución del tamaño del frente de Pareto a lo largo de las generaciones se visualiza en la Figura \ref{fig:evolucion_frente}, donde se puede observar claramente el patrón descrito: crecimiento inicial, estabilización con reducciones periódicas debido al filtro, y convergencia final hacia un conjunto de soluciones únicas bien diversificado.
 
@@ -195,8 +197,9 @@ Estas visualizaciones facilitan la comprensión del frente de Pareto y ayudan al
 Las optimizaciones implementadas (caché de fitness, clasificación adaptativa, búsqueda local selectiva) lograron reducir significativamente el tiempo de ejecución:
 
 \begin{itemize}
-    \item \textbf{Tiempo promedio por ejecución}: 25-30 segundos (con la mejor configuración)
-    \item \textbf{Reducción respecto a versión inicial}: Aproximadamente 60\% de reducción (de ~60 segundos a ~25 segundos)
+    \item \textbf{Tiempo promedio por ejecución}: 27.23 segundos (con la mejor configuración: 100 individuos, 400 generaciones)
+    \item \textbf{Reducción respecto a versión inicial}: Aproximadamente 60\% de reducción (de ~60 segundos a ~27 segundos)
+    \item \textbf{Reducción respecto a configuración de mayor calidad}: La configuración seleccionada (100, 400) reduce el tiempo de ejecución en 63\% comparado con configuraciones de mayor calidad pero más lentas (150, 600: 73.88 segundos), manteniendo una calidad de soluciones comparable
     \item \textbf{Eficiencia del caché}: El caché de fitness evita aproximadamente el 30-40\% de recálculos en generaciones avanzadas
 \end{itemize}
 
