@@ -25,17 +25,12 @@ print("="*70)
 
 def cargar_configuracion():
     """Carga configuración desde config.yaml"""
-    with open('tesis3/config/config.yaml', 'r') as f:
-        config_data = yaml.safe_load(f)
+    # Usar el método estándar como los otros scripts
+    config = ProblemConfig.from_yaml("tesis3/config/config.yaml")
     
-    problem_config = config_data['problem']
-    config = ProblemConfig(
-        num_pedidos=problem_config['num_pedidos'],
-        num_etapas=problem_config['num_etapas'],
-        maquinas_por_etapa=problem_config['maquinas_por_etapa'],
-        tiempos_procesamiento=problem_config['tiempos_procesamiento'],
-        potencias=problem_config['potencias']
-    )
+    # Cargar configuración completa para obtener parámetros del algoritmo
+    with open("tesis3/config/config.yaml", 'r') as f:
+        config_data = yaml.safe_load(f)
     
     return config, config_data['algorithm']
 
@@ -68,10 +63,14 @@ def calcular_metricas(frente_pareto, fitness_pareto, config):
     prom_bal = np.mean(balances)
     prom_eng = np.mean(energias)
     
-    # Valores de referencia (normalización)
-    ref_mk = 2000.0
-    ref_bal = 400.0
-    ref_eng = 800.0
+    # Cargar valores de referencia desde config.yaml
+    with open('tesis3/config/config.yaml', 'r') as f:
+        config_completa = yaml.safe_load(f)
+    valores_ref = config_completa['experiments']['valores_referencia']
+    
+    ref_mk = valores_ref['makespan']
+    ref_bal = valores_ref['balance']
+    ref_eng = valores_ref['energia']
     
     score_agregado = (prom_mk / ref_mk) + (prom_bal / ref_bal) + (prom_eng / ref_eng)
     
@@ -100,10 +99,11 @@ def ejecutar_semilla_ablacion(args):
     random.seed(semilla)
     np.random.seed(semilla)
     
-    tamano_poblacion = algoritmo_config['poblacion']
-    num_generaciones = algoritmo_config['generaciones']
-    prob_cruce = algoritmo_config['prob_cruce']
-    prob_mutacion = algoritmo_config['prob_mutacion']
+    # Acceder a parámetros de NSGA2 desde config
+    tamano_poblacion = algoritmo_config['nsga2']['tamano_poblacion']
+    num_generaciones = algoritmo_config['nsga2']['num_generaciones']
+    prob_cruce = algoritmo_config['nsga2']['prob_cruce']
+    prob_mutacion = algoritmo_config['nsga2']['prob_mutacion']
     
     # Seleccionar operadores según variante
     metodo_cruce = variante.get('cruce', 'uniforme')
@@ -361,9 +361,8 @@ def main():
     config, algoritmo_config = cargar_configuracion()
     variantes = generar_variantes()
     
-    # Número de semillas: usar al menos 10 para resultados estadísticamente significativos
-    # Idealmente 30 como en el tunning, pero para ablación 10-15 es razonable
-    num_semillas = 10
+    # Número de semillas: usar 30 como en el tunning para resultados estadísticamente significativos
+    num_semillas = 30
     semillas = list(range(42, 42 + num_semillas))
     
     print(f"\nConfiguración del estudio:")
