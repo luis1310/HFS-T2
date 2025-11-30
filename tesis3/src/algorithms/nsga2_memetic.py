@@ -111,7 +111,7 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
         fitness_cache[genes_key] = fit
     frentes = clasificacion_no_dominada(poblacion, fitness_inicial)
     frente_size = len(frentes[0])
-
+    
     for gen in range(num_generaciones):
         # OPTIMIZACIÓN: En generaciones avanzadas, reducir operaciones costosas
         # Después de 50% de generaciones
@@ -144,7 +144,7 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
             reclasificar = (gen % 3 == 0) or poblacion_cambio or (gen == num_generaciones - 1)
         
         if reclasificar:
-            frentes = clasificacion_no_dominada(poblacion, fitness_poblacion)
+        frentes = clasificacion_no_dominada(poblacion, fitness_poblacion)
             frente_size = len(frentes[0])
         
         # NO guardar historial aquí - se guardará al final después de todos los filtros
@@ -209,7 +209,7 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
                 or len(indices_a_mejorar) >= frente_size * 0.6
             )
             if debe_reclasificar:
-                frentes = clasificacion_no_dominada(poblacion, fitness_poblacion)
+            frentes = clasificacion_no_dominada(poblacion, fitness_poblacion)
                 frente_size = len(frentes[0])
         
         # Aplicar filtro de similitud cada k_filtro generaciones al frente de Pareto
@@ -348,7 +348,7 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
                     )
                     if genes_sol in genes_filtrados:
                         indices_frente_filtrado.append(idx)
-                
+    
                 # CRÍTICO: Actualizar frentes y frente_size con el tamaño REAL del frente filtrado
                 frentes[0] = indices_frente_filtrado
                 frente_size_nuevo = len(frentes[0])
