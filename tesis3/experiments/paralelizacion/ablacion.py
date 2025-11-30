@@ -1,30 +1,26 @@
-"""
-Estudio de ablación para identificar componentes más relevantes
-en NSGA2 estándar vs memético
+"""Estudio de ablación con paralelización REAL de semillas"""
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-Componentes que se pueden comparar:
-1. Operadores genéticos:
-   - Cruce: uniforme vs one-point
-   - Mutación: swap vs insert vs invert
-2. Componentes del algoritmo:
-   - Filtro epsilon (epsilon-filtering)
-   - Búsqueda local (solo memético)
-   - Cache de fitness (solo memético)
-   - Optimizaciones adaptativas (solo memético):
-     * Reducción de frecuencia de clasificación no dominada
-     * Limitación de individuos en búsqueda local
-     * Reducción de frecuencia de filtrado
-"""
-import time
-import csv
-import numpy as np
 from tesis3.src.core.problem import ProblemConfig
 from tesis3.src.operators.crossover import aplicar_cruce
 from tesis3.src.operators.mutation import aplicar_mutacion
 from tesis3.src.algorithms.nsga2 import nsga2
 from tesis3.src.algorithms.nsga2_memetic import nsga2_memetic
 from tesis3.src.fitness.multi_objective import fitness_multiobjetivo
+import numpy as np
+import random
+import time
+import csv
+import multiprocessing as mp
+from concurrent.futures import ProcessPoolExecutor, as_completed
+import psutil
 import yaml
+
+print("="*70)
+print("ESTUDIO DE ABLACIÓN - PARALELIZACIÓN REAL")
+print("="*70)
 
 
 def cargar_configuracion():
@@ -88,19 +84,18 @@ def calcular_metricas(frente_pareto, fitness_pareto, config):
     }
 
 
-def ejecutar_ablacion_nsga2(config, algoritmo_config, variante, semilla=42):
+def ejecutar_semilla_ablacion(args):
     """
-    Ejecuta una variante del algoritmo con componentes desactivados
+    Ejecuta una semilla específica para una variante (función para paralelización)
     
     Args:
-        config: ProblemConfig
-        algoritmo_config: dict con parámetros del algoritmo
-        variante: dict con flags de componentes activados/desactivados
-        semilla: semilla aleatoria
+        args: tuple (config, algoritmo_config, variante, semilla)
     
     Returns:
-        dict con resultados (tiempo, métricas)
+        dict con resultados (tiempo, métricas, variante, semilla)
     """
+    config, algoritmo_config, variante, semilla = args
+    
     import random
     random.seed(semilla)
     np.random.seed(semilla)
@@ -170,7 +165,11 @@ def ejecutar_ablacion_nsga2(config, algoritmo_config, variante, semilla=42):
     return {
         'tiempo': tiempo,
         **metricas,
-        'historial': historial
+        'historial': historial,
+        'variante': variante['nombre'],
+        'semilla': semilla,
+        'cruce': variante.get('cruce', 'uniforme'),
+        'mutacion': variante.get('mutacion', 'swap')
     }
 
 
@@ -308,11 +307,56 @@ def generar_variantes():
     return variantes
 
 
+def detectar_capacidades_sistema():
+    """Detecta núcleos físicos y lógicos del sistema"""
+    nucleos_fisicos = psutil.cpu_count(logical=False)
+    nucleos_logicos = psutil.cpu_count(logical=True)
+    memoria = psutil.virtual_memory()
+    memoria_gb = memoria.total / (1024**3)
+    return nucleos_fisicos, nucleos_logicos, memoria_gb
+
+
 def main():
-    """Ejecuta estudio de ablación completo"""
+    """Ejecuta estudio de ablación completo con paralelización"""
     print("="*80)
     print("ESTUDIO DE ABLACIÓN: Componentes Relevantes en NSGA2")
+    print("PARALELIZADO - Ejecución rápida con múltiples núcleos")
     print("="*80)
+    
+    # Detectar capacidades del sistema
+    nucleos_fisicos, nucleos_logicos, memoria_gb = detectar_capacidades_sistema()
+    
+    print("\nSeleccione cuántos núcleos usar para la paralelización:")
+    print(f"1. Núcleos físicos ({nucleos_fisicos}) - Recomendado")
+    print(f"2. Núcleos lógicos ({nucleos_logicos}) - Máximo rendimiento")
+    print(f"3. Seguro (6 núcleos) - Para evitar sobrecalentamiento")
+    print(f"4. Personalizado")
+    
+    while True:
+        try:
+            opcion = input("Ingrese opción (1-4): ").strip()
+            if opcion == "1":
+                num_nucleos = nucleos_fisicos
+                break
+            elif opcion == "2":
+                num_nucleos = nucleos_logicos
+                break
+            elif opcion == "3":
+                num_nucleos = min(6, nucleos_fisicos)
+                print(f"Usando {num_nucleos} núcleos para evitar sobrecalentamiento")
+                break
+            elif opcion == "4":
+                num_nucleos = int(input(f"Ingrese número de núcleos (1-{nucleos_logicos}): "))
+                if 1 <= num_nucleos <= nucleos_logicos:
+                    break
+                else:
+                    print("Número inválido")
+            else:
+                print("Opción inválida")
+        except ValueError:
+            print("Ingrese un número válido")
+    
+    print(f"\nUsando {num_nucleos} núcleos para paralelización")
     
     config, algoritmo_config = cargar_configuracion()
     variantes = generar_variantes()
@@ -322,35 +366,81 @@ def main():
     num_semillas = 10
     semillas = list(range(42, 42 + num_semillas))
     
-    print(f"Configuración del estudio:")
+    print(f"\nConfiguración del estudio:")
     print(f"  Variantes a probar: {len(variantes)}")
     print(f"  Semillas por variante: {num_semillas}")
     print(f"  Total ejecuciones: {len(variantes) * num_semillas}")
     print(f"  Semillas: {semillas}")
     
-    resultados = []
-    
+    # Crear todas las tareas (variante, semilla)
+    tareas = []
     for variante in variantes:
-        print(f"\n{'='*80}")
-        print(f"Variante: {variante['nombre']}")
-        print(f"Descripción: {variante['descripcion']}")
-        print(f"{'='*80}")
-        
-        resultados_variante = []
-        
         for semilla in semillas:
-            print(f"  Semilla {semilla}...", end=' ', flush=True)
-            resultado = ejecutar_ablacion_nsga2(
-                config, algoritmo_config, variante, semilla
-            )
-            resultado['variante'] = variante['nombre']
-            resultado['semilla'] = semilla
-            resultado['cruce'] = variante.get('cruce', 'uniforme')
-            resultado['mutacion'] = variante.get('mutacion', 'swap')
-            resultados_variante.append(resultado)
-            print(f"Tiempo: {resultado['tiempo']:.2f}s, "
-                  f"Score: {resultado['score_agregado']:.4f}")
+            tareas.append((config, algoritmo_config, variante, semilla))
+    
+    print(f"\nTiempo estimado: {len(tareas) * 25 / num_nucleos / 60:.1f} minutos "
+          f"(asumiendo ~25s por ejecución)")
+    
+    # Confirmar ejecución
+    confirmar = input(f"\n¿Continuar con {len(tareas)} ejecuciones? (s/n): ").lower()
+    if confirmar != 's':
+        print("Ejecución cancelada.")
+        return
+    
+    # Ejecutar en paralelo
+    todos_resultados = []
+    inicio_total = time.time()
+    
+    print(f"\n{'='*80}")
+    print(f"INICIANDO {len(tareas)} TAREAS EN {num_nucleos} NÚCLEOS...")
+    print(f"Timestamp inicio: {time.strftime('%H:%M:%S')}")
+    print(f"{'='*80}\n")
+    
+    with ProcessPoolExecutor(max_workers=num_nucleos) as executor:
+        # Enviar todas las tareas
+        futures = []
+        for tarea in tareas:
+            futures.append(executor.submit(ejecutar_semilla_ablacion, tarea))
         
+        # Procesar resultados conforme se completan
+        for i, future in enumerate(as_completed(futures)):
+            try:
+                resultado = future.result()
+                todos_resultados.append(resultado)
+                
+                # Mostrar progreso
+                progreso = (i+1) / len(tareas) * 100
+                tiempo_transcurrido = time.time() - inicio_total
+                tiempo_por_ejecucion = tiempo_transcurrido / (i+1)
+                tiempo_restante = tiempo_por_ejecucion * (len(tareas) - i-1)
+                
+                timestamp = time.strftime('%H:%M:%S')
+                print(f"  [{progreso:5.1f}%] {i+1:4d}/{len(tareas)} - "
+                      f"{resultado['variante']:<30} Semilla {resultado['semilla']:<3} - "
+                      f"Tiempo: {resultado['tiempo']:.2f}s - "
+                      f"Score: {resultado['score_agregado']:.4f} - "
+                      f"Restante: {tiempo_restante/60:.1f}min")
+            except Exception as e:
+                print(f"  [ERROR] Tarea falló: {e}")
+    
+    tiempo_total = time.time() - inicio_total
+    print(f"\n{'='*80}")
+    print(f"EJECUCIÓN COMPLETADA")
+    print(f"Tiempo total: {tiempo_total/60:.1f} minutos")
+    print(f"{'='*80}\n")
+    
+    # Agrupar resultados por variante y calcular promedios
+    resultados_por_variante = {}
+    for resultado in todos_resultados:
+        variante_nombre = resultado['variante']
+        if variante_nombre not in resultados_por_variante:
+            resultados_por_variante[variante_nombre] = []
+        resultados_por_variante[variante_nombre].append(resultado)
+    
+    resultados = []
+    resultados_resumen = []
+    
+    for variante_nombre, resultados_variante in resultados_por_variante.items():
         # Calcular promedios
         prom_tiempo = np.mean([r['tiempo'] for r in resultados_variante])
         prom_score = np.mean([r['score_agregado'] for r in resultados_variante])
@@ -359,9 +449,15 @@ def main():
         prom_energia = np.mean([r['energia'] for r in resultados_variante])
         prom_tamano_frente = np.mean([r['tamano_frente'] for r in resultados_variante])
         
-        resultados.append({
-            'variante': variante['nombre'],
-            'descripcion': variante['descripcion'],
+        # Buscar descripción de la variante
+        descripcion = next(
+            (v['descripcion'] for v in variantes if v['nombre'] == variante_nombre),
+            variante_nombre
+        )
+        
+        resultados_resumen.append({
+            'variante': variante_nombre,
+            'descripcion': descripcion,
             'prom_tiempo': prom_tiempo,
             'prom_score': prom_score,
             'prom_makespan': prom_makespan,
