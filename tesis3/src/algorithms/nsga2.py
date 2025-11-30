@@ -587,7 +587,6 @@ def nsga2(config, metodo_cruce, metodo_mutacion,
         # Aplicar filtro adicional al frente después de selección SIEMPRE
         # Esto previene que el frente se rellene con soluciones similares
         # CRÍTICO: Aplicar siempre después de cada selección para mantener frente limpio
-        frente_size_antes_filtro = frente_size
         if epsilon_filtro > 0 and frente_size > 1:
             frente_actual = [poblacion[i] for i in frentes[0]]
             fitness_frente_actual = [fitness_poblacion_actual[i] for i in frentes[0]]
