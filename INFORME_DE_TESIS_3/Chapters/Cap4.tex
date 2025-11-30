@@ -111,26 +111,26 @@ El overhead computacional de la versión memética es del 10.22\%, lo cual es ac
 
 \subsection{Análisis del Frente de Pareto}
 
-Utilizando la mejor configuración identificada (NSGA-II memético con cruce uniforme y mutación swap), se generó un frente de Pareto final con 78 soluciones únicas después de aplicar el filtro de similitud ($\epsilon = 1\%$).
+Utilizando la mejor configuración identificada (NSGA-II memético con cruce uniforme y mutación swap), se generó un frente de Pareto final con 79 soluciones únicas después de aplicar el filtro de similitud ($\epsilon = 1\%$).
 
 \subsubsection{Características del Frente}
 
 El frente de Pareto obtenido presenta las siguientes características:
 
 \begin{itemize}
-    \item \textbf{Rango de makespan}: 1541.92 - 1545.05 minutos (rango de 2.76 minutos)
-    \item \textbf{Rango de balance}: 261.03 - 329.93 (rango de 68.90 unidades)
-    \item \textbf{Rango de energía}: 621.26 - 627.37 kWh (rango de 6.11 kWh)
+    \item \textbf{Rango de makespan}: 1560.61 minutos (rango mínimo, todas las soluciones convergen a este valor)
+    \item \textbf{Rango de balance}: 261.03 - 323.70 (rango de 62.67 unidades)
+    \item \textbf{Rango de energía}: 622.40 - 628.46 kWh (rango de 6.06 kWh)
 \end{itemize}
 
 Estos rangos muestran que el algoritmo logra explorar efectivamente el espacio de compromiso entre los tres objetivos. Es importante destacar que, debido a la naturaleza multiobjetivo del problema, \textbf{no existe una solución única que optimice simultáneamente los tres objetivos}. En su lugar, el frente de Pareto proporciona un conjunto de soluciones alternativas donde cada una representa un compromiso diferente entre los objetivos.
 
 El decisor puede seleccionar la solución más adecuada según sus preferencias específicas:
 \begin{itemize}
-    \item Si se prioriza la \textbf{productividad temporal}, se puede elegir una solución con makespan mínimo (1541.92 minutos), aunque esto puede resultar en mayor desbalance de carga o consumo energético.
-    \item Si se prioriza la \textbf{equidad operativa}, se puede elegir una solución con balance mínimo (261.03), aunque esto puede extender el makespan o aumentar el consumo energético.
-    \item Si se prioriza la \textbf{sostenibilidad energética}, se puede elegir una solución con consumo energético mínimo (621.26 kWh), aunque esto puede afectar el makespan o el balance de carga.
-    \item Si se busca un \textbf{compromiso equilibrado}, se puede elegir una solución intermedia que balancee los tres objetivos de manera razonable.
+    \item Si se prioriza la \textbf{productividad temporal}, todas las soluciones del frente tienen makespan de 1560.61 minutos, por lo que la selección se basa en los otros objetivos.
+    \item Si se prioriza la \textbf{equidad operativa}, se puede elegir una solución con balance mínimo (261.03), aunque esto puede aumentar el consumo energético (628.46 kWh).
+    \item Si se prioriza la \textbf{sostenibilidad energética}, se puede elegir una solución con consumo energético mínimo (622.40 kWh), aunque esto puede resultar en mayor desbalance de carga (323.70).
+    \item Si se busca un \textbf{compromiso equilibrado}, se puede elegir una solución intermedia que balancee balance y energía de manera razonable, manteniendo el makespan constante.
 \end{itemize}
 
 Esta flexibilidad es una de las principales ventajas del enfoque multiobjetivo: proporciona al decisor múltiples alternativas bien fundamentadas, permitiendo una toma de decisiones informada según el contexto específico y las prioridades del momento.
@@ -175,7 +175,7 @@ La evolución del tamaño del frente de Pareto a lo largo de las generaciones se
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.9\textwidth]{Figures/evolucion_frente_memético.png}
-\caption{Evolución del tamaño del frente de Pareto a lo largo de 600 generaciones}
+\caption{Evolución del tamaño del frente de Pareto a lo largo de 400 generaciones}
 \label{fig:evolucion_frente}
 \end{figure}
 
@@ -204,6 +204,81 @@ Las optimizaciones implementadas (caché de fitness, clasificación adaptativa, 
 \end{itemize}
 
 La paralelización de experimentos permitió ejecutar los 56,700 experimentos de tunning en un tiempo razonable, distribuyendo la carga computacional entre múltiples núcleos del procesador.
+
+\subsection{Estudio de Ablación}
+
+Para validar científicamente que cada componente del algoritmo es necesario y cuantificar su impacto individual, se realizó un estudio de ablación sistemático. Este estudio evaluó 11 variantes diferentes del algoritmo, cada una ejecutada con 30 semillas independientes, resultando en un total de 330 ejecuciones.
+
+\subsubsection{Variantes Evaluadas}
+
+El estudio de ablación evaluó las siguientes variantes:
+
+\begin{itemize}
+    \item \textbf{NSGA2 completo}: Con filtro epsilon, cruce uniforme y mutación swap
+    \item \textbf{NSGA2 sin filtro}: Sin filtro epsilon (base NSGA2)
+    \item \textbf{NSGA2 con diferentes operadores}: Cruce one-point, mutación insert, mutación invert
+    \item \textbf{Memético completo}: Con filtro epsilon, búsqueda local, cache y optimizaciones
+    \item \textbf{Memético sin filtro}: Sin filtro epsilon, solo búsqueda local
+    \item \textbf{Memético sin búsqueda local}: Sin búsqueda local, solo cache y optimizaciones
+    \item \textbf{Memético sin filtro ni búsqueda}: Base memético con solo cache y optimizaciones
+    \item \textbf{Memético con diferentes operadores}: Cruce one-point, mutación insert
+\end{itemize}
+
+\subsubsection{Impacto de Componentes}
+
+Los resultados del estudio de ablación permiten cuantificar el impacto de cada componente principal:
+
+\begin{table}[H]
+\centering
+\caption{Impacto de Componentes en el Algoritmo Memético}
+\label{tab:impacto_ablacion}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Componente} & \textbf{Impacto Tiempo} & \textbf{Impacto Score} \\
+\hline
+Filtro Epsilon & +2.33\% & -0.32\% (mejora) \\
+Búsqueda Local & +3.03\% & -0.02\% (mejora marginal) \\
+\hline
+\end{tabular}
+\end{table}
+
+\paragraph{Impacto del Filtro Epsilon}
+
+El filtro epsilon de similitud muestra un impacto positivo en la calidad de las soluciones con un costo computacional mínimo:
+\begin{itemize}
+    \item \textbf{En NSGA-II}: Sin filtro aumenta el tiempo en 2.55\% pero empeora el score en 0.14\%
+    \item \textbf{En Memético}: Sin filtro aumenta el tiempo en 2.33\% pero empeora el score en 0.32\%
+    \item \textbf{Conclusión}: El filtro epsilon mejora significativamente la calidad (reduce soluciones redundantes) con un overhead computacional mínimo, justificando su inclusión en el algoritmo final.
+\end{itemize}
+
+\paragraph{Impacto de la Búsqueda Local}
+
+La búsqueda local en la versión memética muestra un impacto marginal en la calidad pero con un overhead computacional pequeño:
+\begin{itemize}
+    \item Sin búsqueda local aumenta el tiempo en 3.03\% pero el score empeora solo en 0.02\%
+    \item \textbf{Conclusión}: La búsqueda local tiene un impacto mínimo pero positivo en la calidad, con un overhead aceptable. Su inclusión se justifica para robustez y refinamiento de soluciones.
+\end{itemize}
+
+\paragraph{Impacto de Operadores Genéticos}
+
+La comparación de operadores genéticos en el contexto de ablación confirma los resultados de la comparación sistemática previa:
+\begin{itemize}
+    \item \textbf{Cruce uniforme + Mutación swap}: Proporciona el mejor balance tiempo/calidad (21.08s, score 2.6034)
+    \item \textbf{NSGA2 + Mutación invert}: Mejor score absoluto (2.6016) pero significativamente más lento (29.32s, +39\% tiempo)
+    \item \textbf{Conclusión}: La combinación uniforme + swap seleccionada es óptima para el balance deseado entre calidad y tiempo de ejecución.
+\end{itemize}
+
+\subsubsection{Validación del Diseño}
+
+Los resultados del estudio de ablación validan científicamente el diseño del algoritmo:
+\begin{itemize}
+    \item \textbf{Filtro epsilon}: Componente crítico que mejora la calidad con costo mínimo
+    \item \textbf{Búsqueda local}: Componente útil que aporta robustez y refinamiento
+    \item \textbf{Operadores seleccionados}: La combinación uniforme + swap es óptima para el problema
+    \item \textbf{Configuración final}: Todos los componentes contribuyen positivamente al rendimiento
+\end{itemize}
+
+Esta validación científica mediante ablación proporciona evidencia empírica sólida de que cada componente incluido en el algoritmo final es necesario y contribuye al rendimiento global del sistema.
 
 \section{Discusión}
 

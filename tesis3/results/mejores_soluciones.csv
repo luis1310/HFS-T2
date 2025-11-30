@@ -1,4 +1,4 @@
 Solucion,Makespan,Balance,Energia,Indice
-Solución 1: Prioriza Makespan,1547.71,274.60,624.37,3
-Solución 2: Prioriza Balance de Carga,1549.48,261.03,627.72,0
-Solución 3: Prioriza Consumo Energético,1550.22,306.36,621.98,1
+Solución 1: Prioriza Makespan,1553.83,263.81,625.98,2
+Solución 2: Prioriza Balance de Carga,1560.67,261.03,628.47,0
+Solución 3: Prioriza Consumo Energético,1555.05,317.89,622.11,1

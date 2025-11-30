@@ -16,6 +16,7 @@ Determinar la **configuración óptima** del algoritmo NSGA-II memético para el
 | 4 | `ejecutar_memetico.py` | SÍ | SÍ (menú interactivo) | SÍ (opcional: 24/32) |
 | 5 | `visualizar_frente_memetico.py` | NO | NO | NO (no necesita) |
 | 5 | `analizar_mejores_soluciones.py` | NO | NO | NO (no necesita) |
+| 6 | `ablacion.py` | SÍ | SÍ (menú interactivo) | SÍ (opcional: 24/32) |
 
 **Nota sobre Fase 4 y 5:**
 - Fase 4 (`ejecutar_memetico.py`): AHORA PARALELIZADO con 30 semillas (60 ejecuciones totales)
@@ -202,6 +203,44 @@ python3 tesis3/experiments/analizar_mejores_soluciones.py
 
 ---
 
+### **FASE 6: Estudio de Ablación (Validación Científica)**
+
+**Objetivo**: Validar científicamente que cada componente del algoritmo es necesario y medir su impacto individual.
+
+**IMPORTANTE**: Esta fase se ejecuta **DESPUÉS** de tener la configuración final. No cambia la configuración, solo la valida y justifica.
+
+#### 6.1 Estudio de Ablación (Paralelizado)
+```bash
+python3 tesis3/experiments/paralelizacion/ablacion.py
+```
+**¿Qué hace?**
+- Evalúa 11 variantes del algoritmo desactivando componentes:
+  - Con/sin filtro epsilon
+  - Con/sin búsqueda local
+  - Diferentes operadores genéticos
+- 30 semillas por variante = 330 ejecuciones totales
+- Tiempo estimado: ~2-3 horas (con 32 núcleos)
+
+**Paralelización:**
+- SÍ está paralelizado
+- SÍ detecta núcleos automáticamente (24 físicos / 32 lógicos)
+- Menú interactivo para seleccionar cuántos núcleos usar
+- Usa ProcessPoolExecutor para paralelización real
+- Recomendado: usar 32 núcleos lógicos para máximo rendimiento
+
+**Resultados:**
+- `tesis3/results/ablacion_detallado_*.csv` - Resultados por semilla
+- `tesis3/results/ablacion_resumen_*.csv` - Promedios por variante
+
+**Acción después:**
+- Analizar impacto de cada componente
+- Documentar resultados en Cap4 (Resultados) y Cap3 (Metodología)
+- Justificar científicamente el diseño del algoritmo
+
+**Nota**: Esta fase es **opcional pero recomendada** para validación científica rigurosa.
+
+---
+
 ## Resumen del Flujo Completo
 
 ```
@@ -228,6 +267,12 @@ python3 tesis3/experiments/analizar_mejores_soluciones.py
    └─> Lee TODO desde config.yaml (operadores + hiperparámetros)
    └─> Generar gráficos del frente de Pareto
    └─> Análisis de mejores soluciones
+
+6. ESTUDIO DE ABLACIÓN (Validación Científica)
+   └─> Lee TODO desde config.yaml (operadores + hiperparámetros)
+   └─> Evalúa impacto de cada componente
+   └─> Valida que cada componente es necesario
+   └─> Documentar en Cap3/Cap4 para justificación científica
 ```
 
 ## Notas Importantes
@@ -338,7 +383,8 @@ Con tu sistema (32 núcleos, 125 GB RAM):
 | 3. Tunning Multiobjetivo | ~22-30 horas |
 | 4. Comparación Estándar vs Memético | ~10-15 minutos |
 | 5. Visualizaciones | ~5-10 minutos |
-| **TOTAL** | **~25-35 horas** |
+| 6. Estudio de Ablación (opcional) | ~2-3 horas |
+| **TOTAL** | **~25-38 horas** |
 
 ## Resumen del Flujo Completo de Configuración
 
@@ -366,6 +412,11 @@ FASE 4: Comparación Estándar vs Memético
 FASE 5: Visualizaciones
   ↓  (Lee TODO desde config.yaml: operadores + hiperparámetros)
   → Genera: gráficos PNG y CSV de análisis
+  ↓
+FASE 6: Estudio de Ablación (Validación Científica)
+  ↓  (Lee TODO desde config.yaml: operadores + hiperparámetros)
+  → Genera: ablacion_resumen_*.csv, ablacion_detallado_*.csv
+  → ACCIÓN: Documentar en Cap3/Cap4 para justificación científica
   ↓
 FIN
 ```

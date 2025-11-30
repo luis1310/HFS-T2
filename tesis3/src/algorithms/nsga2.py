@@ -414,13 +414,62 @@ def nsga2(config, metodo_cruce, metodo_mutacion,
     poblacion = inicializar_poblacion(config, tamano_poblacion)
     historial_frentes = []
     
+    # OPTIMIZACIÓN: Cache de fitness para evitar recálculos
+    fitness_cache = {}
+    
+    # Inicializar frentes en la primera generación
+    fitness_inicial = [fitness_multiobjetivo(ind, config) for ind in poblacion]
+    for ind, fit in zip(poblacion, fitness_inicial):
+        genes_key = tuple(tuple(row) for row in ind.genes)
+        fitness_cache[genes_key] = fit
+    frentes = clasificacion_no_dominada(poblacion, fitness_inicial)
+    frente_size = len(frentes[0])
+    
     for gen in range(num_generaciones):
-        fitness_poblacion = [fitness_multiobjetivo(ind, config) for ind in poblacion]
-        frentes = clasificacion_no_dominada(poblacion, fitness_poblacion)
+        # OPTIMIZACIÓN: En generaciones avanzadas, reducir operaciones costosas
+        # Después de 50% de generaciones
+        es_generacion_avanzada = gen >= num_generaciones * 0.5
+        # Después de 75% de generaciones
+        es_generacion_muy_avanzada = gen >= num_generaciones * 0.75
+        
+        # OPTIMIZACIÓN: Solo evaluar fitness completo si no hay cache previo
+        # En generaciones avanzadas, asumir que la mayoría de individuos no cambiaron
+        fitness_poblacion = []
+        poblacion_cambio = False
+        for ind in poblacion:
+            genes_key = tuple(tuple(row) for row in ind.genes)
+            if genes_key in fitness_cache:
+                fitness_poblacion.append(fitness_cache[genes_key])
+            else:
+                fit = fitness_multiobjetivo(ind, config)
+                fitness_cache[genes_key] = fit
+                fitness_poblacion.append(fit)
+                poblacion_cambio = True
+        
+        # OPTIMIZACIÓN: Solo reclasificar si hubo cambios significativos o cada N generaciones
+        # En generaciones muy avanzadas, reducir frecuencia de clasificación
+        reclasificar = True
+        if es_generacion_muy_avanzada:
+            # Solo reclasificar cada 5 generaciones o si hubo cambios significativos
+            reclasificar = (gen % 5 == 0) or poblacion_cambio or (gen == num_generaciones - 1)
+        elif es_generacion_avanzada:
+            # Solo reclasificar cada 3 generaciones o si hubo cambios
+            reclasificar = (gen % 3 == 0) or poblacion_cambio or (gen == num_generaciones - 1)
+        
+        if reclasificar:
+            frentes = clasificacion_no_dominada(poblacion, fitness_poblacion)
+            frente_size = len(frentes[0])
         
         # Aplicar filtro de similitud cada k generaciones al frente de Pareto
-        # Esto mantiene el frente limpio eliminando soluciones similares
-        if epsilon_filtro > 0 and (gen + 1) % cada_k_filtro == 0 and len(frentes[0]) > 1:
+        # OPTIMIZACIÓN: En generaciones avanzadas, aplicar filtro menos frecuentemente
+        if es_generacion_muy_avanzada:
+            frecuencia_filtro = cada_k_filtro * 3  # Cada 90 generaciones
+        elif es_generacion_avanzada:
+            frecuencia_filtro = cada_k_filtro * 2  # Cada 60 generaciones
+        else:
+            frecuencia_filtro = cada_k_filtro
+        
+        if epsilon_filtro > 0 and (gen + 1) % frecuencia_filtro == 0 and len(frentes[0]) > 1:
             frente_original = [poblacion[i] for i in frentes[0]]
             fitness_frente = [fitness_poblacion[i] for i in frentes[0]]
             
@@ -472,15 +521,26 @@ def nsga2(config, metodo_cruce, metodo_mutacion,
                         metodo_mutacion([nueva_sol], config, prob_mutacion)
                         poblacion[idx_eliminar] = nueva_sol
                 
+                # Actualizar cache para nuevas soluciones
+                for ind in poblacion:
+                    genes_key = tuple(tuple(row) for row in ind.genes)
+                    if genes_key not in fitness_cache:
+                        fit = fitness_multiobjetivo(ind, config)
+                        fitness_cache[genes_key] = fit
+                
                 # Recalcular fitness y frentes después del filtrado
-                fitness_poblacion = [fitness_multiobjetivo(ind, config) for ind in poblacion]
+                fitness_poblacion = []
+                for ind in poblacion:
+                    genes_key = tuple(tuple(row) for row in ind.genes)
+                    fitness_poblacion.append(fitness_cache[genes_key])
                 frentes = clasificacion_no_dominada(poblacion, fitness_poblacion)
+                frente_size = len(frentes[0])
         
-        historial_frentes.append(len(frentes[0]))
+        # NO guardar historial aquí - se guardará al final después de todos los filtros
         
         if verbose and (gen % 50 == 0 or gen == 0):
             print(
-                f"Gen {gen:3d} | Frente Pareto: {len(frentes[0]):3d} individuos"
+                f"Gen {gen:3d} | Frente Pareto: {frente_size:3d} individuos"
             )
         
         descendencia = []
@@ -495,17 +555,26 @@ def nsga2(config, metodo_cruce, metodo_mutacion,
         descendencia = metodo_mutacion(descendencia, config, prob_mutacion)
         
         poblacion_combinada = poblacion + descendencia
-        fitness_combinada = [fitness_multiobjetivo(ind, config) for ind in poblacion_combinada]
+        
+        # OPTIMIZACIÓN: Usar cache para fitness de descendencia
+        fitness_combinada = []
+        for ind in poblacion_combinada:
+            genes_key = tuple(tuple(row) for row in ind.genes)
+            if genes_key in fitness_cache:
+                fitness_combinada.append(fitness_cache[genes_key])
+            else:
+                fit = fitness_multiobjetivo(ind, config)
+                fitness_cache[genes_key] = fit
+                fitness_combinada.append(fit)
         
         # Aplicar filtro durante la selección para mantener solo soluciones únicas dominantes
         poblacion = seleccion_nsga2(poblacion_combinada, fitness_combinada, tamano_poblacion, 
                                     epsilon_filtro=epsilon_filtro)
         
-        # Aplicar filtro adicional solo cada k generaciones y solo si el frente es grande
-        # Esto reduce el costo computacional mientras mantiene el frente limpio
-        # NOTA: El filtro durante selección ya se aplica siempre, este es solo limpieza adicional
+        # Aplicar filtro post-selección para mantener población limpia
+        # OPTIMIZACIÓN: Usar frecuencia adaptativa (igual que filtro del frente)
         aplicar_filtro_post = (epsilon_filtro > 0 and 
-                              (gen + 1) % cada_k_filtro == 0 and 
+                              (gen + 1) % frecuencia_filtro == 0 and 
                               len(poblacion) > 80
                               )  # Solo si hay más de 80 soluciones
         
@@ -553,8 +622,24 @@ def nsga2(config, metodo_cruce, metodo_mutacion,
                 poblacion = poblacion_filtrada[:tamano_poblacion]
             else:
                 poblacion = poblacion_filtrada[:tamano_poblacion]
+        
+        # Actualizar historial después de todos los filtros
+        # Recalcular frentes para obtener tamaño real del frente
+        if reclasificar or aplicar_filtro_post:
+            fitness_actual = []
+            for ind in poblacion:
+                genes_key = tuple(tuple(row) for row in ind.genes)
+                fitness_actual.append(fitness_cache[genes_key])
+            frentes_actual = clasificacion_no_dominada(poblacion, fitness_actual)
+            frente_size = len(frentes_actual[0])
+        
+        historial_frentes.append(frente_size)
     
-    fitness_final = [fitness_multiobjetivo(ind, config) for ind in poblacion]
+    # Calcular fitness final usando cache
+    fitness_final = []
+    for ind in poblacion:
+        genes_key = tuple(tuple(row) for row in ind.genes)
+        fitness_final.append(fitness_cache[genes_key])
     frentes_final = clasificacion_no_dominada(poblacion, fitness_final)
     
     frente_pareto = [poblacion[i] for i in frentes_final[0]]

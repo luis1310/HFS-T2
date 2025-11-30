@@ -1,11 +1,16 @@
 mejor_combinacion_operadores:
   cruce: uniforme
   mutacion: swap
-  nombre: Uniforme + Swap
+  nombre: uniforme + swap
 metricas_promedio:
   score_agregado:
     promedio: 2.6065072793391164
     desviacion_std: 0.008593583129237364
+  score_balanceado:
+    valor: 0.0
+    pesos:
+      score: 0.7
+      tiempo: 0.3
   makespan:
     promedio: 1559.395644373973
     desviacion_std: 3.759073247865485
@@ -17,4 +22,5 @@ metricas_promedio:
     desviacion_std: 0.2088885539981495
   tiempo: 25.986970098813376
   tamano_frente: 100.0
-timestamp: '20251120_170241'
+timestamp: '20251130_093246'
+nota: Recalculado con score balanceado (70% score + 30% tiempo)

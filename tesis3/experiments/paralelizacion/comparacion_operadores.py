@@ -390,17 +390,51 @@ def main():
                 'prom_tamano_frente': prom_tamano_frente
             })
     
-    # Ordenar por score agregado (menor es mejor)
-    configuraciones_analizadas.sort(key=lambda x: x['prom_score'])
+    # Calcular métrica balanceada: combinar score y tiempo (igual que en tunning)
+    # Usamos una combinación ponderada normalizada
+    # Peso: 0.7 para score, 0.3 para tiempo (ajustable)
+    peso_score = 0.7
+    peso_tiempo = 0.3
+    
+    if configuraciones_analizadas:
+        scores = [c['prom_score'] for c in configuraciones_analizadas]
+        tiempos = [c['prom_tiempo'] for c in configuraciones_analizadas]
+        
+        # Normalizar: (valor - min) / (max - min)
+        # Ambos valores normalizados estarán en [0, 1]
+        min_score = min(scores)
+        max_score = max(scores)
+        min_tiempo = min(tiempos)
+        max_tiempo = max(tiempos)
+        
+        # Evitar división por cero
+        rango_score = max_score - min_score if max_score != min_score else 1.0
+        rango_tiempo = max_tiempo - min_tiempo if max_tiempo != min_tiempo else 1.0
+        
+        # Calcular métrica balanceada para cada configuración
+        for config in configuraciones_analizadas:
+            # Normalizar ambos valores a [0, 1] donde 0 = mejor, 1 = peor
+            score_norm = (config['prom_score'] - min_score) / rango_score
+            tiempo_norm = (config['prom_tiempo'] - min_tiempo) / rango_tiempo
+            
+            # Métrica balanceada: combinación lineal ponderada
+            config['score_balanceado'] = (
+                peso_score * score_norm + peso_tiempo * tiempo_norm
+            )
+    
+    # Ordenar por métrica balanceada (menor es mejor)
+    configuraciones_analizadas.sort(key=lambda x: x['score_balanceado'])
     
     print("\nRanking de configuraciones (promedio de {} semillas):".format(num_semillas))
-    print(f"{'Rank':<4} {'Configuración':<20} {'Score':<8} {'MK':<8} {'Bal':<8} {'Eng':<8} {'Tiempo':<8}")
-    print("-"*80)
+    print(f"   Métrica balanceada = {peso_score*100:.0f}% score + {peso_tiempo*100:.0f}% tiempo")
+    print(f"{'Rank':<4} {'Configuración':<20} {'Score':<8} {'Tiempo':<8} {'Balance':<8} {'MK':<8} {'Bal':<8} {'Eng':<8}")
+    print("-"*90)
     
     for i, res in enumerate(configuraciones_analizadas, 1):
         print(f"{i:<4} {res['config_key']:<20} {res['prom_score']:<8.4f} "
+              f"{res['prom_tiempo']:<8.2f} {res['score_balanceado']:<8.4f} "
               f"{res['prom_makespan']:<8.2f} {res['prom_balance']:<8.2f} "
-              f"{res['prom_energia']:<8.2f} {res['prom_tiempo']:<8.2f}")
+              f"{res['prom_energia']:<8.2f}")
     
     # Mejor configuración
     if configuraciones_analizadas:
@@ -410,6 +444,8 @@ def main():
         print("="*70)
         print(f"Configuración: {mejor['config_key']}")
         print(f"Score agregado: {mejor['prom_score']:.4f} ± {mejor['std_score']:.4f}")
+        print(f"Métrica balanceada: {mejor['score_balanceado']:.4f} "
+              f"({peso_score*100:.0f}% score + {peso_tiempo*100:.0f}% tiempo)")
         print(f"Makespan: {mejor['prom_makespan']:.2f} ± {mejor['std_makespan']:.2f}")
         print(f"Balance: {mejor['prom_balance']:.2f} ± {mejor['std_balance']:.2f}")
         print(f"Energía: {mejor['prom_energia']:.2f} ± {mejor['std_energia']:.2f}")
@@ -429,6 +465,10 @@ def main():
                 'score_agregado': {
                     'promedio': float(mejor['prom_score']),
                     'desviacion_std': float(mejor['std_score'])
+                },
+                'score_balanceado': {
+                    'valor': float(mejor['score_balanceado']),
+                    'pesos': {'score': peso_score, 'tiempo': peso_tiempo}
                 },
                 'makespan': {
                     'promedio': float(mejor['prom_makespan']),

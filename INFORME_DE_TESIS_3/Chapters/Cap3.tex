@@ -380,6 +380,25 @@ Paralelamente, se realizan experimentos de comparación sistemática entre los d
 
 Estos experimentos determinan qué combinaciones de operadores proporcionan mejores resultados en términos de calidad del frente de Pareto, diversidad de soluciones y robustez de los algoritmos.
 
+\subsubsection{Estudio de Ablación}
+
+Para validar científicamente que cada componente del algoritmo es necesario y medir su impacto individual, se realizó un estudio de ablación sistemático. Este estudio evalúa el impacto de desactivar componentes específicos del algoritmo, permitiendo cuantificar la contribución de cada elemento al rendimiento final.
+
+El estudio de ablación evalúa 11 variantes diferentes del algoritmo, incluyendo:
+\begin{itemize}
+    \item Variantes con y sin filtro epsilon de similitud
+    \item Variantes con y sin búsqueda local (para la versión memética)
+    \item Diferentes combinaciones de operadores genéticos (cruce uniforme vs. one-point, mutación swap vs. insert vs. invert)
+    \item Comparación entre NSGA-II estándar y memético con diferentes componentes activados/desactivados
+\end{itemize}
+
+Cada variante se ejecuta con 30 semillas independientes para garantizar robustez estadística. Los resultados del estudio de ablación permiten:
+\begin{itemize}
+    \item Cuantificar el impacto de cada componente en el tiempo de ejecución y la calidad de las soluciones
+    \item Justificar científicamente la inclusión de cada componente en el diseño final del algoritmo
+    \item Identificar componentes críticos que deben mantenerse y componentes opcionales que pueden optimizarse
+\end{itemize}
+
 \subsubsection{Criterios de Evaluación}
 La selección de la configuración óptima considera los siguientes criterios:
 \begin{itemize}

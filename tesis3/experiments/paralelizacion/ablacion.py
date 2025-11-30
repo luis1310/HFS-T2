@@ -215,33 +215,9 @@ def generar_variantes():
         'descripcion': 'NSGA2 sin filtro epsilon (base NSGA2)'
     })
     
-    # ===== VARIANTES: Operadores genéticos en NSGA2 =====
-    variantes.append({
-        'nombre': 'NSGA2_one_point',
-        'algoritmo': 'nsga2',
-        'filtro_epsilon': True,
-        'cruce': 'one_point',
-        'mutacion': 'swap',
-        'descripcion': 'NSGA2 con cruce one-point'
-    })
-    
-    variantes.append({
-        'nombre': 'NSGA2_mutacion_insert',
-        'algoritmo': 'nsga2',
-        'filtro_epsilon': True,
-        'cruce': 'uniforme',
-        'mutacion': 'insert',
-        'descripcion': 'NSGA2 con mutación insert'
-    })
-    
-    variantes.append({
-        'nombre': 'NSGA2_mutacion_invert',
-        'algoritmo': 'nsga2',
-        'filtro_epsilon': True,
-        'cruce': 'uniforme',
-        'mutacion': 'invert',
-        'descripcion': 'NSGA2 con mutación invert'
-    })
+    # NOTA: No se incluyen variantes con operadores genéticos diferentes
+    # porque la comparación de operadores ya se realizó en comparacion_operadores.py
+    # La ablación se enfoca en activar/desactivar componentes, no cambiar operadores
     
     # ===== VARIANTES: NSGA2 memético =====
     variantes.append({
@@ -284,26 +260,9 @@ def generar_variantes():
         'descripcion': 'Memético base (≈NSGA2 estándar con cache y optimizaciones)'
     })
     
-    # ===== VARIANTES: Operadores genéticos en memético =====
-    variantes.append({
-        'nombre': 'Memetico_one_point',
-        'algoritmo': 'memetic',
-        'filtro_epsilon': True,
-        'busqueda_local': True,
-        'cruce': 'one_point',
-        'mutacion': 'swap',
-        'descripcion': 'Memético con cruce one-point'
-    })
-    
-    variantes.append({
-        'nombre': 'Memetico_mutacion_insert',
-        'algoritmo': 'memetic',
-        'filtro_epsilon': True,
-        'busqueda_local': True,
-        'cruce': 'uniforme',
-        'mutacion': 'insert',
-        'descripcion': 'Memético con mutación insert'
-    })
+    # NOTA: No se incluyen variantes con operadores genéticos diferentes
+    # porque la comparación de operadores ya se realizó en comparacion_operadores.py
+    # La ablación se enfoca en activar/desactivar componentes, no cambiar operadores
     
     return variantes
 
@@ -488,7 +447,7 @@ def main():
     
     # Ordenar por tiempo
     resultados_resumen = sorted(
-        [r for r in resultados if 'prom_tiempo' in r],
+        resultados_resumen,
         key=lambda x: x['prom_tiempo']
     )
     

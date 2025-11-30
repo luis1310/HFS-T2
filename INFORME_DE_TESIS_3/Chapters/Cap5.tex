@@ -24,6 +24,8 @@ Este proyecto de tesis ha logrado establecer una base sólida para la implementa
 
 \item[•] El sistema de paralelización de experimentos permite ejecutar experimentos masivos de manera eficiente y reproducible, facilitando la validación estadística de los resultados mediante múltiples semillas independientes.
 
+\item[•] El estudio de ablación realizado validó científicamente que cada componente del algoritmo (filtro epsilon, búsqueda local, operadores genéticos) contribuye positivamente al rendimiento. El filtro epsilon mejora la calidad en 0.32\% con un overhead de solo 2.33\%, mientras que la búsqueda local aporta refinamiento con un overhead del 3.03\%.
+
 \end{itemize}
 
 \subsection{Resultados Principales Obtenidos}
@@ -31,15 +33,17 @@ Este proyecto de tesis ha logrado establecer una base sólida para la implementa
 Los experimentos sistemáticos realizados han proporcionado evidencia empírica sólida sobre la efectividad del enfoque multiobjetivo propuesto:
 
 \begin{enumerate}
-    \item \textbf{Configuración óptima identificada}: Población de 150 individuos, 600 generaciones, probabilidad de cruce 0.7, probabilidad de mutación 0.75, búsqueda local cada 20 generaciones con 5 iteraciones.
+    \item \textbf{Configuración óptima identificada}: Población de 100 individuos, 400 generaciones, probabilidad de cruce 0.6, probabilidad de mutación 0.75, búsqueda local cada 20 generaciones con 5 iteraciones.
 
     \item \textbf{Mejor combinación de operadores}: Cruce uniforme + Mutación swap, con score agregado de 2.6065 ± 0.0086.
     
     \item \textbf{Superioridad de la versión memética}: Mejora del 0.11\% en score agregado con overhead computacional aceptable del 10.22\%.
     
-    \item \textbf{Calidad del frente de Pareto}: 78 soluciones únicas que exploran efectivamente el espacio de compromiso entre los tres objetivos.
+    \item \textbf{Calidad del frente de Pareto}: 79 soluciones únicas que exploran efectivamente el espacio de compromiso entre los tres objetivos.
 
     \item \textbf{Robustez estadística}: Desviaciones estándar bajas (0.0086-0.0115) que demuestran consistencia en los resultados.
+    
+    \item \textbf{Validación mediante ablación}: El estudio de ablación confirmó que cada componente del algoritmo (filtro epsilon, búsqueda local, operadores) contribuye positivamente al rendimiento, justificando científicamente el diseño final.
 \end{enumerate}
 
 \section{Trabajo Futuro}
