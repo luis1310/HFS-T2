@@ -561,13 +561,53 @@ def main():
                 'prom_tamano_frente': prom_tamano_frente
             })
     
-    # Ordenar por score agregado (menor es mejor)
-    configuraciones_analizadas.sort(key=lambda x: x['prom_score'])
+    # Calcular métrica balanceada: combinar score y tiempo
+    # Usamos una combinación ponderada normalizada
+    # Peso: 0.7 para score, 0.3 para tiempo (ajustable)
+    peso_score = 0.7
+    peso_tiempo = 0.3
     
-    print("\nTop 10 configuraciones:")
+    if configuraciones_analizadas:
+        scores = [c['prom_score'] for c in configuraciones_analizadas]
+        tiempos = [c['prom_tiempo'] for c in configuraciones_analizadas]
+        
+        # Normalizar: (valor - min) / (max - min)
+        # Ambos valores normalizados estarán en [0, 1]
+        min_score = min(scores)
+        max_score = max(scores)
+        min_tiempo = min(tiempos)
+        max_tiempo = max(tiempos)
+        
+        # Evitar división por cero
+        rango_score = max_score - min_score if max_score != min_score else 1.0
+        rango_tiempo = max_tiempo - min_tiempo if max_tiempo != min_tiempo else 1.0
+        
+        # Calcular métrica balanceada para cada configuración
+        for config in configuraciones_analizadas:
+            # Normalizar ambos valores a [0, 1] donde 0 = mejor, 1 = peor
+            score_norm = (config['prom_score'] - min_score) / rango_score
+            tiempo_norm = (config['prom_tiempo'] - min_tiempo) / rango_tiempo
+            
+            # Métrica balanceada: combinación lineal ponderada
+            # Ambos valores están normalizados y queremos minimizar ambos
+            # La suma ponderada es apropiada porque:
+            # - Ambos están en la misma escala [0, 1]
+            # - Ambos queremos minimizarlos
+            # - El peso permite priorizar uno sobre el otro
+            # Alternativa sería score/tiempo (eficiencia), pero eso penaliza
+            # demasiado configuraciones con tiempo muy bajo
+            config['score_balanceado'] = (
+                peso_score * score_norm + peso_tiempo * tiempo_norm
+            )
+    
+    # Ordenar por métrica balanceada (menor es mejor)
+    configuraciones_analizadas.sort(key=lambda x: x['score_balanceado'])
+    
+    print("\nTop 10 configuraciones (ordenadas por métrica balanceada):")
+    print(f"   Métrica balanceada = {peso_score*100:.0f}% score + {peso_tiempo*100:.0f}% tiempo")
     print(f"{'Rank':<4} {'Pob':<4} {'Gen':<4} {'PC':<5} {'PM':<5} {'K':<3} {'IL':<3} "
-          f"{'Score':<8} {'MK':<8} {'Bal':<8} {'Eng':<8} {'Tiempo':<8}")
-    print("-"*90)
+          f"{'Score':<8} {'Tiempo':<8} {'Balance':<8} {'MK':<8} {'Bal':<8} {'Eng':<8}")
+    print("-"*100)
     
     for i, res in enumerate(configuraciones_analizadas[:10], 1):
         print(f"{i:<4} {res['configuracion']['tamano_poblacion']:<4} "
@@ -576,9 +616,9 @@ def main():
               f"{res['configuracion']['prob_mutacion']:<5.2f} "
               f"{res['configuracion']['cada_k_gen']:<3} "
               f"{res['configuracion']['max_iter_local']:<3} "
-              f"{res['prom_score']:<8.4f} {res['prom_makespan']:<8.2f} "
-              f"{res['prom_balance']:<8.2f} {res['prom_energia']:<8.2f} "
-              f"{res['prom_tiempo']:<8.2f}")
+              f"{res['prom_score']:<8.4f} {res['prom_tiempo']:<8.2f} "
+              f"{res['score_balanceado']:<8.4f} {res['prom_makespan']:<8.2f} "
+              f"{res['prom_balance']:<8.2f} {res['prom_energia']:<8.2f}")
     
     # Mejor configuración
     if configuraciones_analizadas:
@@ -594,10 +634,12 @@ def main():
         print(f"Iteraciones locales: {mejor['configuracion']['max_iter_local']}")
         print(f"\nMétricas promedio:")
         print(f"   Score agregado: {mejor['prom_score']:.4f}")
+        print(f"   Tiempo de ejecución: {mejor['prom_tiempo']:.2f}s")
+        print(f"   Métrica balanceada: {mejor['score_balanceado']:.4f} "
+              f"({peso_score*100:.0f}% score + {peso_tiempo*100:.0f}% tiempo)")
         print(f"   Makespan: {mejor['prom_makespan']:.2f}s")
         print(f"   Balance: {mejor['prom_balance']:.2f}")
         print(f"   Energía: {mejor['prom_energia']:.2f} kWh")
-        print(f"   Tiempo: {mejor['prom_tiempo']:.2f}s")
         
         # Guardar mejor configuración en YAML
         timestamp_final = time.strftime('%Y%m%d_%H%M%S')
