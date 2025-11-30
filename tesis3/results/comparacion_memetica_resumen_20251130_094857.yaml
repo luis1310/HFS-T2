@@ -1,0 +1,46 @@
+estandar:
+  makespan:
+    promedio: 1552.690092915303
+    std: 5.665201434051212
+    min: 1543.0655585436066
+    max: 1564.4595197652202
+  balance:
+    promedio: 281.01402490363
+    std: 1.9517969381093663
+  energia:
+    promedio: 624.166086211389
+    std: 0.42653594168531567
+  score_agregado:
+    promedio: 2.604724300247926
+    std: 0.006968303102051687
+  tiempo_ejecucion:
+    promedio: 16.78376486301422
+    std: 3.4350401729799365
+memetico:
+  makespan:
+    promedio: 1554.654756341036
+    std: 5.496488011687202
+    min: 1543.225765754756
+    max: 1563.653641393798
+  balance:
+    promedio: 280.2404117638301
+    std: 3.144348750470867
+  energia:
+    promedio: 624.3759372382399
+    std: 0.4379772888330305
+  score_agregado:
+    promedio: 2.603427708676009
+    std: 0.01085830602807363
+  tiempo_ejecucion:
+    promedio: 20.31346684296926
+    std: 4.69369725289447
+comparacion:
+  mejora_makespan_pct: -0.12653287572951935
+  mejora_balance_pct: 0.27529342710393917
+  mejora_energia_pct: -0.03362102355234101
+  mejora_score_pct: 0.04977845723609904
+  overhead_computacional_pct: 21.030454184527553
+  version_recomendada: memetico
+  razon: "El algoritmo mem\xE9tico mejora MODERADAMENTE el score agregado en +0.05%,\
+    \ con mejoras en makespan (-0.13%), balance (+0.28%) y energ\xEDa (-0.03%). El\
+    \ overhead computacional (+21.03%) es aceptable."
