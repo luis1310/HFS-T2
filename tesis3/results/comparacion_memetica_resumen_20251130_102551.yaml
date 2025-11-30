@@ -1,0 +1,55 @@
+estandar:
+  makespan:
+    promedio: 1552.6900929153026
+    std: 5.6652014340512125
+    min: 1543.0655585436066
+    max: 1564.4595197652202
+  balance:
+    promedio: 281.01402490363
+    std: 1.951796938109366
+  energia:
+    promedio: 624.166086211389
+    std: 0.42653594168531567
+  score_agregado:
+    promedio: 2.6047243002479257
+    std: 0.006968303102051689
+  tiempo_ejecucion:
+    promedio: 16.717401234308877
+    std: 3.545834797406905
+memetico:
+  makespan:
+    promedio: 1554.654756341036
+    std: 5.496488011687202
+    min: 1543.225765754756
+    max: 1563.653641393798
+  balance:
+    promedio: 280.2404117638301
+    std: 3.144348750470867
+  energia:
+    promedio: 624.3759372382398
+    std: 0.4379772888330305
+  score_agregado:
+    promedio: 2.603427708676009
+    std: 0.010858306028073628
+  tiempo_ejecucion:
+    promedio: 21.818034736315408
+    std: 5.537727952058228
+comparacion:
+  mejora_makespan_pct: -0.1265328757295487
+  mejora_balance_pct: 0.27529342710393917
+  mejora_energia_pct: -0.0336210235523228
+  mejora_score_pct: 0.049778457236082
+  overhead_computacional_pct: 30.51092350130698
+  score_balanceado:
+    estandar: 0.7
+    memetico: 0.3
+    mejora_pct: 57.14285714285714
+    pesos:
+      score: 0.7
+      tiempo: 0.3
+  version_recomendada: estandar
+  razon: "El algoritmo EST\xC1NDAR es RECOMENDADO. Aunque el mem\xE9tico tiene mejor\
+    \ score balanceado (+57.14%), el overhead computacional (+30.51%) NO se justifica\
+    \ porque la mejora en calidad es muy peque\xF1a (+0.050%) y el ratio de eficiencia\
+    \ es muy bajo (0.0016). El est\xE1ndar ofrece mejor eficiencia con calidad pr\xE1\
+    cticamente igual."
