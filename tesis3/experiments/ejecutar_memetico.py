@@ -450,12 +450,39 @@ def main():
         
         overhead = ((np.mean(t_mem) - np.mean(t_std)) / np.mean(t_std)) * 100
         
+        # Calcular score balanceado (70% score + 30% tiempo)
+        peso_score = 0.7
+        peso_tiempo = 0.3
+        
+        # Normalizar scores y tiempos a [0, 1] donde 0 = mejor, 1 = peor
+        min_score = min(np.mean(score_std), np.mean(score_mem))
+        max_score = max(np.mean(score_std), np.mean(score_mem))
+        min_tiempo = min(np.mean(t_std), np.mean(t_mem))
+        max_tiempo = max(np.mean(t_std), np.mean(t_mem))
+        
+        rango_score = max_score - min_score if max_score != min_score else 1.0
+        rango_tiempo = max_tiempo - min_tiempo if max_tiempo != min_tiempo else 1.0
+        
+        score_norm_std = (np.mean(score_std) - min_score) / rango_score
+        tiempo_norm_std = (np.mean(t_std) - min_tiempo) / rango_tiempo
+        score_balanceado_std = peso_score * score_norm_std + peso_tiempo * tiempo_norm_std
+        
+        score_norm_mem = (np.mean(score_mem) - min_score) / rango_score
+        tiempo_norm_mem = (np.mean(t_mem) - min_tiempo) / rango_tiempo
+        score_balanceado_mem = peso_score * score_norm_mem + peso_tiempo * tiempo_norm_mem
+        
+        mejora_score_balanceado = ((score_balanceado_std - score_balanceado_mem) / score_balanceado_std) * 100
+        
         print(f"\nCOMPARACIÓN Y MEJORAS (3 objetivos):")
         print(f"   Mejora en Makespan:       {mejora_mk:+6.2f}%")
         print(f"   Mejora en Balance:        {mejora_bal:+6.2f}%")
         print(f"   Mejora en Energía:        {mejora_eng:+6.2f}%")
         print(f"   Mejora en Score agregado: {mejora_score:+6.2f}%")
         print(f"   Overhead computacional:   {overhead:+6.2f}%")
+        print(f"\nSCORE BALANCEADO ({peso_score*100:.0f}% score + {peso_tiempo*100:.0f}% tiempo):")
+        print(f"   Estándar:  {score_balanceado_std:.4f}")
+        print(f"   Memético:  {score_balanceado_mem:.4f}")
+        print(f"   Mejora:    {mejora_score_balanceado:+6.2f}%")
 
         print(f"\nCONCLUSIONES:")
         if mejora_score > 5:
@@ -470,16 +497,17 @@ def main():
         else:
             print(f"   El overhead computacional es ALTO ({overhead:+.2f}%)")
         
-        # 🎯 DETERMINAR VERSIÓN RECOMENDADA Y RAZÓN
-        if mejora_score > 5:
+        # 🎯 DETERMINAR VERSIÓN RECOMENDADA USANDO SCORE BALANCEADO
+        # El score balanceado considera tanto calidad como tiempo de ejecución
+        if mejora_score_balanceado > 0:
             version_recomendada = "memetico"
-            razon = f"El algoritmo memético mejora SIGNIFICATIVAMENTE el score agregado en {mejora_score:+.2f}%, con mejoras en makespan ({mejora_mk:+.2f}%), balance ({mejora_bal:+.2f}%) y energía ({mejora_eng:+.2f}%). El overhead computacional ({overhead:+.2f}%) es aceptable dado el beneficio obtenido."
-        elif mejora_score > 0:
-            version_recomendada = "memetico"
-            razon = f"El algoritmo memético mejora MODERADAMENTE el score agregado en {mejora_score:+.2f}%, con mejoras en makespan ({mejora_mk:+.2f}%), balance ({mejora_bal:+.2f}%) y energía ({mejora_eng:+.2f}%). El overhead computacional ({overhead:+.2f}%) es aceptable."
+            if mejora_score_balanceado > 2:
+                razon = f"El algoritmo memético es RECOMENDADO según score balanceado ({mejora_score_balanceado:+.2f}%). Mejora el score agregado en {mejora_score:+.2f}% con overhead computacional de {overhead:+.2f}%. El balance calidad/tiempo favorece al memético."
+            else:
+                razon = f"El algoritmo memético es RECOMENDADO según score balanceado ({mejora_score_balanceado:+.2f}%). Mejora el score agregado en {mejora_score:+.2f}% con overhead computacional de {overhead:+.2f}%. Aunque la mejora es pequeña, el balance calidad/tiempo favorece al memético."
         else:
             version_recomendada = "estandar"
-            razon = f"El algoritmo memético NO mejora el score agregado ({mejora_score:+.2f}%). Aunque puede haber mejoras parciales en algunos objetivos, el overhead computacional ({overhead:+.2f}%) no justifica su uso. Se recomienda usar el algoritmo estándar (NSGA-II) que es más eficiente computacionalmente."
+            razon = f"El algoritmo ESTÁNDAR es RECOMENDADO según score balanceado ({mejora_score_balanceado:+.2f}%). El memético mejora el score en {mejora_score:+.2f}% pero el overhead computacional ({overhead:+.2f}%) no justifica su uso. El estándar ofrece mejor balance calidad/tiempo."
         
         print(f"\n🎯 VERSIÓN RECOMENDADA: {version_recomendada.upper()}")
         print(f"   Razón: {razon}")
@@ -532,6 +560,12 @@ def main():
                     'mejora_energia_pct': float(mejora_eng),
                     'mejora_score_pct': float(mejora_score),
                     'overhead_computacional_pct': float(overhead),
+                    'score_balanceado': {
+                        'estandar': float(score_balanceado_std),
+                        'memetico': float(score_balanceado_mem),
+                        'mejora_pct': float(mejora_score_balanceado),
+                        'pesos': {'score': peso_score, 'tiempo': peso_tiempo}
+                    },
                     'version_recomendada': version_recomendada,
                     'razon': razon
                 }
