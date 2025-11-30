@@ -209,7 +209,7 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
                 or len(indices_a_mejorar) >= frente_size * 0.6
             )
             if debe_reclasificar:
-            frentes = clasificacion_no_dominada(poblacion, fitness_poblacion)
+                frentes = clasificacion_no_dominada(poblacion, fitness_poblacion)
                 frente_size = len(frentes[0])
         
         # Aplicar filtro de similitud cada k_filtro generaciones al frente de Pareto
