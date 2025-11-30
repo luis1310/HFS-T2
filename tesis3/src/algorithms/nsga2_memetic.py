@@ -144,7 +144,7 @@ def nsga2_memetic(config, metodo_cruce, metodo_mutacion,
             reclasificar = (gen % 3 == 0) or poblacion_cambio or (gen == num_generaciones - 1)
         
         if reclasificar:
-        frentes = clasificacion_no_dominada(poblacion, fitness_poblacion)
+            frentes = clasificacion_no_dominada(poblacion, fitness_poblacion)
             frente_size = len(frentes[0])
         
         # NO guardar historial aquí - se guardará al final después de todos los filtros
