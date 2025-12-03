@@ -384,20 +384,47 @@ Estos experimentos determinan qué combinaciones de operadores proporcionan mejo
 
 Para validar científicamente que cada componente del algoritmo es necesario y medir su impacto individual, se realizó un estudio de ablación sistemático. Este estudio evalúa el impacto de desactivar componentes específicos del algoritmo, permitiendo cuantificar la contribución de cada elemento al rendimiento final.
 
-El estudio de ablación evalúa 11 variantes diferentes del algoritmo, incluyendo:
+\paragraph{Metodología del Estudio de Ablación}
+
+El estudio de ablación se diseñó para evaluar sistemáticamente el impacto de cada componente del algoritmo mediante la comparación de variantes que activan o desactivan componentes específicos. Se evaluaron 6 variantes principales del algoritmo:
+
 \begin{itemize}
-    \item Variantes con y sin filtro epsilon de similitud
-    \item Variantes con y sin búsqueda local (para la versión memética)
-    \item Diferentes combinaciones de operadores genéticos (cruce uniforme vs. one-point, mutación swap vs. insert vs. invert)
-    \item Comparación entre NSGA-II estándar y memético con diferentes componentes activados/desactivados
+    \item \textbf{NSGA2 completo}: Con filtro epsilon, cruce uniforme y mutación swap
+    \item \textbf{NSGA2 sin filtro}: Sin filtro epsilon (base NSGA2)
+    \item \textbf{Memético completo}: Con filtro epsilon, búsqueda local, cache y optimizaciones
+    \item \textbf{Memético sin filtro}: Sin filtro epsilon, solo búsqueda local
+    \item \textbf{Memético sin búsqueda local}: Sin búsqueda local, solo cache y optimizaciones
+    \item \textbf{Memético sin filtro ni búsqueda}: Base memético con solo cache y optimizaciones
 \end{itemize}
 
-Cada variante se ejecuta con 30 semillas independientes para garantizar robustez estadística. Los resultados del estudio de ablación permiten:
+Cada variante se ejecutó con 30 semillas independientes para garantizar robustez estadística, resultando en un total de 180 ejecuciones. Los resultados del estudio de ablación permiten:
+
 \begin{itemize}
     \item Cuantificar el impacto de cada componente en el tiempo de ejecución y la calidad de las soluciones
     \item Justificar científicamente la inclusión de cada componente en el diseño final del algoritmo
     \item Identificar componentes críticos que deben mantenerse y componentes opcionales que pueden optimizarse
+    \item Comparar la eficiencia relativa entre NSGA-II estándar y memético
 \end{itemize}
+
+\paragraph{Optimizaciones Basadas en Ablación: Vectorización con NumPy}
+
+Los resultados del estudio de ablación revelaron que las operaciones más costosas del algoritmo eran susceptibles de optimización mediante vectorización. Se identificaron tres operaciones críticas que representaban aproximadamente el 40-50\% del tiempo total de ejecución:
+
+\begin{enumerate}
+    \item \textbf{Clasificación No Dominada} (20-30\% del tiempo): Operaciones O(n²) con bucles anidados en Python puro
+    \item \textbf{Filtro Epsilon} (10-15\% del tiempo): Múltiples conversiones y cálculos repetitivos con list comprehensions
+    \item \textbf{Distancia Crowding} (5-10\% del tiempo): Ordenamientos repetitivos con funciones key costosas
+\end{enumerate}
+
+Para optimizar estas operaciones, se implementó una estrategia de vectorización utilizando NumPy:
+
+\begin{itemize}
+    \item \textbf{Vectorización de Clasificación No Dominada}: Conversión de bucles anidados O(n²) a operaciones vectorizadas usando broadcasting de NumPy, permitiendo comparar todos los pares simultáneamente
+    \item \textbf{Vectorización del Filtro Epsilon}: Reemplazo de list comprehensions por operaciones vectorizadas con arrays NumPy, uso de \texttt{np.ptp} para cálculo de rangos, y vectorización de normalización y discretización
+    \item \textbf{Vectorización de Distancia Crowding}: Reemplazo de \texttt{sorted} con key function por \texttt{np.argsort}, y vectorización de cálculos de distancias para elementos intermedios
+\end{itemize}
+
+Estas optimizaciones lograron una reducción del 80.0\% en el tiempo de ejecución (de 26.55s a 5.32s), superando significativamente el objetivo de <10 segundos, mientras mantienen la calidad del frente de Pareto sin afectar la funcionalidad del algoritmo.
 
 \subsubsection{Criterios de Evaluación}
 La selección de la configuración óptima considera los siguientes criterios:

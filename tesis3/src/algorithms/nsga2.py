@@ -1,6 +1,7 @@
 
 """Implementación de NSGA-II para optimización multiobjetivo"""
 import random
+import numpy as np
 from tesis3.src.fitness.multi_objective import fitness_multiobjetivo
 from tesis3.src.utils.population import inicializar_poblacion
 
@@ -56,57 +57,51 @@ def filtrar_soluciones_similares(poblacion, fitness_poblacion, epsilon=0.01):
     else:
         epsilon_efectivo = epsilon
     
-    # Convertir fitness a métricas reales para calcular distancias (una sola vez)
-    metricas = [convertir_fitness_a_metricas(f) for f in fitness_poblacion]
+    # OPTIMIZACIÓN: Vectorizar conversión de fitness a métricas usando NumPy
+    fitness_array = np.array(fitness_poblacion)
     
-    # Calcular rangos de cada objetivo para normalización (una sola vez)
-    makespans = [m[0] for m in metricas]
-    balances = [m[1] for m in metricas]
-    energias = [m[2] for m in metricas]
+    # Vectorizar conversión: makespan = 1/obj_mk, balance = 1/obj_bal - 1, energia = 1/obj_eng - 1
+    # Evitar división por cero
+    makespans = np.where(fitness_array[:, 0] > 0, 1.0 / fitness_array[:, 0], np.inf)
+    balances = np.where(fitness_array[:, 1] > 0, 1.0 / fitness_array[:, 1] - 1.0, np.inf)
+    energias = np.where(fitness_array[:, 2] > 0, 1.0 / fitness_array[:, 2] - 1.0, np.inf)
     
-    rango_mk = max(makespans) - min(makespans) if max(makespans) > min(makespans) else 1.0
-    rango_bal = max(balances) - min(balances) if max(balances) > min(balances) else 1.0
-    rango_eng = max(energias) - min(energias) if max(energias) > min(energias) else 1.0
+    # Calcular rangos de cada objetivo para normalización (vectorizado)
+    rango_mk = np.ptp(makespans) if np.ptp(makespans) > 0 else 1.0
+    rango_bal = np.ptp(balances) if np.ptp(balances) > 0 else 1.0
+    rango_eng = np.ptp(energias) if np.ptp(energias) > 0 else 1.0
     
     # OPTIMIZACIÓN: Usar grid espacial para agrupar soluciones similares
     # Dividir el espacio en celdas de tamaño epsilon para comparar solo vecinos cercanos
     num_celdas = max(10, int(1.0 / epsilon_efectivo))  # Al menos 10 celdas
     grid = {}
     
-    # Pre-calcular scores normalizados
-    scores_normalizados = []
-    for f in fitness_poblacion:
-        obj_norm = [o / max(abs(o), 1e-10) for o in f]
-        scores_normalizados.append(sum(obj_norm))
+    # OPTIMIZACIÓN: Vectorizar cálculo de scores normalizados
+    # Normalizar cada objetivo y sumar
+    obj_norm = fitness_array / np.maximum(np.abs(fitness_array), 1e-10)
+    scores_normalizados = np.sum(obj_norm, axis=1)
+    
+    # OPTIMIZACIÓN: Vectorizar normalización y cálculo de celdas
+    # Normalizar métricas
+    mk_min, bal_min, eng_min = makespans.min(), balances.min(), energias.min()
+    mk_norm = np.where(rango_mk > 0, (makespans - mk_min) / rango_mk, 0)
+    bal_norm = np.where(rango_bal > 0, (balances - bal_min) / rango_bal, 0)
+    eng_norm = np.where(rango_eng > 0, (energias - eng_min) / rango_eng, 0)
+    
+    # Discretizar a celdas (vectorizado)
+    celdas_mk = (mk_norm * num_celdas).astype(int)
+    celdas_bal = (bal_norm * num_celdas).astype(int)
+    celdas_eng = (eng_norm * num_celdas).astype(int)
     
     # Asignar soluciones a celdas del grid
-    for i, (mk, bal, eng) in enumerate(metricas):
-        # Normalizar y discretizar a celdas
-        mk_norm = (mk - min(makespans)) / rango_mk if rango_mk > 0 else 0
-        bal_norm = (bal - min(balances)) / rango_bal if rango_bal > 0 else 0
-        eng_norm = (eng - min(energias)) / rango_eng if rango_eng > 0 else 0
-        
-        celda_mk = int(mk_norm * num_celdas)
-        celda_bal = int(bal_norm * num_celdas)
-        celda_eng = int(eng_norm * num_celdas)
-        
-        celda_key = (celda_mk, celda_bal, celda_eng)
+    for i in range(len(poblacion)):
+        celda_key = (celdas_mk[i], celdas_bal[i], celdas_eng[i])
         if celda_key not in grid:
             grid[celda_key] = []
         grid[celda_key].append(i)
     
-    # Filtrar soluciones: comparar solo dentro de la misma celda y celdas adyacentes
-    # OPTIMIZACIÓN: Pre-calcular celdas para evitar recalcular en el bucle
-    celdas_soluciones = []
-    for i, (mk, bal, eng) in enumerate(metricas):
-        mk_norm = (mk - min(makespans)) / rango_mk if rango_mk > 0 else 0
-        bal_norm = (bal - min(balances)) / rango_bal if rango_bal > 0 else 0
-        eng_norm = (eng - min(energias)) / rango_eng if rango_eng > 0 else 0
-        celdas_soluciones.append((
-            int(mk_norm * num_celdas),
-            int(bal_norm * num_celdas),
-            int(eng_norm * num_celdas)
-        ))
+    # Pre-calcular celdas para uso en el bucle de filtrado
+    celdas_soluciones = list(zip(celdas_mk, celdas_bal, celdas_eng))
     
     indices_eliminar = set()
     indices_mantener = []
@@ -116,7 +111,8 @@ def filtrar_soluciones_similares(poblacion, fitness_poblacion, epsilon=0.01):
         if i in indices_eliminar:
             continue
         
-        mk_i, bal_i, eng_i = metricas[i]
+        # OPTIMIZACIÓN: Usar arrays NumPy para acceso más rápido
+        mk_i, bal_i, eng_i = makespans[i], balances[i], energias[i]
         obj_i = fitness_poblacion[i]
         i_eliminado = False
         
@@ -137,9 +133,10 @@ def filtrar_soluciones_similares(poblacion, fitness_poblacion, epsilon=0.01):
                         if j <= i or j in indices_eliminar or i_eliminado:
                             continue
                         
-                        mk_j, bal_j, eng_j = metricas[j]
+                        # OPTIMIZACIÓN: Usar arrays NumPy para acceso más rápido
+                        mk_j, bal_j, eng_j = makespans[j], balances[j], energias[j]
                         
-                        # Verificación rápida de similitud (early exit si no es similar)
+                        # OPTIMIZACIÓN: Vectorizar verificación rápida de similitud
                         diff_mk_norm = abs(mk_i - mk_j) / rango_mk if rango_mk > 0 else 0
                         if diff_mk_norm > epsilon_efectivo:  # Early exit si diferencia grande
                             continue
@@ -214,23 +211,47 @@ def dominancia(obj1, obj2):
 def clasificacion_no_dominada(poblacion, fitness_poblacion):
     """
     Clasifica población en frentes de Pareto
+    OPTIMIZACIÓN: Versión vectorizada usando NumPy para mejorar rendimiento
     
     Returns:
         List[List[int]]: Lista de frentes (cada frente es lista de índices)
     """
     n = len(poblacion)
+    if n == 0:
+        return []
+    
+    # OPTIMIZACIÓN: Convertir a array NumPy para operaciones vectorizadas
+    fitness_array = np.array(fitness_poblacion)
+    
+    # OPTIMIZACIÓN: Calcular dominancia usando broadcasting de NumPy
+    # Comparar todos los pares simultáneamente
+    # fitness_array[i] >= fitness_array[j] para todos los objetivos
+    # fitness_array[i] > fitness_array[j] en al menos un objetivo
+    
+    # Crear matrices de comparación usando broadcasting
+    # Shape: (n, n, num_objetivos)
+    fitness_i = fitness_array[:, None, :]  # (n, 1, num_objetivos)
+    fitness_j = fitness_array[None, :, :]  # (1, n, num_objetivos)
+    
+    # i domina j si: i >= j en todos los objetivos Y i > j en al menos uno
+    no_peor_en_todos = (fitness_i >= fitness_j).all(axis=2)  # (n, n)
+    mejor_en_alguno = (fitness_i > fitness_j).any(axis=2)    # (n, n)
+    i_domina_j = no_peor_en_todos & mejor_en_alguno  # (n, n)
+    
+    # Construir estructuras de datos para clasificación
     dominados_por = [[] for _ in range(n)]
     num_dominados = [0] * n
     
+    # OPTIMIZACIÓN: Usar índices de NumPy en lugar de bucles anidados
     for i in range(n):
-        for j in range(i + 1, n):
-            if dominancia(fitness_poblacion[i], fitness_poblacion[j]):
+        # Encontrar todos los j que i domina
+        dominados = np.where(i_domina_j[i, :])[0]
+        for j in dominados:
+            if i != j:  # Evitar auto-dominancia
                 dominados_por[i].append(j)
                 num_dominados[j] += 1
-            elif dominancia(fitness_poblacion[j], fitness_poblacion[i]):
-                dominados_por[j].append(i)
-                num_dominados[i] += 1
     
+    # Construir frentes
     frentes = [[]]
     for i in range(n):
         if num_dominados[i] == 0:
@@ -256,6 +277,7 @@ def clasificacion_no_dominada(poblacion, fitness_poblacion):
 def distancia_crowding(fitness_frente):
     """
     Calcula distancia de crowding para mantener diversidad
+    OPTIMIZACIÓN: Versión vectorizada usando NumPy para mejorar rendimiento
     
     Returns:
         List[float]: Distancias de crowding
@@ -264,28 +286,36 @@ def distancia_crowding(fitness_frente):
     if n <= 2:
         return [float('inf')] * n
     
-    num_objetivos = len(fitness_frente[0])
-    distancias = [0.0] * n
+    # OPTIMIZACIÓN: Convertir a array NumPy para operaciones vectorizadas
+    fitness_array = np.array(fitness_frente)
+    num_objetivos = fitness_array.shape[1]
+    distancias = np.zeros(n)
     
     for m in range(num_objetivos):
-        indices_ordenados = sorted(range(n), key=lambda i: fitness_frente[i][m])
+        # OPTIMIZACIÓN: Usar np.argsort en lugar de sorted con key
+        indices_ordenados = np.argsort(fitness_array[:, m])
         
+        # Los extremos tienen distancia infinita
         distancias[indices_ordenados[0]] = float('inf')
         distancias[indices_ordenados[-1]] = float('inf')
         
-        rango = fitness_frente[indices_ordenados[-1]][m] - fitness_frente[indices_ordenados[0]][m]
+        # OPTIMIZACIÓN: Vectorizar cálculo de rango
+        rango = fitness_array[indices_ordenados[-1], m] - fitness_array[indices_ordenados[0], m]
         
         if rango == 0:
             continue
         
-        for i in range(1, n - 1):
-            idx = indices_ordenados[i]
-            idx_prev = indices_ordenados[i - 1]
-            idx_next = indices_ordenados[i + 1]
-            
-            distancias[idx] += (fitness_frente[idx_next][m] - fitness_frente[idx_prev][m]) / rango
+        # OPTIMIZACIÓN: Vectorizar cálculo de distancias para elementos intermedios
+        # Usar indexación avanzada de NumPy
+        idx_intermedios = indices_ordenados[1:-1]
+        idx_prev = indices_ordenados[:-2]
+        idx_next = indices_ordenados[2:]
+        
+        # Calcular distancias normalizadas vectorizadas
+        distancias_normalizadas = (fitness_array[idx_next, m] - fitness_array[idx_prev, m]) / rango
+        distancias[idx_intermedios] += distancias_normalizadas
     
-    return distancias
+    return distancias.tolist()
 
 
 def seleccion_nsga2(poblacion, fitness_poblacion, tamano_seleccion, epsilon_filtro=0.0):
