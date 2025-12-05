@@ -18,13 +18,13 @@ Este proyecto de tesis ha logrado establecer una base sólida para la implementa
 
 \item[•] La comparación exhaustiva de operadores demostró que la combinación de cruce uniforme y mutación swap proporciona los mejores resultados en términos de calidad del frente de Pareto y robustez estadística.
 
-\item[•] La versión memética del NSGA-II muestra mejoras moderadas pero consistentes (0.11\% en score agregado) sobre la versión estándar, justificando el overhead computacional del 10.22\% para aplicaciones donde la calidad es prioritaria.
+\item[•] La comparación entre NSGA-II estándar y memético reveló que, aunque la versión memética muestra mejoras marginales (0.11\% en score agregado), la versión estándar es más eficiente (14.0\% más rápida) con calidad prácticamente idéntica (diferencia de score: -0.02\%). El overhead computacional del 16.3\% de la versión memética no se justifica por la mejora marginal en calidad, por lo que se recomienda la versión estándar para aplicaciones donde el balance entre calidad y tiempo de ejecución es prioritario.
 
-\item[•] Las optimizaciones implementadas (caché de fitness, filtrado de similitud, clasificación adaptativa, búsqueda local selectiva) lograron reducir el tiempo de ejecución en aproximadamente 60\%, de ~60 segundos a ~25 segundos por ejecución.
+\item[•] Las optimizaciones implementadas se dividen en dos fases: (1) optimizaciones algorítmicas iniciales (caché de fitness, clasificación adaptativa, búsqueda local selectiva) que redujeron el tiempo de ~60 segundos a ~27 segundos, y (2) optimizaciones de vectorización con NumPy (clasificación no dominada, filtro epsilon, distancia crowding) que lograron una reducción adicional del 56.7\%, alcanzando un tiempo promedio de 11.5 segundos (estabilizado en ~10.7s después del warm-up), mejorando significativamente la eficiencia computacional.
 
 \item[•] El sistema de paralelización de experimentos permite ejecutar experimentos masivos de manera eficiente y reproducible, facilitando la validación estadística de los resultados mediante múltiples semillas independientes.
 
-\item[•] El estudio de ablación realizado validó científicamente que cada componente del algoritmo (filtro epsilon, búsqueda local, operadores genéticos) contribuye positivamente al rendimiento. El filtro epsilon mejora la calidad en 0.32\% con un overhead de solo 2.33\%, mientras que la búsqueda local aporta refinamiento con un overhead del 3.03\%.
+\item[•] El estudio de ablación realizado validó científicamente que cada componente del algoritmo contribuye al rendimiento. El filtro epsilon mejora la calidad en 0.23\% (NSGA-II estándar) y 0.31\% (memético) con overheads de 4.3\% y 14.0\% respectivamente, justificando su inclusión. Sin embargo, la búsqueda local muestra un impacto marginal (0.02\% de mejora) con un overhead del 2.7\%, lo que confirma que la versión estándar es más eficiente para este problema específico. El estudio de ablación también identificó las operaciones más costosas (clasificación no dominada, filtro epsilon, distancia crowding), lo que permitió implementar optimizaciones de vectorización con NumPy que lograron una reducción masiva del tiempo de ejecución.
 
 \end{itemize}
 
@@ -37,13 +37,15 @@ Los experimentos sistemáticos realizados han proporcionado evidencia empírica 
 
     \item \textbf{Mejor combinación de operadores}: Cruce uniforme + Mutación swap, con score agregado de 2.6065 ± 0.0086.
     
-    \item \textbf{Superioridad de la versión memética}: Mejora del 0.11\% en score agregado con overhead computacional aceptable del 10.22\%.
+    \item \textbf{Recomendación de versión estándar}: Aunque la versión memética muestra mejoras marginales (0.11\% en score agregado), la versión estándar es 14.0\% más rápida con calidad prácticamente idéntica (diferencia de score: -0.02\%), siendo la opción más eficiente para este problema específico.
     
-    \item \textbf{Calidad del frente de Pareto}: 79 soluciones únicas que exploran efectivamente el espacio de compromiso entre los tres objetivos.
+    \item \textbf{Calidad del frente de Pareto}: 51-82 soluciones únicas que exploran efectivamente el espacio de compromiso entre los tres objetivos, con makespan convergente a 1560.61 minutos y rangos de balance (261.03-323.70) y energía (622.40-628.46 kWh).
+    
+    \item \textbf{Tiempo de ejecución optimizado}: Reducción del 56.7\% mediante vectorización con NumPy, alcanzando un tiempo promedio de 11.5 segundos (estabilizado en ~10.7s), ligeramente por encima del objetivo de <10 segundos pero con mejoras significativas respecto al tiempo inicial.
 
     \item \textbf{Robustez estadística}: Desviaciones estándar bajas (0.0086-0.0115) que demuestran consistencia en los resultados.
     
-    \item \textbf{Validación mediante ablación}: El estudio de ablación confirmó que cada componente del algoritmo (filtro epsilon, búsqueda local, operadores) contribuye positivamente al rendimiento, justificando científicamente el diseño final.
+    \item \textbf{Validación mediante ablación}: El estudio de ablación confirmó que cada componente del algoritmo contribuye al rendimiento, identificando que el filtro epsilon es crítico (mejora calidad con overhead aceptable), mientras que la búsqueda local tiene impacto marginal. El estudio también identificó las operaciones más costosas, permitiendo implementar optimizaciones de vectorización con NumPy que lograron mejoras masivas de rendimiento, justificando científicamente el diseño final del algoritmo.
 \end{enumerate}
 
 \section{Trabajo Futuro}

@@ -416,15 +416,19 @@ Los resultados del estudio de ablación revelaron que las operaciones más costo
     \item \textbf{Distancia Crowding} (5-10\% del tiempo): Ordenamientos repetitivos con funciones key costosas
 \end{enumerate}
 
-Para optimizar estas operaciones, se implementó una estrategia de vectorización utilizando NumPy:
+Para optimizar estas operaciones, se implementó una estrategia de vectorización utilizando NumPy en el archivo \texttt{tesis3/src/algorithms/nsga2.py}:
 
 \begin{itemize}
-    \item \textbf{Vectorización de Clasificación No Dominada}: Conversión de bucles anidados O(n²) a operaciones vectorizadas usando broadcasting de NumPy, permitiendo comparar todos los pares simultáneamente
-    \item \textbf{Vectorización del Filtro Epsilon}: Reemplazo de list comprehensions por operaciones vectorizadas con arrays NumPy, uso de \texttt{np.ptp} para cálculo de rangos, y vectorización de normalización y discretización
-    \item \textbf{Vectorización de Distancia Crowding}: Reemplazo de \texttt{sorted} con key function por \texttt{np.argsort}, y vectorización de cálculos de distancias para elementos intermedios
+    \item \textbf{Vectorización de Clasificación No Dominada} (función \texttt{clasificacion\_no\_dominada}): Conversión de bucles anidados O(n²) a operaciones vectorizadas usando broadcasting de NumPy. Se convierte \texttt{fitness\_poblacion} a un array NumPy y se utilizan operaciones de broadcasting (\texttt{fitness\_array[:, None, :]} y \texttt{fitness\_array[None, :, :]}) para calcular la matriz de dominancia \texttt{i\_domina\_j} comparando todos los pares simultáneamente, reemplazando los bucles anidados en Python.
+    
+    \item \textbf{Vectorización del Filtro Epsilon} (función \texttt{filtrar\_soluciones\_similares}): Reemplazo de list comprehensions por operaciones vectorizadas con arrays NumPy. Se vectoriza la conversión de fitness a métricas (\texttt{makespans = 1 / fitness\_array[:, 0]}, etc.), se utiliza \texttt{np.ptp} para cálculo de rangos, y se vectoriza la normalización y discretización para asignación a grilla espacial, reduciendo la complejidad de comparaciones.
+    
+    \item \textbf{Vectorización de Distancia Crowding} (función \texttt{distancia\_crowding}): Reemplazo de \texttt{sorted} con key function por \texttt{np.argsort} para obtener índices ordenados, y vectorización de cálculos de distancias para elementos intermedios usando indexación avanzada de NumPy.
 \end{itemize}
 
-Estas optimizaciones lograron una reducción del 80.0\% en el tiempo de ejecución (de 26.55s a 5.32s), superando significativamente el objetivo de <10 segundos, mientras mantienen la calidad del frente de Pareto sin afectar la funcionalidad del algoritmo.
+\textbf{Importante}: Estas optimizaciones de vectorización trabajan exclusivamente sobre los valores de \textit{fitness} (objetivos a maximizar) y \textbf{no modifican la estructura del cromosoma}. El cromosoma mantiene su representación original como array de enteros que indica las asignaciones de máquinas por etapa para cada pedido. La vectorización solo acelera las operaciones de clasificación, filtrado y cálculo de distancias que procesan los valores de fitness, sin alterar la representación genética de las soluciones.
+
+Estas optimizaciones lograron una reducción del 56.7\% en el tiempo de ejecución (de 26.55s a 11.5s promedio, estabilizado en ~10.7s después del warm-up), mejorando significativamente la eficiencia computacional mientras mantienen la calidad del frente de Pareto sin afectar la funcionalidad del algoritmo.
 
 \subsubsection{Criterios de Evaluación}
 La selección de la configuración óptima considera los siguientes criterios:
