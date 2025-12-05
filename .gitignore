@@ -19,9 +19,11 @@ build/
 *.pdf
 *.log
 
-# PERO permitir la carpeta de resultados completa
-!tesis3/results/
-!tesis3/results/**
+# PERO permitir la carpeta de resultados completa (especificar extensiones)
+!tesis3/results/**/*.png
+!tesis3/results/**/*.csv
+!tesis3/results/**/*.pdf
+!tesis3/results/**/*.log
 
 # IDEs
 .vscode/
