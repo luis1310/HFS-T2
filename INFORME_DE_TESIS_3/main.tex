@@ -6,8 +6,11 @@
 \usepackage{acronym}
 \spacing{1.5}
 \usepackage[nomain]{glossaries}
-%\usepackage[backend=bibtex,style=authoryear,natbib=true]{biblatex}
-%\addbibresource{main.bib}
+\usepackage[style=apa,backend=biber,language=spanish]{biblatex}
+\addbibresource{main.bib}
+% Configurar \cite para que funcione como \parencite (citas parentéticas APA)
+\let\oldcite\cite
+\renewcommand{\cite}[1]{\parencite{#1}}
 \usepackage[autostyle=true]{csquotes}
 
 \usepackage{afterpage}
@@ -158,8 +161,7 @@ A todos, gracias por acompañarme en este camino y por ser una parte fundamental
 
 
 
-\bibliography{main}
-\bibliographystyle{unsrt}
+\printbibliography[title={Referencias}]
 \afterpage{\blankpage}
 
 %\appendix

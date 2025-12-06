@@ -52,22 +52,15 @@ Los experimentos sistemáticos realizados han proporcionado evidencia empírica 
 
 Aunque se han completado exitosamente los experimentos de tunning multiobjetivo y comparación de operadores, se identifican las siguientes líneas de trabajo futuro:
 
-\subsection*{Análisis de Escalabilidad y Performance}
-Se recomienda evaluar la escalabilidad del algoritmo implementado con diferentes tamaños de instancias del problema (número de pedidos, número de máquinas, etc.), analizando tanto el tiempo de ejecución como la calidad de las soluciones obtenidas. Este análisis permitirá identificar limitaciones y oportunidades de mejora para instancias más grandes (100+ pedidos).
-
 \subsection*{Extensión a Problemas Dinámicos}
 Una línea de investigación prometedora es la extensión del algoritmo a problemas dinámicos donde los pedidos llegan de forma estocástica durante la ejecución. Esto requeriría adaptar el algoritmo para reoptimizar la programación cuando se reciben nuevos pedidos.
 
 \subsection*{Integración con Sistemas de Decisión Multi-Criterio}
 El frente de Pareto obtenido puede integrarse con métodos de decisión multi-criterio (como AHP, TOPSIS, o métodos de agregación ponderada) para ayudar al decisor a seleccionar la solución final según sus preferencias específicas.
 
-\subsection*{Validación en Entornos Industriales Reales}
-Aunque el modelo considera aspectos realistas (desgaste de máquinas, enfriamiento), la validación en entornos industriales reales proporcionaría evidencia adicional sobre la aplicabilidad práctica del enfoque propuesto.
-
 \subsection*{Optimizaciones Adicionales}
 Se pueden explorar optimizaciones adicionales como:
 \begin{itemize}
-    \item Paralelización del algoritmo mismo (no solo de los experimentos) para reducir el tiempo de ejecución en instancias grandes.
     \item Técnicas de reducción de espacio de búsqueda mediante conocimiento del dominio.
     \item Algoritmos híbridos que combinen NSGA-II con otras metaheurísticas (como simulated annealing o tabu search).
 \end{itemize}

@@ -1,17 +1,17 @@
 #!/bin/bash
 
-# Script para compilar el documento LaTeX con bibliografía
+# Script para compilar el documento LaTeX con bibliografía (APA 7 con biblatex)
 
-echo "Compilando documento LaTeX..."
+echo "Compilando documento LaTeX (primera vez)..."
 pdflatex -interaction=nonstopmode main.tex
 
-echo "Procesando bibliografía con bibtex..."
-bibtex main
+echo "Procesando bibliografía con biber (APA 7)..."
+biber main
 
-echo "Recompilando (primera vez)..."
+echo "Recompilando (segunda vez)..."
 pdflatex -interaction=nonstopmode main.tex
 
-echo "Recompilando (segunda vez) para resolver referencias..."
+echo "Recompilando (tercera vez) para resolver referencias..."
 pdflatex -interaction=nonstopmode main.tex
 
 echo ""
