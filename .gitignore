@@ -19,55 +19,15 @@ build/
 *.pdf
 *.log
 
-# PERO permitir la carpeta de resultados completa (especificar extensiones)
-!tesis3/results/**/*.png
-!tesis3/results/**/*.csv
-!tesis3/results/**/*.pdf
-!tesis3/results/**/*.log
-
-# IDEs
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# macOS
-.DS_Store
-
-# Jupyter
-.ipynb_checkpoints/
-
-# Configuración local
-config.local.yaml
-tesis3/config/config.local.yaml
-
-# Datos grandes
-*.zip
-*.tar.gz
+# PyCharm
+#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
+#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
+#  and can be added to the global gitignore or merged into this file.  For a more nuclear
+#  option (not recommended) you can uncomment the following to ignore the entire idea folder.
+#.idea/
 
 # macOS metadata files
 ._*
 .DS_Store
 .AppleDouble
 .LSOverride
-
-!/INFORME_DE_TESIS_3/Figures/**
-
-/INFORME_DE_TESIS_3/main.aux
-/INFORME_DE_TESIS_3/main.bbl
-/INFORME_DE_TESIS_3/main.blg
-/INFORME_DE_TESIS_3/main.log
-/INFORME_DE_TESIS_3/main.out
-/INFORME_DE_TESIS_3/main.toc
-/INFORME_DE_TESIS_3/main.lof
-/INFORME_DE_TESIS_3/main.lot
-/INFORME_DE_TESIS_3/main.lol
-/INFORME_DE_TESIS_3/main.loa
-/GUIA_UBUNTU_GIT.md
-/GUIA_CONFIGURACION_GIT.md
-/EJECUTAR_PARALELIZACION_UBUNTU.md
-/AUMENTAR_CONFIGURACIONES.md
-/COMO_FUNCIONA_FRENTE_PARETO_TUNNING.md
-/SUBIR_RESULTADOS.md
-INFORME_DE_TESIS_3/CAMBIOS_APA7.md
-INFORME_DE_TESIS_3/EJEMPLOS_CITAS_APA7.md
