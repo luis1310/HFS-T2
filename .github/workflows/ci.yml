@@ -1,0 +1,36 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Instalar dependencias del proyecto
+        run: |
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Lint estricto (algorithms/ y operators/)
+        run: |
+          pip install flake8 black isort
+          # Formateo automático para evitar fallos triviales de estilo
+          black tesis3/src
+          isort tesis3/src --profile black
+          # Verificación de linting
+          flake8 tesis3/src/algorithms tesis3/src/operators
+      - name: Tests core (timeout y cobertura)
+        run: |
+          pip install pytest pytest-timeout pytest-cov
+          pytest tesis3/tests -v -o addopts= --timeout=30 \
+            --cov=tesis3/src/core \
+            --cov-config=.coveragerc_ci \
+            --cov-report=term --cov-fail-under=85
+      - name: Tests operators (timeout y cobertura)
+        run: |
+          pytest tesis3/tests -v -o addopts= --timeout=30 \
+            --cov=tesis3/src/operators \
+            --cov-config=.coveragerc_ci \
+            --cov-report=term --cov-fail-under=85
+
+

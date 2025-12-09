@@ -1,0 +1,2 @@
+Modifical laboratorio a laboratorio de ciencias de la computacion del pabello de investigacion, esp. del monstrito
+ingresar citas (referencias) de los cambios hechos a las mutaciones y por q eran necesarios para este proyetco

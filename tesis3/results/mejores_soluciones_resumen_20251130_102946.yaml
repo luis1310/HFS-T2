@@ -1,0 +1,68 @@
+metadata:
+  fecha_analisis: '2025-11-30 10:29:46'
+  version_algoritmo: estándar
+  total_soluciones_frente: 67
+  parametros_algoritmo:
+    tamano_poblacion: 100
+    num_generaciones: 400
+    prob_cruce: 0.6
+    prob_mutacion: 0.75
+    operador_cruce: uniforme
+    operador_mutacion: swap
+mejores_soluciones:
+  solucion_1_prioriza_makespan:
+    metricas:
+      makespan_s: 1548.471246574762
+      balance: 268.89896596650476
+      energia_kwh: 624.5033573681013
+      indice_frente: 3
+    recomendacion:
+      cuando_usar: Cuando el tiempo de ejecución (makespan) es crítico y se necesita
+        minimizar el tiempo total de procesamiento.
+      ventajas: 'Makespan mínimo: 1548.47s. Ideal para sistemas con restricciones
+        de tiempo estrictas.'
+      desventajas: Balance y energía pueden ser mayores que otras soluciones.
+  solucion_2_prioriza_balance:
+    metricas:
+      makespan_s: 1550.3099611304042
+      balance: 261.0285820094613
+      energia_kwh: 627.7776982788604
+      indice_frente: 0
+    recomendacion:
+      cuando_usar: Cuando se requiere balancear la carga entre máquinas para evitar
+        sobrecargas y mejorar la distribución del trabajo.
+      ventajas: 'Balance óptimo: 261.03. Distribución más uniforme de tareas entre
+        máquinas.'
+      desventajas: Makespan y energía pueden ser mayores que otras soluciones.
+  solucion_3_prioriza_energia:
+    metricas:
+      makespan_s: 1549.1113432255747
+      balance: 328.1700727123073
+      energia_kwh: 621.6054862045062
+      indice_frente: 1
+    recomendacion:
+      cuando_usar: Cuando el consumo energético es una preocupación principal y se
+        busca minimizar costos operativos.
+      ventajas: 'Energía mínima: 621.61 kWh. Reduce costos operativos y huella de
+        carbono.'
+      desventajas: Makespan y balance pueden ser mayores que otras soluciones.
+comparacion:
+  rango_makespan:
+    min: 1548.471246574762
+    max: 1550.3099611304042
+    diferencia_pct: 0.1187438617093722
+  rango_balance:
+    min: 261.0285820094613
+    max: 328.1700727123073
+    diferencia_pct: 25.72189228703406
+  rango_energia:
+    min: 621.6054862045062
+    max: 627.7776982788604
+    diferencia_pct: 0.9929468467277279
+resumen_ejecutivo:
+  total_soluciones_analizadas: 67
+  soluciones_recomendadas: 3
+  conclusion: Se identificaron 3 soluciones óptimas que representan los trade-offs
+    principales del problema multi-objetivo. Cada solución prioriza un objetivo diferente
+    (makespan, balance o energía), permitiendo al cliente elegir según sus necesidades
+    específicas.

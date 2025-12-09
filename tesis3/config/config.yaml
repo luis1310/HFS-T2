@@ -1,0 +1,65 @@
+# Configuración del problema HFS
+problem:
+  num_pedidos: 40
+  num_maquinas: 11
+  num_etapas: 5
+  
+  tiempos_iniciales: [55, 53, 56, 42, 41, 30, 34, 35, 28, 26, 20]
+  
+  incrementos: [0.0235, 0.0376, 0.0298, 0.0265, 0.0343, 
+                0.0201, 0.0235, 0.0358, 0.0269, 0.0385, 0.0269]
+  
+  maquinas_por_etapa:
+    etapa_1: [1, 2, 3]
+    etapa_2: [4, 5]
+    etapa_3: [6, 7, 8]
+    etapa_4: [9, 10]
+    etapa_5: [11]
+  
+  enfriamiento:
+    limite: 1.30
+    factor: 0.85
+    tiempo: 6
+  
+  energia:
+    potencias_activas: [5.5, 5.3, 5.6, 4.2, 4.1, 3.0, 3.4, 3.5, 2.8, 2.6, 2.0]
+    potencias_inactivas: [0.5, 0.5, 0.5, 0.4, 0.4, 0.3, 0.3, 0.3, 0.3, 0.3, 0.2]
+    energia_por_enfriamiento: 2.0
+
+# Configuración de algoritmos
+algorithm:
+  nsga2:
+    tamano_poblacion: 100
+    num_generaciones: 400
+    prob_cruce: 0.6
+    prob_mutacion: 0.75
+  
+  memetic:
+    activado: true
+    cada_k_generaciones: 20
+    max_iteraciones_local: 5
+
+  # Operadores genéticos
+  # Actualizar estos valores después de ejecutar comparacion_operadores.py
+  operators:
+    cruce: 'uniforme'      # Opciones: 'uniforme', 'un_punto', 'dos_puntos', 'pmx'
+    mutacion: 'swap'     # Opciones: 'invert', 'swap', 'scramble', 'insert'
+
+# Configuración de experimentos
+experiments:
+  num_semillas: 30
+  output_dir: "results/tesis3"
+  save_plots: true
+  save_csv: true
+  
+  # Valores de referencia para normalización del score agregado
+  # Estos valores son proporcionales al número de pedidos (num_pedidos = 40)
+  # Si se cambia num_pedidos, estos valores deben ajustarse proporcionalmente
+  # Fórmulas aproximadas: ref_makespan ≈ 50 * num_pedidos
+  #                      ref_balance ≈ 7.5 * num_pedidos
+  #                      ref_energia ≈ 17.5 * num_pedidos
+  valores_referencia:
+    makespan: 2000   # minutos (para 40 pedidos)
+    balance: 300     # minutos (para 40 pedidos)
+    energia: 700     # kWh (para 40 pedidos)
+
