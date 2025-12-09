@@ -3112,13 +3112,31 @@
     <bcf:citekey order="40" intorder="1">Deb2002</bcf:citekey>
     <bcf:citekey order="41" intorder="1">Deb2002</bcf:citekey>
     <bcf:citekey order="42" intorder="1">Moscato1989</bcf:citekey>
-    <bcf:citekey order="43" intorder="1">Deb2002</bcf:citekey>
-    <bcf:citekey order="44" intorder="1">Deb2002</bcf:citekey>
-    <bcf:citekey order="45" intorder="1">Zitzler2003</bcf:citekey>
-    <bcf:citekey order="46" intorder="1">Deb2002</bcf:citekey>
-    <bcf:citekey order="47" intorder="1">Lop_et_al_2015</bcf:citekey>
-    <bcf:citekey order="48" intorder="1">KRAUL2025125624</bcf:citekey>
-    <bcf:citekey order="49" intorder="1">Mun_etal_2024</bcf:citekey>
+    <bcf:citekey order="43" intorder="1">CooperativeGAHFS2023</bcf:citekey>
+    <bcf:citekey order="44" intorder="1">AutomaticAlgorithmDesignHFS2023</bcf:citekey>
+    <bcf:citekey order="45" intorder="1">HybridFlowShopMultiCrossover2023</bcf:citekey>
+    <bcf:citekey order="45" intorder="2">SustainableHFSScheduling2023</bcf:citekey>
+    <bcf:citekey order="46" intorder="1">GeneticOperatorsReview2024</bcf:citekey>
+    <bcf:citekey order="46" intorder="2">EnhancingMOEAScheduling2024</bcf:citekey>
+    <bcf:citekey order="47" intorder="1">ViralMutationFlowshop2024</bcf:citekey>
+    <bcf:citekey order="47" intorder="2">RealTimeSchedulingGA2024</bcf:citekey>
+    <bcf:citekey order="48" intorder="1">GeneticOperatorsReview2024</bcf:citekey>
+    <bcf:citekey order="49" intorder="1">RealTimeSchedulingGA2024</bcf:citekey>
+    <bcf:citekey order="50" intorder="1">ViralMutationFlowshop2024</bcf:citekey>
+    <bcf:citekey order="51" intorder="1">EnhancingMOEAScheduling2024</bcf:citekey>
+    <bcf:citekey order="52" intorder="1">OptimalAblation2024</bcf:citekey>
+    <bcf:citekey order="53" intorder="1">AblationLLM2024</bcf:citekey>
+    <bcf:citekey order="53" intorder="2">AblationEvolutionaryAlgorithms2024</bcf:citekey>
+    <bcf:citekey order="53" intorder="3">AblationAttentionModules2024</bcf:citekey>
+    <bcf:citekey order="54" intorder="1">AblationLLM2024</bcf:citekey>
+    <bcf:citekey order="55" intorder="1">Deb2002</bcf:citekey>
+    <bcf:citekey order="56" intorder="1">Deb2002</bcf:citekey>
+    <bcf:citekey order="57" intorder="1">NormalizationPBEMO2024</bcf:citekey>
+    <bcf:citekey order="57" intorder="2">HypervolumeNormalization2022</bcf:citekey>
+    <bcf:citekey order="58" intorder="1">Deb2002</bcf:citekey>
+    <bcf:citekey order="59" intorder="1">Lop_et_al_2015</bcf:citekey>
+    <bcf:citekey order="60" intorder="1">KRAUL2025125624</bcf:citekey>
+    <bcf:citekey order="61" intorder="1">Mun_etal_2024</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="apa">
