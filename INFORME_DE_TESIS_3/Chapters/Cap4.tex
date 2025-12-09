@@ -2,6 +2,34 @@
 
 \section{Resultados}
 
+\subsection{Comparación de Operadores}
+
+Se evaluaron sistemáticamente 6 combinaciones diferentes de operadores de cruce y mutación, cada una ejecutada con 30 semillas independientes. Las combinaciones evaluadas fueron:
+
+\begin{itemize}
+    \item Cruce uniforme + Mutación swap
+    \item Cruce uniforme + Mutación insert
+    \item Cruce uniforme + Mutación invert
+    \item Cruce un punto + Mutación swap
+    \item Cruce un punto + Mutación insert
+    \item Cruce un punto + Mutación invert
+\end{itemize}
+
+\subsubsection{Mejor Combinación de Operadores}
+
+La mejor combinación identificada fue \textbf{Cruce Uniforme + Mutación Swap}, con las siguientes métricas promedio (sobre 30 semillas):
+
+\begin{itemize}
+    \item Score agregado: 2.6065 ± 0.0086
+    \item Makespan: 1559.40 ± 3.76 minutos
+    \item Balance: 280.34 ± 2.23
+    \item Energía: 624.63 ± 0.21 kWh
+    \item Tiempo de ejecución: 25.99 segundos
+    \item Tamaño del frente: 100 soluciones
+\end{itemize}
+
+Esta combinación demostró ser superior en términos de balance entre los tres objetivos, mostrando una buena convergencia y diversidad en el frente de Pareto. Esta configuración se utilizó como base para las siguientes fases de optimización.
+
 \subsection{Experimentos de Tunning Multiobjetivo}
 
 Se realizó un experimento exhaustivo de tunning de hiperparámetros para el algoritmo NSGA-II (estándar y memético), evaluando un espacio de búsqueda de 1,890 configuraciones diferentes. Cada configuración se ejecutó con 30 semillas independientes para garantizar robustez estadística, resultando en un total de 56,700 ejecuciones.
@@ -43,33 +71,15 @@ Esta configuración obtuvo un score agregado promedio de 2.5997, con las siguien
 
 Esta configuración fue seleccionada considerando un balance entre la calidad de las soluciones (score agregado) y el tiempo de ejecución, proporcionando un rendimiento óptimo con un tiempo de ejecución significativamente menor (27.23 segundos vs. 73.88 segundos) comparado con configuraciones que priorizan únicamente el score agregado, manteniendo una calidad de soluciones comparable.
 
-\subsection{Comparación de Operadores}
+\subsection{Optimizaciones Algorítmicas Iniciales}
 
-Se evaluaron sistemáticamente 6 combinaciones diferentes de operadores de cruce y mutación, cada una ejecutada con 30 semillas independientes. Las combinaciones evaluadas fueron:
-
-\begin{itemize}
-    \item Cruce uniforme + Mutación swap
-    \item Cruce uniforme + Mutación insert
-    \item Cruce uniforme + Mutación invert
-    \item Cruce un punto + Mutación swap
-    \item Cruce un punto + Mutación insert
-    \item Cruce un punto + Mutación invert
-\end{itemize}
-
-\subsubsection{Mejor Combinación de Operadores}
-
-La mejor combinación identificada fue \textbf{Cruce Uniforme + Mutación Swap}, con las siguientes métricas promedio (sobre 30 semillas):
+Después de identificar la mejor configuración mediante comparación de operadores y tunning, se implementaron optimizaciones algorítmicas iniciales que lograron reducir el tiempo de ejecución de ~60 segundos a ~27 segundos:
 
 \begin{itemize}
-    \item Score agregado: 2.6065 ± 0.0086
-    \item Makespan: 1559.40 ± 3.76 minutos
-    \item Balance: 280.34 ± 2.23
-    \item Energía: 624.63 ± 0.21 kWh
-    \item Tiempo de ejecución: 25.99 segundos
-    \item Tamaño del frente: 100 soluciones
+    \item \textbf{Caché de fitness}: Evita aproximadamente el 30-40\% de recálculos en generaciones avanzadas
+    \item \textbf{Clasificación adaptativa}: Reduce la frecuencia de reclasificación no dominada en generaciones avanzadas
+    \item \textbf{Búsqueda local selectiva}: Limita la aplicación de búsqueda local según la fase del algoritmo
 \end{itemize}
-
-Esta combinación demostró ser superior en términos de balance entre los tres objetivos, mostrando una buena convergencia y diversidad en el frente de Pareto.
 
 \subsection{Comparación NSGA-II Estándar vs. Memético}
 
@@ -111,7 +121,7 @@ El overhead computacional de la versión memética es del 16.3\% (de 26.55s a 30
 
 \textbf{Conclusión}: La versión estándar es más eficiente para este problema específico, ya que proporciona calidad prácticamente idéntica (diferencia de score: -0.02\%) con un tiempo de ejecución 14.0\% menor. La versión estándar se recomienda para aplicaciones donde el balance entre calidad y tiempo de ejecución es prioritario.
 
-\subsection{Análisis del Frente de Pareto}
+\subsection{Estudio de Ablación}
 
 Utilizando la mejor configuración identificada (NSGA-II estándar con cruce uniforme y mutación swap), se generó un frente de Pareto final con 51-82 soluciones únicas después de aplicar el filtro de similitud ($\epsilon = 1\%$).
 
@@ -194,49 +204,6 @@ Para facilitar la selección de soluciones según diferentes criterios, se ident
 
 Estas visualizaciones facilitan la comprensión del frente de Pareto y ayudan al decisor a identificar rápidamente qué soluciones se alinean mejor con sus objetivos prioritarios, ya sea minimizar el tiempo de producción, equilibrar la carga de trabajo o reducir el consumo energético.
 
-\subsection{Optimizaciones y Tiempos de Ejecución}
-
-Las optimizaciones implementadas se dividen en dos fases: optimizaciones algorítmicas iniciales (caché de fitness, clasificación adaptativa, búsqueda local selectiva) y optimizaciones de vectorización basadas en el estudio de ablación.
-
-\subsubsection{Optimizaciones Algorítmicas Iniciales}
-
-Las optimizaciones algorítmicas iniciales lograron reducir el tiempo de ejecución de ~60 segundos a ~27 segundos:
-
-\begin{itemize}
-    \item \textbf{Caché de fitness}: Evita aproximadamente el 30-40\% de recálculos en generaciones avanzadas
-    \item \textbf{Clasificación adaptativa}: Reduce la frecuencia de reclasificación no dominada en generaciones avanzadas
-    \item \textbf{Búsqueda local selectiva}: Limita la aplicación de búsqueda local según la fase del algoritmo
-\end{itemize}
-
-\subsubsection{Optimizaciones de Vectorización con NumPy}
-
-El estudio de ablación identificó que las operaciones más costosas eran susceptibles de optimización mediante vectorización. Se implementaron tres optimizaciones críticas en el archivo \texttt{tesis3/src/algorithms/nsga2.py}:
-
-\begin{enumerate}
-    \item \textbf{Vectorización de Clasificación No Dominada} (función \texttt{clasificacion\_no\_dominada}): Conversión de bucles anidados O(n²) a operaciones vectorizadas usando broadcasting de NumPy. Se convierte \texttt{fitness\_poblacion} a un array NumPy (\texttt{fitness\_array = np.array(fitness\_poblacion)}) y se utilizan operaciones de broadcasting para crear matrices de comparación (\texttt{fitness\_i = fitness\_array[:, None, :]} y \texttt{fitness\_j = fitness\_array[None, :, :]}), calculando la matriz de dominancia \texttt{i\_domina\_j} comparando todos los pares simultáneamente. Esto reduce el tiempo de clasificación en 30-50\%.
-    
-    \item \textbf{Vectorización del Filtro Epsilon} (función \texttt{filtrar\_soluciones\_similares}): Reemplazo de list comprehensions por operaciones vectorizadas. Se vectoriza la conversión de fitness a métricas usando arrays NumPy (\texttt{makespans = np.where(fitness\_array[:, 0] > 0, 1.0 / fitness\_array[:, 0], np.inf)}), se utiliza \texttt{np.ptp} para cálculo de rangos, y se vectoriza la normalización y discretización para asignación a grilla espacial. Esto reduce el tiempo de filtrado en 20-40\%.
-    
-    \item \textbf{Vectorización de Distancia Crowding} (función \texttt{distancia\_crowding}): Reemplazo de \texttt{sorted} con key function por \texttt{np.argsort} para obtener índices ordenados (\texttt{indices\_ordenados = np.argsort(fitness\_array[:, m])}), y vectorización de cálculos de distancias para elementos intermedios usando indexación avanzada de NumPy. Esto reduce el tiempo de crowding en 15-30\%.
-\end{enumerate}
-
-\textbf{Aclaración importante}: Estas optimizaciones de vectorización trabajan exclusivamente sobre los valores de \textit{fitness} (objetivos a maximizar: makespan, balance, energía) y \textbf{no modifican la estructura del cromosoma}. El cromosoma mantiene su representación original como array de enteros que indica las asignaciones de máquinas por etapa para cada pedido. La vectorización solo acelera las operaciones de clasificación, filtrado y cálculo de distancias que procesan los valores de fitness, sin alterar la representación genética de las soluciones ni la funcionalidad del algoritmo evolutivo.
-
-\subsubsection{Resultados de las Optimizaciones}
-
-Las optimizaciones de vectorización lograron una reducción significativa en el tiempo de ejecución:
-
-\begin{itemize}
-    \item \textbf{Tiempo antes de vectorización} (estudio de ablación): 26.55 segundos (NSGA-II estándar completo)
-    \item \textbf{Tiempo después de vectorización} (medición actual): 10.7-11.5 segundos (promedio de 11.5s sobre 10 ejecuciones, estabilizado en ~10.7s después del warm-up inicial)
-    \item \textbf{Reducción total}: 56.7\% de reducción (factor de mejora: 2.31x más rápido)
-    \item \textbf{Objetivo de tiempo}: El tiempo promedio de 11.5s está ligeramente por encima del objetivo de <10 segundos, aunque ejecuciones individuales pueden alcanzar ~10.7s después del warm-up del sistema
-    \item \textbf{Calidad mantenida}: El frente de Pareto mantiene 51-82 soluciones únicas, confirmando que las optimizaciones no afectan la calidad de los resultados
-    \item \textbf{Estabilidad}: No se observa degradación progresiva en ejecuciones consecutivas; de hecho, se observa un efecto de warm-up donde la primera ejecución es más lenta (~15s) y las siguientes se estabilizan alrededor de 10.7-11.0s
-\end{itemize}
-
-La paralelización de experimentos permitió ejecutar los 56,700 experimentos de tunning en un tiempo razonable, distribuyendo la carga computacional entre múltiples núcleos del procesador.
-
 \subsection{Estudio de Ablación}
 
 Para validar científicamente que cada componente del algoritmo es necesario y cuantificar su impacto individual, se realizó un estudio de ablación sistemático. Este estudio evaluó 6 variantes principales del algoritmo, cada una ejecutada con 30 semillas independientes, resultando en un total de 180 ejecuciones.
@@ -302,6 +269,23 @@ El estudio de ablación reveló que:
     \item \textbf{Conclusión}: La versión estándar es más eficiente para este problema específico, ya que el overhead computacional de la búsqueda local (16.3\%) no se justifica por la mejora marginal en calidad (0.11\%).
 \end{itemize}
 
+\subsubsection{Optimizaciones de Vectorización con NumPy}
+
+Basándose en los resultados del estudio de ablación, se identificaron las operaciones más costosas del algoritmo que eran susceptibles de optimización mediante vectorización. Se implementaron optimizaciones de vectorización con NumPy en tres funciones críticas del algoritmo: \texttt{clasificacion\_no\_dominada}, \texttt{filtrar\_soluciones\_similares} y \texttt{distancia\_crowding}. Estas optimizaciones trabajan exclusivamente sobre los valores de \textit{fitness} y no modifican la estructura del cromosoma.
+
+\paragraph{Resultados de las Optimizaciones de Vectorización}
+
+Las optimizaciones de vectorización lograron una reducción significativa en el tiempo de ejecución:
+
+\begin{itemize}
+    \item \textbf{Tiempo antes de vectorización} (estudio de ablación): 26.55 segundos (NSGA-II estándar completo)
+    \item \textbf{Tiempo después de vectorización} (medición actual): 10.7-11.5 segundos (promedio de 11.5s sobre 10 ejecuciones, estabilizado en ~10.7s después del warm-up inicial)
+    \item \textbf{Reducción total}: 56.7\% de reducción (factor de mejora: 2.31x más rápido)
+    \item \textbf{Objetivo de tiempo}: El tiempo promedio de 11.5s está ligeramente por encima del objetivo de <10 segundos, aunque ejecuciones individuales pueden alcanzar ~10.7s después del warm-up del sistema
+    \item \textbf{Calidad mantenida}: El frente de Pareto mantiene 51-82 soluciones únicas, confirmando que las optimizaciones no afectan la calidad de los resultados
+    \item \textbf{Estabilidad}: No se observa degradación progresiva en ejecuciones consecutivas; de hecho, se observa un efecto de warm-up donde la primera ejecución es más lenta (~15s) y las siguientes se estabilizan alrededor de 10.7-11.0s
+\end{itemize}
+
 \subsubsection{Validación del Diseño y Optimizaciones}
 
 Los resultados del estudio de ablación validan científicamente el diseño del algoritmo y proporcionan evidencia para optimizaciones adicionales:
@@ -325,6 +309,89 @@ El estudio de ablación identificó que las operaciones más costosas (clasifica
 \end{itemize}
 
 Esta validación científica mediante ablación proporciona evidencia empírica sólida de que cada componente incluido en el algoritmo final es necesario y contribuye al rendimiento global del sistema, además de identificar oportunidades de optimización que resultaron en mejoras masivas de rendimiento.
+
+\subsection{Análisis del Frente de Pareto}
+
+Utilizando la mejor configuración identificada (NSGA-II estándar con cruce uniforme y mutación swap) y después de aplicar todas las optimizaciones (algorítmicas iniciales y vectorización), se generó un frente de Pareto final con 51-82 soluciones únicas después de aplicar el filtro de similitud ($\epsilon = 1\%$).
+
+\subsubsection{Características del Frente}
+
+El frente de Pareto obtenido presenta las siguientes características:
+
+\begin{itemize}
+    \item \textbf{Rango de makespan}: 1560.61 minutos (rango mínimo, todas las soluciones convergen a este valor)
+    \item \textbf{Rango de balance}: 261.03 - 323.70 (rango de 62.67 unidades)
+    \item \textbf{Rango de energía}: 622.40 - 628.46 kWh (rango de 6.06 kWh)
+\end{itemize}
+
+Estos rangos muestran que el algoritmo logra explorar efectivamente el espacio de compromiso entre los tres objetivos. Es importante destacar que, debido a la naturaleza multiobjetivo del problema, \textbf{no existe una solución única que optimice simultáneamente los tres objetivos}. En su lugar, el frente de Pareto proporciona un conjunto de soluciones alternativas donde cada una representa un compromiso diferente entre los objetivos.
+
+El decisor puede seleccionar la solución más adecuada según sus preferencias específicas:
+\begin{itemize}
+    \item Si se prioriza la \textbf{productividad temporal}, todas las soluciones del frente tienen makespan de 1560.61 minutos, por lo que la selección se basa en los otros objetivos.
+    \item Si se prioriza la \textbf{equidad operativa}, se puede elegir una solución con balance mínimo (261.03), aunque esto puede aumentar el consumo energético (628.46 kWh).
+    \item Si se prioriza la \textbf{sostenibilidad energética}, se puede elegir una solución con consumo energético mínimo (622.40 kWh), aunque esto puede resultar en mayor desbalance de carga (323.70).
+    \item Si se busca un \textbf{compromiso equilibrado}, se puede elegir una solución intermedia que balancee balance y energía de manera razonable, manteniendo el makespan constante.
+\end{itemize}
+
+Esta flexibilidad es una de las principales ventajas del enfoque multiobjetivo: proporciona al decisor múltiples alternativas bien fundamentadas, permitiendo una toma de decisiones informada según el contexto específico y las prioridades del momento.
+
+La visualización del frente de Pareto en el espacio tridimensional de objetivos se muestra en la Figura \ref{fig:frente_3d}, donde cada punto representa una solución no dominada. La distribución de las soluciones muestra claramente el trade-off entre los tres objetivos: soluciones con makespan menor tienden a tener mayor balance o consumo energético, y viceversa.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{Figures/frente_pareto_estándar_3d.png}
+\caption{Frente de Pareto en el espacio tridimensional (Makespan vs Balance vs Energía)}
+\label{fig:frente_3d}
+\end{figure}
+
+Para facilitar el análisis de las relaciones entre pares de objetivos, se generaron proyecciones bidimensionales del frente de Pareto, mostradas en la Figura \ref{fig:frente_2d}. Estas proyecciones permiten visualizar claramente los compromisos entre:
+\begin{itemize}
+    \item Makespan y Balance de Carga
+    \item Makespan y Consumo Energético
+    \item Balance de Carga y Consumo Energético
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1.0\textwidth]{Figures/frente_pareto_estándar_2d.png}
+\caption{Proyecciones bidimensionales del frente de Pareto}
+\label{fig:frente_2d}
+\end{figure}
+
+\subsubsection{Evolución del Frente}
+
+La evolución del tamaño del frente de Pareto a lo largo de las 400 generaciones muestra un patrón característico:
+
+\begin{itemize}
+    \item \textbf{Generaciones iniciales (0-100)}: El frente crece rápidamente desde valores pequeños (10-20 soluciones) hasta valores elevados. Sin embargo, gracias al filtro de similitud aplicado periódicamente, el tamaño del frente nunca alcanza el máximo teórico de la población (100 soluciones), ya que las soluciones similares son eliminadas antes de que se acumulen.
+    \item \textbf{Generaciones intermedias (100-250)}: El frente se mantiene en valores altos pero controlados, con reducciones periódicas cuando se aplica el filtro de similitud (cada 30 generaciones). Estas reducciones eliminan soluciones redundantes, manteniendo solo aquellas que son significativamente diferentes en el espacio objetivo.
+    \item \textbf{Generaciones avanzadas (250-400)}: El tamaño del frente se estabiliza alrededor de 60-90 soluciones únicas después de cada filtrado, mostrando que el algoritmo ha convergido hacia un conjunto de soluciones no dominadas bien diversificado. El filtro asegura que estas soluciones representen compromisos genuinamente diferentes entre los tres objetivos.
+\end{itemize}
+
+El filtro de similitud ($\epsilon = 1\%$) aplicado periódicamente asegura que el frente final contenga solo soluciones significativamente diferentes, evitando la acumulación de soluciones prácticamente idénticas. Esto es fundamental porque, aunque el algoritmo podría generar hasta 100 soluciones no dominadas, el filtro previene que se alcance este máximo al eliminar soluciones redundantes que no aportan diversidad real al conjunto de alternativas disponibles para el decisor.
+
+La evolución del tamaño del frente de Pareto a lo largo de las generaciones se visualiza en la Figura \ref{fig:evolucion_frente}, donde se puede observar claramente el patrón descrito: crecimiento inicial, estabilización con reducciones periódicas debido al filtro, y convergencia final hacia un conjunto de soluciones únicas bien diversificado.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{Figures/evolucion_frente_estándar.png}
+\caption{Evolución del tamaño del frente de Pareto a lo largo de 400 generaciones}
+\label{fig:evolucion_frente}
+\end{figure}
+
+\subsubsection{Análisis de Soluciones Extremas}
+
+Para facilitar la selección de soluciones según diferentes criterios, se identificaron las soluciones extremas del frente de Pareto que optimizan cada objetivo individualmente. La Figura \ref{fig:mejores_soluciones} muestra estas soluciones destacadas junto con sus valores en los tres objetivos, permitiendo al decisor visualizar rápidamente las opciones disponibles.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{Figures/mejores_soluciones_pareto.png}
+\caption{Mejores soluciones del frente de Pareto según cada objetivo}
+\label{fig:mejores_soluciones}
+\end{figure}
+
+Estas visualizaciones facilitan la comprensión del frente de Pareto y ayudan al decisor a identificar rápidamente qué soluciones se alinean mejor con sus objetivos prioritarios, ya sea minimizar el tiempo de producción, equilibrar la carga de trabajo o reducir el consumo energético.
 
 \section{Discusión}
 

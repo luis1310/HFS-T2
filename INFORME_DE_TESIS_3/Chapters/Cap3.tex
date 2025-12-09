@@ -5,7 +5,7 @@ La métodología a utilizar en esta problemática se centra en las condiciones q
 
 \subsection{Condiciones del problema}
 
-El problema clásico del flow shop hibrido flexible (HFS, por sus siglas en inglés) supone un conjunto de $P$ pedidos que deben ser procesados en $E$ etapas. Cada etapa contiene varias máquinas paralelas idénticas y la ruta de proceso es igual para cada trabajo (Pedido); teniendo en cuenta un conjunto de suposiciones estándar \cite{Song202156822}, el objetivo es encontrar la programación que logre el mínimo makespan. El tiempo que transcurre entre el inicio del primer trabajo en la primera máquina y la terminación del último trabajo en la última máquina se conoce con el término de makespan \cite{Garavito-Hernández2019362}. Se considera que minimizar el makespan equivale a maximizar la utilización de las máquinas, ya que se busca disminuir los tiempos de alistamiento y los tiempos de ocio de las máquinas.
+El problema clásico del flow shop hibrido flexible (HFS, por sus siglas en inglés) supone un conjunto de $P$ pedidos que deben ser procesados en $K$ etapas. Cada etapa contiene varias máquinas paralelas idénticas y la ruta de proceso es igual para cada pedido; teniendo en cuenta un conjunto de suposiciones estándar \cite{Song202156822}, el objetivo es encontrar la programación que logre el mínimo makespan. El tiempo que transcurre entre el inicio del primer pedido en la primera máquina y la terminación del último pedido en la última máquina se conoce con el término de makespan \cite{Garavito-Hernández2019362}. Se considera que minimizar el makespan equivale a maximizar la utilización de las máquinas, ya que se busca disminuir los tiempos de alistamiento y los tiempos de ocio de las máquinas.
 
 Para el presente proyecto, como condición del problema se le asigna un tiempo inicial en minutos a cada maquina, como se ve en la figura \ref{tiempos_maquina}. Estos tiempos indican cuanto tarda dicha maquina en completar una determinada etapa.
 
@@ -28,7 +28,7 @@ Así mismo, se toma como condición que esta linea de ensamblaje cuente con 5 et
 \subsection{Diseño del cromosoma}
 En vista de que el algoritmo buscará la alternativa de solución que presente el menor makespan, fue importante determinar la estructura de los cromosomas que conformaron la población inicial, dicha población se modificó durante las iteraciones del algoritmo genético.
 
-Una representación usual en la literatura es la de una representación binaria \cite{Lop_et_al_2015}, tomandolo como un array de desiciones, tal como se ve en la figura \ref{crom_bin}, sin embargo, para una cuantiosa cantidad de trabajos, maquinas y etapas esto no es viable, en caso se requiera el cromosoma para 3 trabajos y una distribución de maquinas como la mencionada en la figura \ref{maquinas} se usa un array de 33 genes, los cuales tendrían valores de 0 o 1.
+Una representación usual en la literatura es la de una representación binaria \cite{Lop_et_al_2015}, tomandolo como un array de desiciones, tal como se ve en la figura \ref{crom_bin}, sin embargo, para una cuantiosa cantidad de pedidos, maquinas y etapas esto no es viable, en caso se requiera el cromosoma para 3 pedidos y una distribución de maquinas como la mencionada en la figura \ref{maquinas} se usa un array de 33 genes, los cuales tendrían valores de 0 o 1.
 
 \begin{figure}[H]
 \centering
@@ -70,7 +70,7 @@ Para este ejemplo el makespan es de 215.1 minutos como se muestra en la figura \
 \end{figure}
 
 \subsection{Algoritmo NSGA-II}
-El algoritmo Non-dominated Sorting Genetic Algorithm II (NSGA-II) \cite{Deb2002} es una metaheurística evolutiva multiobjetivo desarrollada por Deb et al. en 2002. Este algoritmo está diseñado para resolver problemas de optimización con múltiples objetivos simultáneos mediante el concepto de dominancia de Pareto.
+El algoritmo Non-dominated Sorting Genetic Algorithm II (NSGA-II) \textcite{Deb2002} es una metaheurística evolutiva multiobjetivo desarrollada en 2002. Este algoritmo está diseñado para resolver problemas de optimización con múltiples objetivos simultáneos mediante el concepto de dominancia de Pareto.
 
 El NSGA-II opera mediante tres mecanismos fundamentales: (1) la clasificación de no-dominancia, que organiza la población en frentes de Pareto basándose en la dominancia entre individuos; (2) el cálculo de la distancia de crowding (crowding distance), que mide la densidad de soluciones alrededor de cada individuo en el espacio objetivo; y (3) un operador de selección que favorece individuos con mejor rango de frente y mayor diversidad.
 
@@ -114,10 +114,10 @@ Inicialmente se tuvo las siguientes definiciones:
 \begin{itemize}
     \item \( M_i \) es la máquina \( i \)-ésima (donde \( i = 1, 2, \dots, 11 \)) con un tiempo inicial de procesamiento \( T_{i}^{(0)} \).
     \item \( P_j \) es el pedido \( j \)-ésimo (donde \( j = 1, 2, \dots, n \)).
-    \item \( S_k \) es la \( k \)-ésima etapa de producción (donde \( k = 1, 2, \dots, 5 \)).
+    \item \( E_k \) es la \( k \)-ésima etapa de producción (donde \( k = 1, 2, \dots, 5 \)).
     \item \( T_{i,j}^{(k)} \) es el tiempo que la máquina \( i \)-ésima tarda en procesar el pedido \( j \)-ésimo en la etapa \( k \).
     \item \( r_i \in [0.02, 0.03] \) es el incremento porcentual del tiempo de trabajo de la máquina \( i \)-ésima después de procesar un pedido.
-    \item \( n \) es el número de trabajos que se solicitarán.
+    \item \( n \) es el número de pedidos que se solicitarán.
     \item \( \alpha = 1.30 \) es el umbral del 130\% del tiempo inicial para que se produzca el enfriamiento.
     \item \( c = 6 \) es el tiempo de enfriamiento en segundos.
     \item \( \gamma = 0.75 \) es el factor de reducción del tiempo después del enfriamiento.
@@ -356,10 +356,20 @@ Este método invierte la secuencia de asignaciones de máquinas de un pedido en 
 
 \subsection{Metodología de Selección de Configuración}
 
-Para determinar la configuración óptima de los algoritmos implementados (NSGA-II y NSGA-II memético), se emplea una metodología sistemática que combina el tunning de hiperparámetros y la comparación de operadores. Esta metodología permite identificar la configuración más adecuada que se ajuste específicamente al problema de programación en líneas de ensamblaje.
+Para determinar la configuración óptima de los algoritmos implementados (NSGA-II y NSGA-II memético), se emplea una metodología sistemática que combina la comparación de operadores, el tunning de hiperparámetros, la implementación de optimizaciones algorítmicas iniciales, y finalmente el estudio de ablación para identificar mejoras adicionales. Esta metodología permite identificar la configuración más adecuada que se ajuste específicamente al problema de programación en líneas de ensamblaje.
+
+\subsubsection{Comparación de Operadores}
+En primer lugar, se realizan experimentos de comparación sistemática entre los diferentes operadores implementados:
+\begin{itemize}
+    \item Cruce uniforme por etapa vs. cruce de un punto
+    \item Mutación swap vs. insert vs. invert stage-aware
+    \item NSGA-II estándar vs. NSGA-II memético
+\end{itemize}
+
+Estos experimentos determinan qué combinaciones de operadores proporcionan mejores resultados en términos de calidad del frente de Pareto, diversidad de soluciones y robustez de los algoritmos. La mejor combinación identificada se utiliza como base para las siguientes fases de optimización.
 
 \subsubsection{Tunning Multiobjetivo}
-El tunning de hiperparámetros se realiza mediante experimentos sistemáticos que evalúan múltiples configuraciones de parámetros numéricos. Se consideran diferentes valores para:
+Una vez identificada la mejor combinación de operadores, se realiza el tunning de hiperparámetros mediante experimentos sistemáticos que evalúan múltiples configuraciones de parámetros numéricos. Se consideran diferentes valores para:
 \begin{itemize}
     \item Tamaño de población
     \item Número de generaciones
@@ -370,19 +380,13 @@ El tunning de hiperparámetros se realiza mediante experimentos sistemáticos qu
 
 Estos experimentos evalúan la calidad de las soluciones mediante múltiples métricas del frente de Pareto, permitiendo identificar configuraciones que proporcionen el mejor compromiso entre calidad, diversidad y convergencia.
 
-\subsubsection{Comparación de Operadores}
-Paralelamente, se realizan experimentos de comparación sistemática entre los diferentes operadores implementados:
-\begin{itemize}
-    \item Cruce uniforme por etapa vs. cruce de un punto
-    \item Mutación swap vs. insert vs. invert stage-aware
-    \item NSGA-II estándar vs. NSGA-II memético
-\end{itemize}
+\subsubsection{Optimizaciones Algorítmicas Iniciales}
 
-Estos experimentos determinan qué combinaciones de operadores proporcionan mejores resultados en términos de calidad del frente de Pareto, diversidad de soluciones y robustez de los algoritmos.
+Después de identificar la mejor configuración mediante comparación de operadores y tunning, se implementaron optimizaciones algorítmicas iniciales para mejorar la eficiencia computacional. Estas optimizaciones incluyen caché de fitness, clasificación adaptativa y búsqueda local selectiva, las cuales se describen en detalle en la Sección \ref{sec:optimizaciones_algoritmicas}.
 
 \subsubsection{Estudio de Ablación}
 
-Para validar científicamente que cada componente del algoritmo es necesario y medir su impacto individual, se realizó un estudio de ablación sistemático. Este estudio evalúa el impacto de desactivar componentes específicos del algoritmo, permitiendo cuantificar la contribución de cada elemento al rendimiento final.
+Una vez implementadas las optimizaciones algorítmicas iniciales, se realizó un estudio de ablación sistemático para validar científicamente que cada componente del algoritmo es necesario y medir su impacto individual. Este estudio evalúa el impacto de desactivar componentes específicos del algoritmo, permitiendo cuantificar la contribución de cada elemento al rendimiento final.
 
 \paragraph{Metodología del Estudio de Ablación}
 
@@ -496,7 +500,7 @@ se mantiene bajo cualquier transformación $(\text{ref}_{\text{mk}}', \text{ref}
 
 Por tanto, la selección específica de valores de referencia no compromete la identificación de la configuración óptima, que es el objetivo del proceso de tunning. Los valores elegidos deben ser \textbf{conservadores} (suficientemente grandes) para evitar que las métricas excedan los valores de referencia, pero su magnitud exacta no es crítica para la comparación.
 
-Este enfoque es estándar en optimización multiobjetivo: Deb et al. \cite{Deb2002} emplean normalización basada en límites del espacio objetivo sin requerir calibración empírica precisa; Zitzler et al. \cite{Zitzler2003} utilizan valores de referencia para métricas de calidad (como hipervolumen) donde los valores específicos afectan magnitudes pero no rankings relativos. La práctica común en la literatura es establecer valores de referencia que sean "razonables" para el problema, no necesariamente "óptimos" u obtenidos empíricamente.
+Este enfoque es estándar en optimización multiobjetivo: \textcite{Deb2002} emplean normalización basada en límites del espacio objetivo sin requerir calibración empírica precisa; \textcite{Zitzler2003} utilizan valores de referencia para métricas de calidad (como hipervolumen) donde los valores específicos afectan magnitudes pero no rankings relativos. La práctica común en la literatura es establecer valores de referencia que sean "razonables" para el problema, no necesariamente "óptimos" u obtenidos empíricamente.
 
 Los valores elegidos como límites conservadores cubren ampliamente el rango esperado de valores del sistema, asegurando que las métricas observadas típicamente se encuentren por debajo de estos límites, permitiendo así una normalización efectiva
 
@@ -575,7 +579,7 @@ En esta sección se detalla la complejidad teórica del algoritmo implementado (
     \item $G$: número de generaciones (\texttt{num\_generaciones}).
     \item $M$: número de objetivos (en este trabajo, $M=3$: \textit{makespan}, \textit{balance}, \textit{energía}).
     \item $L$: longitud del cromosoma (número de unidades/etapas asignadas).
-    \item $E$: costo de una evaluación de \textit{fitness} para un individuo (depende de la instancia del problema; en general incluye calcular tiempo de proceso, enfriamientos y energía sobre todas las etapas).\footnote{En la práctica, $E$ escala con el tamaño de la instancia: número de trabajos, etapas y máquinas por etapa.}
+    \item $C_{eval}$: costo de una evaluación de \textit{fitness} para un individuo (depende de la instancia del problema; en general incluye calcular tiempo de proceso, enfriamientos y energía sobre todas las etapas).\footnote{En la práctica, $C_{eval}$ escala con el tamaño de la instancia: número de pedidos, etapas y máquinas por etapa.}
     \item $k$: frecuencia de búsqueda local en el memético (\texttt{cada\_k\_gen}).
     \item $I$: iteraciones máximas de la búsqueda local (\texttt{max\_iter\_local}).
 \end{itemize}
@@ -585,7 +589,7 @@ En esta sección se detalla la complejidad teórica del algoritmo implementado (
 Por generación, los costos dominantes son:
 
 \begin{enumerate}
-    \item \textbf{Evaluación de la población}: $\mathcal{O}(N\,E)$.
+    \item \textbf{Evaluación de la población}: $\mathcal{O}(N\,C_{eval})$.
     \item \textbf{Ordenamiento no dominado (fast non-dominated sorting)}: $\mathcal{O}(M\,N^{2})$ \cite{Deb2002}.
     \item \textbf{Distancia de hacinamiento (crowding distance)}: ordenar por cada objetivo dentro de cada frente. En el peor caso (frente grande), $\mathcal{O}(M\,N\log N)$ por generación.
     \item \textbf{Selección, cruce y mutación}: típicamente $\mathcal{O}(N\,L)$, pues se generan $\approx N$ descendientes y cada operador recorre una fracción del cromosoma.
@@ -593,27 +597,27 @@ Por generación, los costos dominantes son:
 
 Por tanto, la complejidad por generación del NSGA-II estándar queda acotada por:
 \[
-\mathcal{O}\big(M\,N^{2} + M\,N\log N + N\,E + N\,L\big) = \mathcal{O}\big(M\,N^{2} + N\,(E+L)\big),
+\mathcal{O}\big(M\,N^{2} + M\,N\log N + N\,C_{eval} + N\,L\big) = \mathcal{O}\big(M\,N^{2} + N\,(C_{eval}+L)\big),
 \]
 siendo el término $\mathcal{O}(M\,N^{2})$ típicamente dominante.
 
 En $G$ generaciones, la complejidad temporal total es:
 \[
-\mathcal{T}_{\text{NSGA-II}}(N,G) = \mathcal{O}\big(G\,M\,N^{2} + G\,N\,(E+L)\big) = \mathcal{O}\big(G\,M\,N^{2}\big).
+\mathcal{T}_{\text{NSGA-II}}(N,G) = \mathcal{O}\big(G\,M\,N^{2} + G\,N\,(C_{eval}+L)\big) = \mathcal{O}\big(G\,M\,N^{2}\big).
 \]
 
 \paragraph{Coste adicional por la búsqueda local (versión memética)}
 
-La variante memética aplica una búsqueda local cada $k$ generaciones, hasta $I$ iteraciones por individuo seleccionado. Si se aplica sobre la población completa (caso peor), y el vecindario evalúa $\Theta(1)$ movimientos por iteración (p.ej., \textit{swap/insert/invert} con evaluación incremental), el coste adicional por ciclo de búsqueda local es $\mathcal{O}(N\,I\,E)$. Dado que ocurre aproximadamente $G/k$ veces:
+La variante memética aplica una búsqueda local cada $k$ generaciones, hasta $I$ iteraciones por individuo seleccionado. Si se aplica sobre la población completa (caso peor), y el vecindario evalúa $\Theta(1)$ movimientos por iteración (p.ej., \textit{swap/insert/invert} con evaluación incremental), el coste adicional por ciclo de búsqueda local es $\mathcal{O}(N\,I\,C_{eval})$. Dado que ocurre aproximadamente $G/k$ veces:
 \[
-\mathcal{T}_{\text{memético}}^{\text{local}} = \mathcal{O}\Big(\frac{G}{k}\,N\,I\,E\Big).
+\mathcal{T}_{\text{memético}}^{\text{local}} = \mathcal{O}\Big(\frac{G}{k}\,N\,I\,C_{eval}\Big).
 \]
 
 Así, la complejidad total del NSGA-II memético implementado es:
 \[
-\mathcal{T}_{\text{NSGA-II-mem}}(N,G) = \mathcal{O}\big(G\,M\,N^{2}\big)\; +\; \mathcal{O}\Big(\frac{G}{k}\,N\,I\,E\Big)\; +\; \mathcal{O}\big(G\,N\,(E+L)\big).
+\mathcal{T}_{\text{NSGA-II-mem}}(N,G) = \mathcal{O}\big(G\,M\,N^{2}\big)\; +\; \mathcal{O}\Big(\frac{G}{k}\,N\,I\,C_{eval}\Big)\; +\; \mathcal{O}\big(G\,N\,(C_{eval}+L)\big).
 \]
-En la práctica, el término $\mathcal{O}(G\,M\,N^{2})$ sigue siendo dominante salvo que $\tfrac{I\,E}{k}$ sea grande. Esto justifica, en los experimentos, limitar $I$ y espaciar la búsqueda local con $k$ para mantener tiempos manejables.
+En la práctica, el término $\mathcal{O}(G\,M\,N^{2})$ sigue siendo dominante salvo que $\tfrac{I\,C_{eval}}{k}$ sea grande. Esto justifica, en los experimentos, limitar $I$ y espaciar la búsqueda local con $k$ para mantener tiempos manejables.
 
 \paragraph{Complejidad espacial}
 
@@ -624,11 +628,12 @@ La memoria está dominada por almacenar población y descendencia, sus \textit{f
 
 \paragraph{Implicancias prácticas para esta tesis}
 
-En nuestros experimentos, con $M=3$ objetivos y los rangos $N\in\{100,200\}$, $G\in\{400,600\}$, la cota dominante $\mathcal{O}(G\,M\,N^{2})$ explica el tiempo de cómputo observado y la importancia de la paralelización por semillas. La búsqueda local (parámetros \texttt{cada\_k\_gen} y \texttt{max\_iter\_local}) introduce un término adicional proporcional a $\tfrac{G}{k}\,N\,I\,E$, por lo que se recomienda (y así se hizo) mantener $I$ y $k$ en valores moderados para equilibrar calidad/tiempo.
+En nuestros experimentos, con $M=3$ objetivos y los rangos $N\in\{100,200\}$, $G\in\{400,600\}$, la cota dominante $\mathcal{O}(G\,M\,N^{2})$ explica el tiempo de cómputo observado y la importancia de la paralelización por semillas. La búsqueda local (parámetros \texttt{cada\_k\_gen} y \texttt{max\_iter\_local}) introduce un término adicional proporcional a $\tfrac{G}{k}\,N\,I\,C_{eval}$, por lo que se recomienda (y así se hizo) mantener $I$ y $k$ en valores moderados para equilibrar calidad/tiempo.
 
 \subsection{Optimizaciones Implementadas en el Algoritmo}
+\label{sec:optimizaciones_algoritmicas}
 
-Para mejorar la eficiencia computacional y la calidad del frente de Pareto, se implementaron varias optimizaciones en el algoritmo NSGA-II memético:
+Para mejorar la eficiencia computacional y la calidad del frente de Pareto, se implementaron varias optimizaciones algorítmicas iniciales en el algoritmo NSGA-II memético después de la fase de tunning:
 
 \subsubsection{Filtrado de Soluciones Similares (Epsilon-Filter)}
 

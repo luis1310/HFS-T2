@@ -3090,13 +3090,15 @@
     <bcf:citekey order="18" intorder="1">Garavito-Hernández2019362</bcf:citekey>
     <bcf:citekey order="19" intorder="1">Lop_et_al_2015</bcf:citekey>
     <bcf:citekey order="20" intorder="1">Deb2002</bcf:citekey>
-    <bcf:citekey order="21" intorder="1">Moscato1989</bcf:citekey>
-    <bcf:citekey order="22" intorder="1">Deb2002</bcf:citekey>
-    <bcf:citekey order="23" intorder="1">Zitzler2003</bcf:citekey>
+    <bcf:citekey order="21" intorder="1">Deb2002</bcf:citekey>
+    <bcf:citekey order="22" intorder="1">Moscato1989</bcf:citekey>
+    <bcf:citekey order="23" intorder="1">Deb2002</bcf:citekey>
     <bcf:citekey order="24" intorder="1">Deb2002</bcf:citekey>
-    <bcf:citekey order="25" intorder="1">Lop_et_al_2015</bcf:citekey>
-    <bcf:citekey order="26" intorder="1">KRAUL2025125624</bcf:citekey>
-    <bcf:citekey order="27" intorder="1">Mun_etal_2024</bcf:citekey>
+    <bcf:citekey order="25" intorder="1">Zitzler2003</bcf:citekey>
+    <bcf:citekey order="26" intorder="1">Deb2002</bcf:citekey>
+    <bcf:citekey order="27" intorder="1">Lop_et_al_2015</bcf:citekey>
+    <bcf:citekey order="28" intorder="1">KRAUL2025125624</bcf:citekey>
+    <bcf:citekey order="29" intorder="1">Mun_etal_2024</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="apa">
