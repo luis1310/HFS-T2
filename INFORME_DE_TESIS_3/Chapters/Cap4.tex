@@ -271,7 +271,7 @@ El estudio de ablación reveló que:
 
 \subsubsection{Optimizaciones de Vectorización con NumPy}
 
-Basándose en los resultados del estudio de ablación, se identificaron las operaciones más costosas del algoritmo que eran susceptibles de optimización mediante vectorización. Se implementaron optimizaciones de vectorización con NumPy en tres funciones críticas del algoritmo: \texttt{clasificacion\_no\_dominada}, \texttt{filtrar\_soluciones\_similares} y \texttt{distancia\_crowding}. Estas optimizaciones trabajan exclusivamente sobre los valores de \textit{fitness} y no modifican la estructura del cromosoma.
+Basándose en los resultados del estudio de ablación, se implementaron optimizaciones de vectorización con NumPy en tres funciones críticas del algoritmo (metodología detallada en el Capítulo 3, Sección 3.3.4): \texttt{clasificacion\_no\_dominada}, \texttt{filtrar\_soluciones\_similares} y \texttt{distancia\_crowding}. Estas optimizaciones trabajan exclusivamente sobre los valores de \textit{fitness} y no modifican la estructura del cromosoma.
 
 \paragraph{Resultados de las Optimizaciones de Vectorización}
 
@@ -299,99 +299,9 @@ Los resultados del estudio de ablación validan científicamente el diseño del 
 
 \paragraph{Optimizaciones Basadas en Ablación}
 
-El estudio de ablación identificó que las operaciones más costosas (clasificación no dominada, filtro epsilon, distancia crowding) eran susceptibles de optimización mediante vectorización con NumPy. Las optimizaciones implementadas lograron:
-
-\begin{itemize}
-    \item \textbf{Reducción de tiempo}: 56.7\% (de 26.55s a 11.5s promedio, estabilizado en ~10.7s)
-    \item \textbf{Objetivo de tiempo}: Tiempo promedio de 11.5s (ligeramente por encima del objetivo de <10s, aunque ejecuciones individuales pueden alcanzar ~10.7s)
-    \item \textbf{Mantenimiento de calidad}: Frente de Pareto con 51-82 soluciones únicas
-    \item \textbf{Metodología}: Vectorización de bucles anidados O(n²) a operaciones vectorizadas usando broadcasting de NumPy
-\end{itemize}
+El estudio de ablación identificó que las operaciones más costosas (clasificación no dominada, filtro epsilon, distancia crowding) eran susceptibles de optimización mediante vectorización con NumPy. Las optimizaciones implementadas (descritas metodológicamente en el Capítulo 3) lograron una reducción del 56.7\% en el tiempo de ejecución (de 26.55s a 11.5s promedio, estabilizado en ~10.7s), manteniendo la calidad del frente de Pareto con 51-82 soluciones únicas.
 
 Esta validación científica mediante ablación proporciona evidencia empírica sólida de que cada componente incluido en el algoritmo final es necesario y contribuye al rendimiento global del sistema, además de identificar oportunidades de optimización que resultaron en mejoras masivas de rendimiento.
-
-\subsection{Análisis del Frente de Pareto}
-
-Utilizando la mejor configuración identificada (NSGA-II estándar con cruce uniforme y mutación swap) y después de aplicar todas las optimizaciones (algorítmicas iniciales y vectorización), se generó un frente de Pareto final con 51-82 soluciones únicas después de aplicar el filtro de similitud ($\epsilon = 1\%$).
-
-\subsubsection{Características del Frente}
-
-El frente de Pareto obtenido presenta las siguientes características:
-
-\begin{itemize}
-    \item \textbf{Rango de makespan}: 1560.61 minutos (rango mínimo, todas las soluciones convergen a este valor)
-    \item \textbf{Rango de balance}: 261.03 - 323.70 (rango de 62.67 unidades)
-    \item \textbf{Rango de energía}: 622.40 - 628.46 kWh (rango de 6.06 kWh)
-\end{itemize}
-
-Estos rangos muestran que el algoritmo logra explorar efectivamente el espacio de compromiso entre los tres objetivos. Es importante destacar que, debido a la naturaleza multiobjetivo del problema, \textbf{no existe una solución única que optimice simultáneamente los tres objetivos}. En su lugar, el frente de Pareto proporciona un conjunto de soluciones alternativas donde cada una representa un compromiso diferente entre los objetivos.
-
-El decisor puede seleccionar la solución más adecuada según sus preferencias específicas:
-\begin{itemize}
-    \item Si se prioriza la \textbf{productividad temporal}, todas las soluciones del frente tienen makespan de 1560.61 minutos, por lo que la selección se basa en los otros objetivos.
-    \item Si se prioriza la \textbf{equidad operativa}, se puede elegir una solución con balance mínimo (261.03), aunque esto puede aumentar el consumo energético (628.46 kWh).
-    \item Si se prioriza la \textbf{sostenibilidad energética}, se puede elegir una solución con consumo energético mínimo (622.40 kWh), aunque esto puede resultar en mayor desbalance de carga (323.70).
-    \item Si se busca un \textbf{compromiso equilibrado}, se puede elegir una solución intermedia que balancee balance y energía de manera razonable, manteniendo el makespan constante.
-\end{itemize}
-
-Esta flexibilidad es una de las principales ventajas del enfoque multiobjetivo: proporciona al decisor múltiples alternativas bien fundamentadas, permitiendo una toma de decisiones informada según el contexto específico y las prioridades del momento.
-
-La visualización del frente de Pareto en el espacio tridimensional de objetivos se muestra en la Figura \ref{fig:frente_3d}, donde cada punto representa una solución no dominada. La distribución de las soluciones muestra claramente el trade-off entre los tres objetivos: soluciones con makespan menor tienden a tener mayor balance o consumo energético, y viceversa.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.9\textwidth]{Figures/frente_pareto_estándar_3d.png}
-\caption{Frente de Pareto en el espacio tridimensional (Makespan vs Balance vs Energía)}
-\label{fig:frente_3d}
-\end{figure}
-
-Para facilitar el análisis de las relaciones entre pares de objetivos, se generaron proyecciones bidimensionales del frente de Pareto, mostradas en la Figura \ref{fig:frente_2d}. Estas proyecciones permiten visualizar claramente los compromisos entre:
-\begin{itemize}
-    \item Makespan y Balance de Carga
-    \item Makespan y Consumo Energético
-    \item Balance de Carga y Consumo Energético
-\end{itemize}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=1.0\textwidth]{Figures/frente_pareto_estándar_2d.png}
-\caption{Proyecciones bidimensionales del frente de Pareto}
-\label{fig:frente_2d}
-\end{figure}
-
-\subsubsection{Evolución del Frente}
-
-La evolución del tamaño del frente de Pareto a lo largo de las 400 generaciones muestra un patrón característico:
-
-\begin{itemize}
-    \item \textbf{Generaciones iniciales (0-100)}: El frente crece rápidamente desde valores pequeños (10-20 soluciones) hasta valores elevados. Sin embargo, gracias al filtro de similitud aplicado periódicamente, el tamaño del frente nunca alcanza el máximo teórico de la población (100 soluciones), ya que las soluciones similares son eliminadas antes de que se acumulen.
-    \item \textbf{Generaciones intermedias (100-250)}: El frente se mantiene en valores altos pero controlados, con reducciones periódicas cuando se aplica el filtro de similitud (cada 30 generaciones). Estas reducciones eliminan soluciones redundantes, manteniendo solo aquellas que son significativamente diferentes en el espacio objetivo.
-    \item \textbf{Generaciones avanzadas (250-400)}: El tamaño del frente se estabiliza alrededor de 60-90 soluciones únicas después de cada filtrado, mostrando que el algoritmo ha convergido hacia un conjunto de soluciones no dominadas bien diversificado. El filtro asegura que estas soluciones representen compromisos genuinamente diferentes entre los tres objetivos.
-\end{itemize}
-
-El filtro de similitud ($\epsilon = 1\%$) aplicado periódicamente asegura que el frente final contenga solo soluciones significativamente diferentes, evitando la acumulación de soluciones prácticamente idénticas. Esto es fundamental porque, aunque el algoritmo podría generar hasta 100 soluciones no dominadas, el filtro previene que se alcance este máximo al eliminar soluciones redundantes que no aportan diversidad real al conjunto de alternativas disponibles para el decisor.
-
-La evolución del tamaño del frente de Pareto a lo largo de las generaciones se visualiza en la Figura \ref{fig:evolucion_frente}, donde se puede observar claramente el patrón descrito: crecimiento inicial, estabilización con reducciones periódicas debido al filtro, y convergencia final hacia un conjunto de soluciones únicas bien diversificado.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.9\textwidth]{Figures/evolucion_frente_estándar.png}
-\caption{Evolución del tamaño del frente de Pareto a lo largo de 400 generaciones}
-\label{fig:evolucion_frente}
-\end{figure}
-
-\subsubsection{Análisis de Soluciones Extremas}
-
-Para facilitar la selección de soluciones según diferentes criterios, se identificaron las soluciones extremas del frente de Pareto que optimizan cada objetivo individualmente. La Figura \ref{fig:mejores_soluciones} muestra estas soluciones destacadas junto con sus valores en los tres objetivos, permitiendo al decisor visualizar rápidamente las opciones disponibles.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.9\textwidth]{Figures/mejores_soluciones_pareto.png}
-\caption{Mejores soluciones del frente de Pareto según cada objetivo}
-\label{fig:mejores_soluciones}
-\end{figure}
-
-Estas visualizaciones facilitan la comprensión del frente de Pareto y ayudan al decisor a identificar rápidamente qué soluciones se alinean mejor con sus objetivos prioritarios, ya sea minimizar el tiempo de producción, equilibrar la carga de trabajo o reducir el consumo energético.
 
 \section{Discusión}
 
@@ -442,3 +352,5 @@ Este trabajo contribuye al área de optimización multiobjetivo en líneas de en
 \end{enumerate}
 
 Estas contribuciones proporcionan una base sólida para futuras investigaciones en optimización multiobjetivo de sistemas de manufactura.
+
+Habiendo presentado y discutido los resultados experimentales, el siguiente capítulo sintetiza las conclusiones principales del trabajo, valida las hipótesis planteadas en la introducción y propone direcciones futuras de investigación basadas en los hallazgos obtenidos.

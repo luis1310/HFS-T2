@@ -28,26 +28,6 @@ Este proyecto de tesis ha logrado establecer una base sólida para la implementa
 
 \end{itemize}
 
-\subsection{Resultados Principales Obtenidos}
-
-Los experimentos sistemáticos realizados han proporcionado evidencia empírica sólida sobre la efectividad del enfoque multiobjetivo propuesto:
-
-\begin{enumerate}
-    \item \textbf{Configuración óptima identificada}: Población de 100 individuos, 400 generaciones, probabilidad de cruce 0.6, probabilidad de mutación 0.75, búsqueda local cada 20 generaciones con 5 iteraciones.
-
-    \item \textbf{Mejor combinación de operadores}: Cruce uniforme + Mutación swap, con score agregado de 2.6065 ± 0.0086.
-    
-    \item \textbf{Recomendación de versión estándar}: Aunque la versión memética muestra mejoras marginales (0.11\% en score agregado), la versión estándar es 14.0\% más rápida con calidad prácticamente idéntica (diferencia de score: -0.02\%), siendo la opción más eficiente para este problema específico.
-    
-    \item \textbf{Calidad del frente de Pareto}: 51-82 soluciones únicas que exploran efectivamente el espacio de compromiso entre los tres objetivos, con makespan convergente a 1560.61 minutos y rangos de balance (261.03-323.70) y energía (622.40-628.46 kWh).
-    
-    \item \textbf{Tiempo de ejecución optimizado}: Reducción del 56.7\% mediante vectorización con NumPy, alcanzando un tiempo promedio de 11.5 segundos (estabilizado en ~10.7s), ligeramente por encima del objetivo de <10 segundos pero con mejoras significativas respecto al tiempo inicial.
-
-    \item \textbf{Robustez estadística}: Desviaciones estándar bajas (0.0086-0.0115) que demuestran consistencia en los resultados.
-    
-    \item \textbf{Validación mediante ablación}: El estudio de ablación confirmó que cada componente del algoritmo contribuye al rendimiento, identificando que el filtro epsilon es crítico (mejora calidad con overhead aceptable), mientras que la búsqueda local tiene impacto marginal. El estudio también identificó las operaciones más costosas, permitiendo implementar optimizaciones de vectorización con NumPy que lograron mejoras masivas de rendimiento, justificando científicamente el diseño final del algoritmo.
-\end{enumerate}
-
 \section{Trabajo Futuro}
 
 Aunque se han completado exitosamente los experimentos de tunning multiobjetivo y comparación de operadores, se identifican las siguientes líneas de trabajo futuro:

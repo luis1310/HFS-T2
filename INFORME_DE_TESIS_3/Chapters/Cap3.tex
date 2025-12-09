@@ -390,49 +390,17 @@ Una vez implementadas las optimizaciones algorítmicas iniciales, se realizó un
 
 \paragraph{Metodología del Estudio de Ablación}
 
-El estudio de ablación se diseñó para evaluar sistemáticamente el impacto de cada componente del algoritmo mediante la comparación de variantes que activan o desactivan componentes específicos. Se evaluaron 6 variantes principales del algoritmo:
+El estudio de ablación se diseñó para evaluar sistemáticamente el impacto de cada componente del algoritmo mediante la comparación de variantes que activan o desactivan componentes específicos. Se evaluaron 6 variantes principales del algoritmo: NSGA-II completo (con filtro epsilon), NSGA-II sin filtro (base), Memético completo (con filtro epsilon, búsqueda local, cache y optimizaciones), Memético sin filtro, Memético sin búsqueda local, y Memético sin filtro ni búsqueda. Cada variante se ejecutó con 30 semillas independientes para garantizar robustez estadística, resultando en un total de 180 ejecuciones.
 
-\begin{itemize}
-    \item \textbf{NSGA2 completo}: Con filtro epsilon, cruce uniforme y mutación swap
-    \item \textbf{NSGA2 sin filtro}: Sin filtro epsilon (base NSGA2)
-    \item \textbf{Memético completo}: Con filtro epsilon, búsqueda local, cache y optimizaciones
-    \item \textbf{Memético sin filtro}: Sin filtro epsilon, solo búsqueda local
-    \item \textbf{Memético sin búsqueda local}: Sin búsqueda local, solo cache y optimizaciones
-    \item \textbf{Memético sin filtro ni búsqueda}: Base memético con solo cache y optimizaciones
-\end{itemize}
-
-Cada variante se ejecutó con 30 semillas independientes para garantizar robustez estadística, resultando en un total de 180 ejecuciones. Los resultados del estudio de ablación permiten:
-
-\begin{itemize}
-    \item Cuantificar el impacto de cada componente en el tiempo de ejecución y la calidad de las soluciones
-    \item Justificar científicamente la inclusión de cada componente en el diseño final del algoritmo
-    \item Identificar componentes críticos que deben mantenerse y componentes opcionales que pueden optimizarse
-    \item Comparar la eficiencia relativa entre NSGA-II estándar y memético
-\end{itemize}
+Los resultados del estudio de ablación permiten cuantificar el impacto de cada componente en el tiempo de ejecución y la calidad de las soluciones, justificar científicamente la inclusión de cada componente en el diseño final del algoritmo, identificar componentes críticos que deben mantenerse y componentes opcionales que pueden optimizarse, y comparar la eficiencia relativa entre NSGA-II estándar y memético. Los resultados detallados y análisis cuantitativo se presentan en el Capítulo 4.
 
 \paragraph{Optimizaciones Basadas en Ablación: Vectorización con NumPy}
 
-Los resultados del estudio de ablación revelaron que las operaciones más costosas del algoritmo eran susceptibles de optimización mediante vectorización. Se identificaron tres operaciones críticas que representaban aproximadamente el 40-50\% del tiempo total de ejecución:
+Los resultados del estudio de ablación revelaron que las operaciones más costosas del algoritmo eran susceptibles de optimización mediante vectorización. Se identificaron tres operaciones críticas que representaban aproximadamente el 40-50\% del tiempo total de ejecución: (1) Clasificación No Dominada (20-30\% del tiempo), con operaciones O(n²) con bucles anidados en Python puro; (2) Filtro Epsilon (10-15\% del tiempo), con múltiples conversiones y cálculos repetitivos; y (3) Distancia Crowding (5-10\% del tiempo), con ordenamientos repetitivos costosos.
 
-\begin{enumerate}
-    \item \textbf{Clasificación No Dominada} (20-30\% del tiempo): Operaciones O(n²) con bucles anidados en Python puro
-    \item \textbf{Filtro Epsilon} (10-15\% del tiempo): Múltiples conversiones y cálculos repetitivos con list comprehensions
-    \item \textbf{Distancia Crowding} (5-10\% del tiempo): Ordenamientos repetitivos con funciones key costosas
-\end{enumerate}
+Para optimizar estas operaciones, se implementó una estrategia de vectorización utilizando NumPy en el archivo \texttt{tesis3/src/algorithms/nsga2.py}, reemplazando bucles anidados y list comprehensions por operaciones vectorizadas que aprovechan el broadcasting y la indexación avanzada de NumPy. Las tres funciones optimizadas son: \texttt{clasificacion\_no\_dominada}, \texttt{filtrar\_soluciones\_similares} y \texttt{distancia\_crowding}.
 
-Para optimizar estas operaciones, se implementó una estrategia de vectorización utilizando NumPy en el archivo \texttt{tesis3/src/algorithms/nsga2.py}:
-
-\begin{itemize}
-    \item \textbf{Vectorización de Clasificación No Dominada} (función \texttt{clasificacion\_no\_dominada}): Conversión de bucles anidados O(n²) a operaciones vectorizadas usando broadcasting de NumPy. Se convierte \texttt{fitness\_poblacion} a un array NumPy y se utilizan operaciones de broadcasting (\texttt{fitness\_array[:, None, :]} y \texttt{fitness\_array[None, :, :]}) para calcular la matriz de dominancia \texttt{i\_domina\_j} comparando todos los pares simultáneamente, reemplazando los bucles anidados en Python.
-    
-    \item \textbf{Vectorización del Filtro Epsilon} (función \texttt{filtrar\_soluciones\_similares}): Reemplazo de list comprehensions por operaciones vectorizadas con arrays NumPy. Se vectoriza la conversión de fitness a métricas (\texttt{makespans = 1 / fitness\_array[:, 0]}, etc.), se utiliza \texttt{np.ptp} para cálculo de rangos, y se vectoriza la normalización y discretización para asignación a grilla espacial, reduciendo la complejidad de comparaciones.
-    
-    \item \textbf{Vectorización de Distancia Crowding} (función \texttt{distancia\_crowding}): Reemplazo de \texttt{sorted} con key function por \texttt{np.argsort} para obtener índices ordenados, y vectorización de cálculos de distancias para elementos intermedios usando indexación avanzada de NumPy.
-\end{itemize}
-
-\textbf{Importante}: Estas optimizaciones de vectorización trabajan exclusivamente sobre los valores de \textit{fitness} (objetivos a maximizar) y \textbf{no modifican la estructura del cromosoma}. El cromosoma mantiene su representación original como array de enteros que indica las asignaciones de máquinas por etapa para cada pedido. La vectorización solo acelera las operaciones de clasificación, filtrado y cálculo de distancias que procesan los valores de fitness, sin alterar la representación genética de las soluciones.
-
-Estas optimizaciones lograron una reducción del 56.7\% en el tiempo de ejecución (de 26.55s a 11.5s promedio, estabilizado en ~10.7s después del warm-up), mejorando significativamente la eficiencia computacional mientras mantienen la calidad del frente de Pareto sin afectar la funcionalidad del algoritmo.
+\textbf{Importante}: Estas optimizaciones de vectorización trabajan exclusivamente sobre los valores de \textit{fitness} (objetivos a maximizar) y \textbf{no modifican la estructura del cromosoma}. El cromosoma mantiene su representación original como array de enteros que indica las asignaciones de máquinas por etapa para cada pedido. La vectorización solo acelera las operaciones de clasificación, filtrado y cálculo de distancias que procesan los valores de fitness, sin alterar la representación genética de las soluciones. Los resultados cuantitativos de estas optimizaciones se presentan en el Capítulo 4.
 
 \subsubsection{Criterios de Evaluación}
 La selección de la configuración óptima considera los siguientes criterios:
@@ -742,4 +710,6 @@ En la Figura \ref{fig:pipeline} se muestra el flujo de procesamiento de extremo 
 \caption{Pipeline del sistema: desde carga de configuración hasta obtención del frente de Pareto.}
 \label{fig:pipeline}
 \end{figure}
+
+Con la metodología establecida, los algoritmos implementados y las optimizaciones aplicadas, el siguiente capítulo presenta los resultados experimentales obtenidos mediante la aplicación sistemática de esta metodología, incluyendo el análisis detallado del frente de Pareto y la comparación con trabajos previos en la literatura.
 
