@@ -1,6 +1,64 @@
-\chapter{Estado del Arte}
+\chapter{Marco Teórico y Estado del Arte}
 
-Este capítulo tiene como objetivo proporcionar un conjunto de antecedentes sobre los avances y enfoques más relevantes en la aplicación de AE, en particular los AG, a la optimización de procesos productivos. Este análisis es fundamental para entender el estado actual de las investigaciones y prácticas en esta área, así como para identificar las oportunidades y limitaciones de las soluciones existentes.
+Este capítulo establece los fundamentos teóricos necesarios para comprender el problema de optimización abordado en este proyecto, seguido de una revisión del estado actual de las investigaciones en el campo. La primera sección presenta el marco teórico que sustenta el enfoque multiobjetivo implementado, mientras que la segunda sección analiza los avances y aplicaciones más relevantes en la literatura reciente.
+
+\section{Marco Teórico}
+
+Esta sección presenta los fundamentos teóricos que sustentan el desarrollo de este proyecto de tesis, abarcando desde los conceptos de optimización multiobjetivo hasta las particularidades de los problemas de programación en sistemas de manufactura y la importancia de la eficiencia energética.
+
+\subsection{Optimización Multiobjetivo}
+
+La optimización multiobjetivo es un campo de las matemáticas aplicadas que aborda problemas donde múltiples funciones objetivo deben ser optimizadas simultáneamente. A diferencia de los problemas de optimización monoobjetivo, donde existe una única solución óptima, los problemas multiobjetivo generalmente presentan un conjunto de soluciones óptimas conocidas como soluciones Pareto-óptimas \cite{ParetoPFL2024}.
+
+\subsubsection{Dominancia de Pareto y Frente de Pareto}
+
+El concepto de dominancia de Pareto es fundamental en optimización multiobjetivo. Una solución $\mathbf{x}_1$ domina en el sentido de Pareto a otra solución $\mathbf{x}_2$ si $\mathbf{x}_1$ es al menos tan buena como $\mathbf{x}_2$ en todos los objetivos, y estrictamente mejor en al menos uno. El conjunto de soluciones no dominadas forma el frente de Pareto, que representa el espacio de compromiso entre objetivos conflictivos \cite{ParetoSmallData2023}.
+
+Investigaciones recientes han demostrado que el aprendizaje del frente de Pareto (Pareto Front Learning, PFL) mediante hiperrredes permite aproximar eficientemente el frente en problemas multiobjetivo complejos \cite{ParetoPFL2024}. Estudios sobre optimización bajo incertidumbre han mostrado que la cuantificación de incertidumbre aleatoria mejora significativamente la creación del frente de Pareto y la toma de decisiones en procesos con funciones no lineales \cite{ParetoUncertainty2025}.
+
+\subsection{Algoritmos Evolutivos y NSGA-II}
+
+Los algoritmos evolutivos (AE) son metaheurísticas inspiradas en los principios de la evolución biológica, que utilizan mecanismos de selección, cruce y mutación para explorar el espacio de soluciones de problemas de optimización. En el contexto multiobjetivo, el algoritmo NSGA-II (Non-dominated Sorting Genetic Algorithm II) se ha establecido como uno de los métodos más ampliamente adoptados debido a su simplicidad operativa, eficiencia computacional y requisitos mínimos de parámetros \cite{NSGAII2020Workshop}.
+
+\subsubsection{Principios Fundamentales del NSGA-II}
+
+El algoritmo NSGA-II aborda tres dificultades clave de los algoritmos evolutivos multiobjetivo: complejidad computacional, ausencia de elitismo, y la necesidad de especificar parámetros de compartición. El algoritmo utiliza un enfoque de ordenamiento no dominado rápido con complejidad computacional $O(MN^2)$, donde $M$ es el número de objetivos y $N$ es el tamaño de la población \cite{NSGAIIImproved2025}.
+
+Los mecanismos principales del NSGA-II incluyen: (1) clasificación no dominada para identificar los frentes de Pareto en la población, (2) distancia de aglomeración (crowding distance) que reemplaza el radio de compartición y reduce la complejidad computacional, y (3) elitismo mediante la preservación de las mejores soluciones entre generaciones \cite{NSGAII2020Workshop}.
+
+\subsubsection{Mejoras Recientes del NSGA-II}
+
+Investigaciones recientes han propuesto mejoras al algoritmo NSGA-II para problemas específicos. Un estudio de 2024 presentó un operador de cruce híbrido simulado binario y aritmético mejorado (SBAX) aplicado al NSGA-II para problemas bi-objetivo de operación de reservorios \cite{NSGAIIReservoir2024}. Otro trabajo de 2025 introdujo mecanismos adaptativos que ajustan dinámicamente las tasas de cruce y mutación basándose en el progreso generacional, mejorando el rendimiento en problemas de optimización de antenas \cite{NSGAIIImproved2025}.
+
+Comparaciones sistemáticas entre NSGA-II y NSGA-III han confirmado que NSGA-II sigue siendo altamente efectivo para problemas con dos o tres objetivos \cite{NSGAIIvsIII2020}.
+
+\subsection{Problemas de Programación de Producción}
+
+Los problemas de programación de producción en sistemas de manufactura buscan optimizar la asignación de tareas a máquinas y la secuenciación de operaciones. El problema de Hybrid Flow Shop (HFS) representa una generalización del flow shop clásico donde máquinas paralelas están disponibles para realizar la misma operación en cada etapa \cite{HFSRL2025}.
+
+\subsubsection{Características del Hybrid Flow Shop}
+
+Un sistema HFS se caracteriza por tener múltiples etapas de procesamiento, donde cada etapa puede contener una o más máquinas idénticas operando en paralelo. Los pedidos deben procesarse secuencialmente a través de todas las etapas, pero pueden asignarse a cualquier máquina disponible dentro de cada etapa. Esta estructura refleja configuraciones industriales reales en sectores como manufactura de semiconductores, industria textil y procesamiento de alimentos \cite{HFSSemiconductor2025}.
+
+Revisiones sistemáticas recientes han documentado el creciente interés industrial en métodos y algoritmos de optimización para problemas HFS multiobjetivo \cite{HFSSystematicReview2022}. Estudios de 2025 han explorado el uso de aprendizaje por refuerzo para programación HFS, mostrando resultados prometedores en problemas multi-escenario \cite{HFSRL2025}.
+
+\subsubsection{Restricciones y Complejidad}
+
+Los problemas HFS reales incluyen restricciones como tiempos de preparación dependientes de la secuencia (sequence-dependent setup times), restricciones de elegibilidad de fábrica, y sistemas re-entrantes donde los pedidos pueden volver a etapas previas. La complejidad computacional de estos problemas es típicamente NP-difícil, lo que justifica el uso de metaheurísticas como los algoritmos evolutivos \cite{HFSEnergyEfficient2022}.
+
+\subsection{Sostenibilidad Energética en Manufactura}
+
+El aumento de los costos energéticos, las incertidumbres en el suministro de energía, y la crisis de sostenibilidad han intensificado la necesidad de eficiencia energética en la manufactura industrial \cite{EnergyOptimization2025}. Los sistemas de manufactura flexibles en energía (Energy Flexible Manufacturing Systems) buscan apoyar a las empresas en la optimización de eficiencia energética, costos y emisiones de carbono mediante el consumo flexible de energía renovable \cite{EnergyFlexible2025}.
+
+\subsubsection{Programación Consciente de Energía}
+
+La programación consciente de energía (energy-aware scheduling) ha emergido como un área de investigación muy activa, con más de 500 artículos publicados en la última década \cite{EnergySchedulingReview2025}. Esta área aborda la optimización simultánea de objetivos productivos (como el makespan) y objetivos de sostenibilidad (como el consumo energético), reconociendo que estos objetivos son frecuentemente conflictivos.
+
+Investigaciones recientes proponen marcos de optimización multiobjetivo basados en simulación combinados con descubrimiento de conocimiento, que identifican sistemáticamente pérdidas de energía y productividad, extrayendo reglas accionables para guiar la toma de decisiones \cite{EnergyOptimization2025}. Debido a los crecientes requisitos de reducción de emisiones y precios energéticos más altos, las empresas manufactureras han comenzado a prestar atención a la eficiencia energética de las cadenas de suministro \cite{EnergySupplyChain2025}.
+
+\section{Estado del Arte}
+
+Esta sección proporciona un conjunto de antecedentes sobre los avances y enfoques más relevantes en la aplicación de AE, en particular los AG, a la optimización de procesos productivos. Este análisis es fundamental para entender el estado actual de las investigaciones y prácticas en esta área, así como para identificar las oportunidades y limitaciones de las soluciones existentes.
 
 \section{Reducción del Tiempo de Terminación en la Programación de la Producción de una Línea de Flujo Híbrida Flexible (HFS)}
 Lopez, et al. \textcite{Lop_et_al_2015} presenta un modelo de programación de la producción utilizando una metaheurística para reducir el tiempo de finalización del makespan en una empresa textil. A través de la codificación de un algoritmo genético simple, se desarrolló una metodología para gestionar la producción en líneas de flujo híbridas flexibles. El algoritmo ofrece resultados de buena calidad con tiempos de ejecución razonables y una variación mínima en el makespan (2\%). Los autores concluyen que el algoritmo genético gestiona eficazmente la producción al reducir el makespan.
