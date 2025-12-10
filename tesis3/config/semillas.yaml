@@ -1,0 +1,17 @@
+# Semillas para experimentos de paralelización
+# Estas semillas se usan consistentemente en todos los scripts de paralelización
+# para asegurar reproducibilidad y comparabilidad de resultados
+
+semillas:
+  # Semillas estándar para experimentos completos (30 semillas)
+  estandar: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
+  
+  # Semillas para pruebas rápidas (4 semillas)
+  prueba_rapida: [0, 1, 2, 3]
+  
+  # Semillas personalizadas (si se necesitan diferentes semillas)
+  # personalizadas: [42, 123, 456, 789, ...]
+
+# Nota: Las semillas se generan usando range(), por lo que estandar = [0..29]
+# Este archivo permite verificar y documentar qué semillas se usan
+

@@ -1,0 +1,74 @@
+\chapter{Introducción}
+Hoy en día, la tecnología industrial avanza constantemente y la competencia global se intensifica cada vez más. Por esto, las empresas tienen que optimizar sus procesos productivos si quieren mantenerse competitivas. Las líneas de ensamblaje juegan un papel central en la fabricación, y necesitan soluciones que garanticen eficiencia, sostenibilidad y capacidad de adaptarse cuando las condiciones operativas cambian. Resolver problemas donde interactúan muchas variables simultáneamente (número de máquinas, secuencia de tareas, restricciones operativas) representa un desafío importante. Esta complejidad hace evidente que se necesitan herramientas que vayan más allá de los enfoques tradicionales, y los algoritmos evolutivos destacan como una alternativa viable.
+
+Los algoritmos evolutivos (AE) se han posicionado como una opción potente y flexible para estos desafíos. Están inspirados en la evolución natural, lo que les permite explorar espacios de soluciones muy amplios y encontrar resultados cercanos al óptimo en problemas complejos. Esta tesis implementa algoritmos evolutivos multiobjetivo, específicamente NSGA-II y su variante memética, para optimizar simultáneamente varios aspectos al programar máquinas en líneas de ensamblaje. El objetivo es conseguir soluciones que minimicen el tiempo de producción, balanceen la carga de trabajo entre máquinas y reduzcan el consumo energético.
+
+\section{Motivación}
+Este trabajo busca implementar algoritmos evolutivos multiobjetivo que permitan encontrar programaciones óptimas para líneas de ensamblaje considerando múltiples objetivos relevantes. Optimizar los tiempos en una línea de ensamblaje ya es complicado por sí mismo. Las empresas necesitan organizarse mejor, reducir costos, ahorrar tiempo y aumentar su eficiencia para mantenerse competitivas. Sin embargo, hoy no basta con producir más rápido. También hay que distribuir el trabajo equitativamente entre las máquinas para evitar desgastes disparejos, y consumir menos energía para operar de manera más sostenible.
+
+Un enfoque multiobjetivo con NSGA-II resulta apropiado para abordar esta problemática. Los algoritmos evolutivos multiobjetivo exploran el espacio de compromiso entre objetivos que compiten entre sí, entregando un conjunto de soluciones Pareto-óptimas. Esto le permite al decisor elegir según sus prioridades. Este enfoque es más flexible que métodos tradicionales como programación lineal, búsqueda local o heurísticas monoobjetivo, que no capturan adecuadamente la complejidad de problemas reales con múltiples criterios de decisión.
+
+Este proyecto aporta al desarrollo del conocimiento en algoritmos evolutivos multiobjetivo y su aplicación a problemas industriales reales. Esto enriquece tanto el ámbito académico como el práctico, proporcionando herramientas para enfrentar desafíos concretos en sistemas de producción modernos donde la eficiencia, sostenibilidad y equidad operativa deben considerarse simultáneamente.
+
+\section{Justificación}
+Desde una perspectiva científica, este proyecto contribuye al avance del conocimiento en algoritmos evolutivos multiobjetivo y aborda un problema real de la industria. Al desarrollar una función de fitness multiobjetivo que considera simultáneamente varios criterios (makespan, balance de carga, consumo energético) e incorpora fenómenos realistas como el desgaste de máquinas y procesos de enfriamiento, el algoritmo opera en condiciones más cercanas a la realidad.
+
+La implementación de NSGA-II y su variante memética aporta a la literatura sobre optimización multiobjetivo aplicada a problemas de programación en líneas de ensamblaje. La identificación del frente de Pareto proporciona al decisor múltiples configuraciones óptimas entre las cuales puede elegir según sus prioridades particulares.
+
+Este proyecto tiene un carácter interdisciplinario. La formulación del problema requiere conocimientos de matemáticas aplicadas (optimización multiobjetivo, teoría de Pareto) y habilidades prácticas de programación para implementar NSGA-II en Python. De esta forma se puede abordar un desafío del mundo real con rigor científico y aplicabilidad industrial.
+
+\section{Objetivos}
+
+El objetivo general de este proyecto es establecer la eficacia de los algoritmos evolutivos multiobjetivo, específicamente el algoritmo NSGA-II y su variante memética, para resolver problemas de optimización multiobjetivo en la programación de máquinas en líneas de ensamblaje.
+
+Específicamente, los objetivos específicos de este trabajo son:
+
+\begin{itemize}
+\item[•] Implementar una función de fitness multiobjetivo que capture simultáneamente el makespan, el balance de carga entre máquinas y el consumo energético del sistema.
+\item[•] Desarrollar e implementar el algoritmo NSGA-II estándar y su variante memética (NSGA-II con búsqueda local) para problemas de programación en líneas de ensamblaje.
+\item[•] Analizar la efectividad del enfoque multiobjetivo mediante la visualización del frente de Pareto y la evaluación de las soluciones obtenidas.
+\end{itemize}
+
+Y los objetivos con respecto a las competencias académicas desplegadas en el trabajo son:
+\begin{itemize}
+\item[•] Integrar conocimientos interdisciplinares de optimización multiobjetivo, programación y matemáticas en la implementación de soluciones efectivas para la programación de líneas de ensamblaje.
+\item[•] Fomentar el trabajo autónomo y la resolución de problemas aplicando conceptos de algoritmos evolutivos multiobjetivo en un entorno práctico de manufactura.
+\end{itemize}
+
+\section{Hipótesis}
+La hipótesis general de este proyecto es que los algoritmos evolutivos multiobjetivo, específicamente el algoritmo NSGA-II y su variante memética, son eficientes para resolver problemas de optimización multiobjetivo en la programación de máquinas en líneas de ensamblaje.
+
+Específicamente, las hipótesis específicas de este proyecto son:
+
+\begin{itemize}
+\item[•] Un diseño adecuado de una función de fitness multiobjetivo que considere simultáneamente el makespan, el balance de carga y el consumo energético mejora la capacidad del NSGA-II para identificar un frente de Pareto de calidad en la programación de líneas de ensamblaje.
+\item[•] La incorporación de búsqueda local en el algoritmo NSGA-II (versión memética) mejora la calidad del frente de Pareto en comparación con la versión estándar del NSGA-II.
+\end{itemize}
+
+\section{Estructura del proyecto}
+
+Para brindar al lector una idea global del contenido de este trabajo, a continuación se hace una breve descripción del propósito de cada capítulo presente en este proyecto de tesis.
+\begin{itemize}
+
+\item \textbf{Introducción:} \\
+En este capítulo introductorio se comentan las motivaciones que se tuvieron para abordar la problemática de las líneas de ensamblaje usando algoritmos evolutivos multiobjetivo, específicamente el algoritmo NSGA-II y su variante memética. Asimismo, se mencionan los objetivos generales y específicos para el presente proyecto.
+
+\item \textbf{Marco teórico y estado del arte:} \\
+Aquí se establecen las bases teóricas para entender el problema. Se revisan conceptos de optimización multiobjetivo, dominancia de Pareto, algoritmos evolutivos, NSGA-II, problemas de Hybrid Flow Shop y sostenibilidad energética en manufactura. Luego se hace una revisión de la literatura para contextualizar qué aporta este proyecto frente a trabajos previos en optimización multiobjetivo aplicada a programación de líneas de ensamblaje.
+
+\item \textbf{Metodología y herramientas:} \\
+Este capítulo describe la metodología para resolver el problema. Primero se detallan las condiciones del problema y la función de fitness multiobjetivo empleada. Después se explica la implementación de NSGA-II estándar y su variante memética, incluyendo los operadores de cruce y mutación desarrollados. La selección de configuración se realizó mediante tunning de hiperparámetros y comparación de operadores, considerando robustez, replicabilidad y calidad. También se cubre cómo visualizar y analizar el frente de Pareto. El capítulo cierra con el estudio de ablación que identificó oportunidades de optimización y las implementaciones de vectorización con NumPy para mejorar la eficiencia.
+
+\item \textbf{Resultados y discusión:} \\
+Los resultados experimentales se presentan comenzando por el tunning multiobjetivo de hiperparámetros y la comparación de operadores de cruce y mutación. Se compara NSGA-II estándar contra su variante memética en términos de calidad de soluciones y eficiencia computacional. El estudio de ablación y las optimizaciones de vectorización también se discuten aquí. Las características del frente de Pareto obtenido se analizan mediante soluciones representativas y visualizaciones que facilitan decisiones. Los resultados se contrastan con trabajos previos para contextualizar el aporte.
+
+\item \textbf{Conclusiones y trabajo futuro:} \\
+Las conclusiones del proyecto cubren la efectividad del enfoque multiobjetivo, las contribuciones principales y las limitaciones identificadas. Se ofrecen recomendaciones para elegir algoritmos y configuraciones según distintos criterios. Finalmente se proponen direcciones futuras de investigación y posibles extensiones.
+
+\end{itemize}
+
+Habiendo establecido los objetivos y el marco general del proyecto, el siguiente capítulo revisa el estado del arte en optimización de líneas de ensamblaje y algoritmos evolutivos multiobjetivo, proporcionando el contexto necesario para entender las contribuciones de este trabajo.
+
+%NOTA: RECUERDE QUE ES COMO UN LIBRO TODO CAPÍTULO NUEVO COMENZARÁ CON PÁGINA IMPAR NUNCA PAR
+
+

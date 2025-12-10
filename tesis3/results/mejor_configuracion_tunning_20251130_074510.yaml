@@ -1,0 +1,15 @@
+mejor_configuracion:
+  cada_k_gen: 20
+  max_iter_local: 5
+  num_generaciones: 400
+  prob_cruce: 0.6
+  prob_mutacion: 0.75
+  tamano_poblacion: 100
+metricas_promedio:
+  score_agregado: 2.5996896238141596
+  makespan: 1556.765516105425
+  balance: 278.65117621367943
+  energia: 624.7287282010943
+  tiempo: 27.228653860092162
+  tamano_frente: 100.0
+timestamp: '20251130_074510'

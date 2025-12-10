@@ -1,0 +1,48 @@
+\chapter{Conclusiones y trabajo futuro}
+
+\section{Conclusiones}
+
+Este proyecto de tesis ha logrado establecer una base sólida para la implementación de algoritmos evolutivos multiobjetivo en la optimización de líneas de ensamblaje. A continuación se presentan las conclusiones principales del trabajo realizado:
+
+\begin{itemize}
+
+\item[•] El enfoque multiobjetivo implementado mediante NSGA-II y su variante memética representa una evolución significativa respecto a métodos monoobjetivo tradicionales. La formulación de tres objetivos simultáneos (makespan, balance de carga y consumo energético) permite capturar la complejidad real de los sistemas de manufactura, proporcionando al decisor múltiples soluciones Pareto-óptimas.
+
+\item[•] La implementación del algoritmo NSGA-II con operadores especializados para problemas de programación en líneas de ensamblaje (cruce uniforme por etapa, mutaciones stage-aware) ha demostrado ser efectiva para explorar el espacio de soluciones manteniendo la validez de las configuraciones generadas. Los operadores desarrollados están específicamente adaptados a la estructura de etapas del problema, respetando las restricciones de máquinas disponibles por etapa.
+
+\item[•] La adaptación del problema monoobjetivo original a un enfoque multiobjetivo con tres objetivos permite considerar simultáneamente aspectos de productividad, equidad operativa y sostenibilidad energética. Esta transformación enriquece el análisis y proporciona soluciones más completas para sistemas de manufactura modernos.
+
+\item[•] El desarrollo de la función de fitness multiobjetivo que considera el desgaste de máquinas y procesos de enfriamiento añade realismo al modelo, permitiendo que el algoritmo opere bajo condiciones similares a entornos industriales reales.
+
+\item[•] El proceso sistemático de tunning multiobjetivo, evaluando 1,890 configuraciones con 30 semillas cada una (56,700 ejecuciones totales), permitió identificar la configuración óptima de hiperparámetros que maximiza el balance entre los tres objetivos considerados.
+
+\item[•] La comparación exhaustiva de operadores demostró que la combinación de cruce uniforme y mutación swap proporciona los mejores resultados en términos de calidad del frente de Pareto y robustez estadística.
+
+\item[•] La comparación entre NSGA-II estándar y memético reveló que, aunque la versión memética muestra mejoras marginales (0.11\% en score agregado), la versión estándar es más eficiente (14.0\% más rápida) con calidad prácticamente idéntica (diferencia de score: -0.02\%). El overhead computacional del 16.3\% de la versión memética no se justifica por la mejora marginal en calidad, por lo que se recomienda la versión estándar para aplicaciones donde el balance entre calidad y tiempo de ejecución es prioritario.
+
+\item[•] Las optimizaciones implementadas se dividen en dos fases: (1) optimizaciones algorítmicas iniciales (caché de fitness, clasificación adaptativa, búsqueda local selectiva) que redujeron el tiempo de ~60 segundos a ~27 segundos, y (2) optimizaciones de vectorización con NumPy (clasificación no dominada, filtro epsilon, distancia crowding) que lograron una reducción adicional del 56.7\%, alcanzando un tiempo promedio de 11.5 segundos (estabilizado en ~10.7s después del warm-up), mejorando significativamente la eficiencia computacional.
+
+\item[•] El sistema de paralelización de experimentos permite ejecutar experimentos masivos de manera eficiente y reproducible, facilitando la validación estadística de los resultados mediante múltiples semillas independientes.
+
+\item[•] El estudio de ablación realizado validó científicamente que cada componente del algoritmo contribuye al rendimiento. El filtro epsilon mejora la calidad en 0.23\% (NSGA-II estándar) y 0.31\% (memético) con overheads de 4.3\% y 14.0\% respectivamente, justificando su inclusión. Sin embargo, la búsqueda local muestra un impacto marginal (0.02\% de mejora) con un overhead del 2.7\%, lo que confirma que la versión estándar es más eficiente para este problema específico. El estudio de ablación también identificó las operaciones más costosas (clasificación no dominada, filtro epsilon, distancia crowding), lo que permitió implementar optimizaciones de vectorización con NumPy que lograron una reducción masiva del tiempo de ejecución.
+
+\end{itemize}
+
+\section{Trabajo futuro}
+
+Aunque se han completado exitosamente los experimentos de tunning multiobjetivo y comparación de operadores, se identifican las siguientes líneas de trabajo futuro:
+
+\subsection*{Extensión a problemas dinámicos}
+Una línea de investigación prometedora es la extensión del algoritmo a problemas dinámicos donde los pedidos llegan de forma estocástica durante la ejecución. Esto requeriría adaptar el algoritmo para reoptimizar la programación cuando se reciben nuevos pedidos.
+
+\subsection*{Integración con sistemas de decisión multicriterio}
+El frente de Pareto obtenido puede integrarse con métodos de decisión multi-criterio (como AHP, TOPSIS, o métodos de agregación ponderada) para ayudar al decisor a seleccionar la solución final según sus preferencias específicas.
+
+\subsection*{Optimizaciones adicionales}
+Se pueden explorar optimizaciones adicionales como:
+\begin{itemize}
+    \item Técnicas de reducción de espacio de búsqueda mediante conocimiento del dominio.
+    \item Algoritmos híbridos que combinen NSGA-II con otras metaheurísticas (como simulated annealing o tabu search).
+\end{itemize}
+
+%\afterpage{\blankpage}

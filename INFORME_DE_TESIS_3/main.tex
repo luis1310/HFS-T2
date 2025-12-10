@@ -1,0 +1,170 @@
+\documentclass[12pt,spanish, singlespacing,]{MastersDoctoralThesis}
+\usepackage[utf8]{inputenc} 
+\usepackage[T1]{fontenc} 
+\usepackage[none]{hyphenat}
+\usepackage{palatino} 
+\usepackage{acronym}
+\spacing{1.5}
+\usepackage[nomain]{glossaries}
+\usepackage[style=apa,backend=biber,language=spanish]{biblatex}
+\addbibresource{main.bib}
+% Configurar \cite para que funcione como \parencite (citas parentéticas APA)
+\let\oldcite\cite
+\renewcommand{\cite}[1]{\parencite{#1}}
+\usepackage[autostyle=true]{csquotes}
+
+\usepackage{afterpage}
+\newcommand\blankpage{%
+    \null
+    \thispagestyle{empty}%
+    \addtocounter{page}{0}%
+    \newpage}
+    
+\usepackage{listings}
+\renewcommand{\lstlistingname}{Código}
+\renewcommand\lstlistlistingname{Índice de Código}
+
+\usepackage{float}
+\usepackage{url}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric}
+\makeatletter
+\g@addto@macro{\UrlBreaks}{\UrlOrds}
+\makeatother                                                  
+
+\thesistitle{}
+\supervisor{Cesar Jesus Lara Avila} 
+\examiner{} 
+\degree{} 
+\author{Luis Alberto De la cruz Mantilla} 
+\subject{}
+\keywords{} 
+\university{\href{http://www.uni.edu.pe/}{Universidad Nacional de Ingenier\'ia}} 
+\department{\href{http://fc.uni.edu.pe/fc/index.php/escuelas/ciencia-de-la-computacion}{}} 
+\faculty{\href{http://fc.uni.edu.pe/fc/}{}}
+\hypersetup{pdftitle=\ttitle} 
+\hypersetup{pdfauthor=\authorname}
+\hypersetup{pdfkeywords=\keywordnames} 
+\sloppy
+\decimalpoint
+\begin{document}
+\frontmatter 
+\pagestyle{plain} 
+\begin{titlepage}
+\begin{center}
+%\textsc{\huge \univname}\\[0.5cm]
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.3\textwidth]{Figures/Escudo_UNI.png}
+\end{figure}
+
+\textsc{\huge \univname}\\[0.3cm]
+\textsc{\Large Facultad de Ciencias}\\[0.2cm]
+\textsc{\large Escuela Profesional de Ciencia de la Computaci\'on}\\[2cm]
+\textsc{\LARGE \textit{Optimización Multiobjetivo de Líneas de Ensamblaje usando NSGA-II y Algoritmo Memético}}\\[2cm] 
+{\Large \textbf{PROYECTO DE TESIS}}
+{\huge \bfseries \ttitle}\\[2cm] 
+% Thesis title
+%\bigskip
+%\HRule \\[0.8cm] % Horizontal line
+
+%\begin{minipage}{1.5\textwidth}
+%\begin{flushleft} \large
+\bigskip
+\bigskip
+\large\emph{Autor:}
+{\authorname}\\ 
+\large\emph{Asesor:} 
+{\supname} 
+%\end{flushleft}
+%\end{minipage}
+%\\[2cm]
+\\[1cm]
+{\large Octubre, 2025}\\[4cm] 
+ 
+\vfill
+\end{center}
+\end{titlepage}
+\afterpage{\blankpage}
+%\cleardoublepage
+%\renewcommand{\abstractname}{Abstract}
+\begin{abstract}
+\addchaptertocentry{\abstractname}
+
+Este estudio desarrolla algoritmos evolutivos multiobjetivo para programación de tareas en HFS con máquinas en paralelo. Se implementa NSGA-II y su variante memética para optimizar simultáneamente tres objetivos: minimizar makespan, balancear carga de trabajo y reducir consumo energético. La metodología considera programación realista incluyendo desgaste de máquinas y procesos de enfriamiento. Se realizó tunning multiobjetivo evaluando 1,890 configuraciones (56,700 ejecuciones) y un estudio de ablación para validar cada componente. Los resultados proporcionan 51-82 soluciones Pareto-óptimas, identificando tres soluciones representantes que priorizan cada objetivo individualmente, facilitando la selección según prioridades operativas. La comparación reveló que NSGA-II estándar es 14.0\% más rápido con calidad prácticamente idéntica. Las optimizaciones de vectorización con NumPy redujeron el tiempo de ejecución en 56.7\%, alcanzando 11.5 segundos promedio. El estudio demuestra la efectividad del algoritmo NSGA-II estándar para optimizar simultáneamente productividad, equidad de carga y consumo energético en sistemas de manufactura.
+
+\end{abstract}
+\afterpage{\blankpage}
+\tableofcontents
+%\afterpage{\blankpage}
+\listoffigures
+%\afterpage{\blankpage}
+%\listoftables
+%\afterpage{\blankpage}
+%\listoftables 
+%\lstlistoflistings
+%\afterpage{\blankpage}
+\newpage
+\begin{center}
+{\huge Índice de Acrónimos}\\[2cm]
+\end{center}
+\bigskip
+\begin{tabular}{ l c l }
+\textbf{HFS} & & Hybrid Flow Shop\\
+\textbf{AE} & & Algoritmo evolutivo\\
+\textbf{AG} & & Algoritmo Genético \\
+\textbf{NSGA-II} & & Non-dominated Sorting Genetic Algorithm II\\
+\textbf{MILP} & & Mixed Integer Linear Programming\\
+
+\end{tabular}
+\afterpage{\blankpage}
+
+\newpage
+\begin{center}
+{\huge \textit{Agradecimientos}}\\[1.5cm]
+\end{center}
+
+Agradezco a mi asesor de tesis, el profesor Cesar Jesús Lara Avila, por su guía invaluable, paciencia y dedicación durante todo este proyecto. Sus orientaciones precisas y su compromiso con mi desarrollo académico fueron fundamentales para el crecimiento de este trabajo.
+
+A mi familia por su apoyo incondicional durante todo el proceso, especialmente durante las largas noches de trabajo, brindándome la tranquilidad necesaria para culminar esta investigación.
+
+A la Facultad de Ciencias de la Universidad Nacional de Ingeniería, por permitirme utilizar la computadora del Laboratorio de Ciencias de Computación del pabellón de investigación (conocido como "Mostrito") para ejecutar las pruebas computacionales más pesadas, permitiéndome realizar análisis exhaustivos que de otra manera no habrían sido posibles en un tiempo razonable.
+
+A todos, gracias por acompañarme en este camino y por ser una parte fundamental en la realización de este proyecto.
+
+\afterpage{\blankpage}
+
+\mainmatter 
+\pagestyle{thesis}
+\input{Chapters/Cap1}
+%\newpage
+%$\ $
+%\thispagestyle{empty} % para que no se numere esta pagina
+\input{Chapters/Cap2}
+%\newpage
+%$\ $
+%\thispagestyle{empty} % para que no se numere esta pagina
+\input{Chapters/Cap3}
+%\newpage
+%$\ $
+%\thispagestyle{empty} % para que no se numere esta pagina
+\input{Chapters/Cap4}
+%\newpage
+%$\ $
+%\thispagestyle{empty} % para que no se numere esta pagina
+\input{Chapters/Cap5}
+
+
+
+\printbibliography[title={Referencias}]
+\afterpage{\blankpage}
+
+%\appendix
+\input{Appendix/AppendixA}
+
+\end{document}
