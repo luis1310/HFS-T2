@@ -1,4 +1,4 @@
-\chapter{Metodología y Herramientas}
+\chapter{Metodología y herramientas}
 
 \section{Metodología}
 La métodología a utilizar en esta problemática se centra en las condiciones que el problema tenga y la función de aptitud (fitness) a utilizar, lo que incluye su estructura, sus parámetros y una breve descripción de los mismos.
@@ -100,7 +100,7 @@ En cada generación, el algoritmo evalúa el fitness multiobjetivo de todos los 
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Variante Memética: NSGA-II con Búsqueda Local}
+\subsection{Variante Memética: NSGA-II con búsqueda local}
 La versión memética del NSGA-II combina el algoritmo evolutivo estándar con una fase de búsqueda local \cite{Moscato1989}. Este enfoque híbrido incorpora refinamiento local de las soluciones para mejorar la convergencia hacia el frente de Pareto verdadero.
 
 En esta implementación, la búsqueda local se aplica periódicamente (cada $k$ generaciones) a los individuos del primer frente de Pareto. La estrategia de búsqueda local implementada es un algoritmo de ascenso de colina (hill climbing) adaptado al contexto multiobjetivo. Para cada individuo seleccionado, se generan vecinos mediante mutaciones locales pequeñas y se evalúa si estos vecinos dominan o igualan la solución actual. Si un vecino mejora la solución (la domina en el sentido de Pareto), se acepta como la nueva solución.
@@ -204,7 +204,7 @@ El problema se formula como:
 
 donde \( C \) es el cromosoma que representa la asignación de máquinas para cada pedido en cada etapa, y cada función objetivo \( f_i(C) \) representa un aspecto diferente del rendimiento del sistema.
 
-\subsubsection{Objetivo 1: Minimización del Makespan}
+\subsubsection{Objetivo 1: Minimización del makespan}
 
 El primer objetivo busca minimizar el tiempo total de producción, definido como:
 
@@ -214,7 +214,7 @@ f_1(C) = T_{\text{total}}(C) = \max_{j=1}^{n} T_{P_j}
 
 donde \( T_{P_j} \) es el tiempo total que toma procesar el pedido \( P_j \) a través de todas las etapas, calculado como se definió anteriormente.
 
-\subsubsection{Objetivo 2: Balance de Carga entre Máquinas}
+\subsubsection{Objetivo 2: Balance de carga entre máquinas}
 
 El segundo objetivo busca equilibrar la distribución del trabajo entre las máquinas, minimizando la desviación estándar de sus tiempos de uso:
 
@@ -236,7 +236,7 @@ y el tiempo promedio de uso es:
 
 Un valor menor de \( f_2(C) \) indica una distribución más equitativa del trabajo entre las máquinas, lo que reduce el desgaste desigual y mejora la eficiencia del sistema.
 
-\subsubsection{Objetivo 3: Minimización del Consumo Energético}
+\subsubsection{Objetivo 3: Minimización del consumo energético}
 
 El tercer objetivo busca minimizar el consumo energético total del sistema, considerando la energía consumida en estado activo e inactivo:
 
@@ -331,17 +331,17 @@ Como herramientas se implementan los operadores de cruce y mutación específico
 \subsection{Selección en NSGA-II}
 En el algoritmo NSGA-II, la selección de padres se realiza mediante un torneo binario que considera simultáneamente el rango de no-dominancia y la distancia de crowding. Los individuos se comparan primero por su rango de frente (preferencia hacia menores rangos), y en caso de empate, se selecciona el individuo con mayor distancia de crowding, promoviendo así tanto la convergencia hacia el frente de Pareto como la diversidad de las soluciones.
 
-\subsection{Métodos de Cruzamiento}
+\subsection{Métodos de cruzamiento}
 
 Para el problema de programación en líneas de ensamblaje, se implementan dos operadores de cruce adaptados a la estructura del cromosoma que representa la asignación de máquinas por etapa para cada pedido. Ambos operadores preservan la validez de las soluciones generadas.
 
-\subsubsection{Cruzamiento Uniforme por Etapa}
+\subsubsection{Cruzamiento uniforme por etapa}
 Este método realiza un cruce uniforme considerando la estructura de etapas del problema \cite{CooperativeGAHFS2023}. Para cada etapa de cada pedido, se decide aleatoriamente (con probabilidad 0.5) si la asignación de máquina proviene del padre 1 o del padre 2. De esta forma, cada gen (asignación de máquina) se hereda independientemente de uno de los padres. Este operador preserva la validez de los cromosomas asegurando que cada pedido mantenga una máquina válida para cada etapa. Este operador es particularmente efectivo en problemas multiobjetivo ya que combina soluciones de manera uniforme, explorando eficientemente el espacio de compromiso entre objetivos.
 
-\subsubsection{Cruzamiento de Un Punto}
+\subsubsection{Cruzamiento de un punto}
 En este método se selecciona un punto de corte aleatorio entre pedidos \cite{AutomaticAlgorithmDesignHFS2023}. Para cada pedido, si su posición es anterior al punto de corte, mantiene las asignaciones del padre 1; si es posterior al punto de corte, hereda las asignaciones del padre 2. El hijo 2 se genera con la lógica inversa. Este operador proporciona una variación más conservadora del genoma, agrupando pedidos completos y manteniendo bloques de asignaciones de máquinas de cada padre, útil cuando el frente de Pareto está convergiendo \cite{HybridFlowShopMultiCrossover2023, SustainableHFSScheduling2023}.
 
-\subsection{Métodos de Mutación}
+\subsection{Métodos de mutación}
 
 Se implementan tres métodos de mutación orientados a la estructura de etapas del problema \cite{GeneticOperatorsReview2024, EnhancingMOEAScheduling2024}. Todos estos operadores respetan las restricciones del problema, asegurando que cada etapa reciba una máquina válida. Los operadores de mutación swap, insert e invert han demostrado ser efectivos en problemas de scheduling mediante algoritmos evolutivos \cite{ViralMutationFlowshop2024, RealTimeSchedulingGA2024}.
 
@@ -354,11 +354,11 @@ Este método modifica la asignación de máquina de un pedido en una etapa espec
 \subsubsection{Mutación Invert Stage-Aware}
 Este método invierte la secuencia de asignaciones de máquinas de un pedido en un rango de etapas consecutivas. Se selecciona aleatoriamente un pedido y dos etapas, y se invierte la secuencia de máquinas asignadas entre esas etapas. Este operador preserva las asignaciones individuales pero altera su orden, introduciendo variación en la estructura del cromosoma. La mutación de inversión se ha mostrado efectiva en problemas de ruteo y scheduling donde el orden de operaciones es crítico \cite{EnhancingMOEAScheduling2024}.
 
-\subsection{Metodología de Selección de Configuración}
+\subsection{Metodología de selección de configuración}
 
 Para determinar la configuración óptima de los algoritmos implementados (NSGA-II y NSGA-II memético), se emplea una metodología sistemática que combina la comparación de operadores, el tunning de hiperparámetros, la implementación de optimizaciones algorítmicas iniciales, y finalmente el estudio de ablación para identificar mejoras adicionales. Esta metodología permite identificar la configuración más adecuada que se ajuste específicamente al problema de programación en líneas de ensamblaje.
 
-\subsubsection{Comparación de Operadores}
+\subsubsection{Comparación de operadores}
 En primer lugar, se realizan experimentos de comparación sistemática entre los diferentes operadores implementados:
 \begin{itemize}
     \item Cruce uniforme por etapa vs. cruce de un punto
@@ -368,8 +368,8 @@ En primer lugar, se realizan experimentos de comparación sistemática entre los
 
 Estos experimentos determinan qué combinaciones de operadores proporcionan mejores resultados en términos de calidad del frente de Pareto, diversidad de soluciones y robustez de los algoritmos. La mejor combinación identificada se utiliza como base para las siguientes fases de optimización.
 
-\subsubsection{Tunning Multiobjetivo}
-Una vez identificada la mejor combinación de operadores, se realiza el tunning de hiperparámetros mediante experimentos sistemáticos que evalúan múltiples configuraciones de parámetros numéricos. Se consideran diferentes valores para:
+\subsubsection{Tunning multiobjetivo}
+Después de encontrar la mejor combinación de operadores, se hace tunning de hiperparámetros usando experimentos sistemáticos que prueban distintas configuraciones de parámetros numéricos. Se prueban distintos valores para:
 \begin{itemize}
     \item Tamaño de población
     \item Número de generaciones
@@ -378,31 +378,31 @@ Una vez identificada la mejor combinación de operadores, se realiza el tunning 
     \item Para la versión memética: frecuencia de aplicación de búsqueda local y número de iteraciones locales
 \end{itemize}
 
-Estos experimentos evalúan la calidad de las soluciones mediante múltiples métricas del frente de Pareto, permitiendo identificar configuraciones que proporcionen el mejor compromiso entre calidad, diversidad y convergencia.
+Estos experimentos miden la calidad de las soluciones con varias métricas del frente de Pareto, lo que permite identificar configuraciones que den el mejor balance entre calidad, diversidad y convergencia.
 
-\subsubsection{Optimizaciones Algorítmicas Iniciales}
+\subsubsection{Optimizaciones algorítmicas iniciales}
 
-Después de identificar la mejor configuración mediante comparación de operadores y tunning, se implementaron optimizaciones algorítmicas iniciales para mejorar la eficiencia computacional. Estas optimizaciones incluyen caché de fitness, clasificación adaptativa y búsqueda local selectiva, las cuales se describen en detalle en la Sección \ref{sec:optimizaciones_algoritmicas}.
+Una vez identificada la mejor configuración comparando operadores y haciendo tunning, se implementaron optimizaciones algorítmicas iniciales para mejorar la eficiencia computacional. Estas optimizaciones incluyen caché de fitness, clasificación adaptativa y búsqueda local selectiva, que se detallan en la Sección \ref{sec:optimizaciones_algoritmicas}.
 
-\subsubsection{Estudio de Ablación}
+\subsubsection{Estudio de ablación}
 
-Una vez implementadas las optimizaciones algorítmicas iniciales, se realizó un estudio de ablación sistemático para validar científicamente que cada componente del algoritmo es necesario y medir su impacto individual \cite{OptimalAblation2024}. El estudio de ablación es una metodología científica ampliamente utilizada en inteligencia artificial, machine learning y algoritmos evolutivos para determinar la contribución individual de cada componente de un sistema mediante su remoción sistemática y el análisis del rendimiento resultante \cite{AblationLLM2024, AblationEvolutionaryAlgorithms2024, AblationAttentionModules2024}. Este estudio evalúa el impacto de desactivar componentes específicos del algoritmo, permitiendo cuantificar la contribución de cada elemento al rendimiento final.
+Tras implementar las optimizaciones algorítmicas iniciales, se hizo un estudio de ablación sistemático para validar que cada componente del algoritmo es necesario y medir su impacto individual \cite{OptimalAblation2024}. El estudio de ablación es una metodología científica muy usada en IA, machine learning y algoritmos evolutivos. Determina la contribución de cada componente removiéndolo sistemáticamente y analizando cómo cambia el rendimiento \cite{AblationLLM2024, AblationAttentionModules2024}. Este estudio evalúa qué pasa cuando se desactivan componentes específicos, permitiendo cuantificar cuánto aporta cada elemento al rendimiento final.
 
-\paragraph{Metodología del Estudio de Ablación}
+\paragraph{Metodología del estudio de ablación}
 
-El estudio de ablación se diseñó para evaluar sistemáticamente el impacto de cada componente del algoritmo mediante la comparación de variantes que activan o desactivan componentes específicos \cite{AblationLLM2024}. Se evaluaron 6 variantes principales del algoritmo: NSGA-II completo (con filtro epsilon), NSGA-II sin filtro (base), Memético completo (con filtro epsilon, búsqueda local, cache y optimizaciones), Memético sin filtro, Memético sin búsqueda local, y Memético sin filtro ni búsqueda. Cada variante se ejecutó con 30 semillas independientes para garantizar robustez estadística, resultando en un total de 180 ejecuciones.
+El estudio de ablación se diseñó para evaluar sistemáticamente el impacto de cada componente comparando variantes que activan o desactivan componentes específicos \cite{AblationLLM2024}. Se probaron 6 variantes principales: NSGA-II completo (con filtro epsilon), NSGA-II sin filtro (base), Memético completo (con filtro epsilon, búsqueda local, cache y optimizaciones), Memético sin filtro, Memético sin búsqueda local, y Memético sin filtro ni búsqueda. Cada variante se corrió con 30 semillas independientes para garantizar robustez estadística, dando un total de 180 ejecuciones.
 
-Los resultados del estudio de ablación permiten cuantificar el impacto de cada componente en el tiempo de ejecución y la calidad de las soluciones, justificar científicamente la inclusión de cada componente en el diseño final del algoritmo, identificar componentes críticos que deben mantenerse y componentes opcionales que pueden optimizarse, y comparar la eficiencia relativa entre NSGA-II estándar y memético. Los resultados detallados y análisis cuantitativo se presentan en el Capítulo 4.
+Los resultados del estudio de ablación permiten varias cosas: cuantificar el impacto de cada componente en tiempo y calidad, justificar científicamente su inclusión, identificar componentes críticos versus opcionales, y comparar la eficiencia entre NSGA-II estándar y memético. Los resultados detallados y el análisis cuantitativo están en el Capítulo 4.
 
-\paragraph{Optimizaciones Basadas en Ablación: Vectorización con NumPy}
+\paragraph{Optimizaciones basadas en ablación: vectorización con NumPy}
 
-Los resultados del estudio de ablación revelaron que las operaciones más costosas del algoritmo eran susceptibles de optimización mediante vectorización. Se identificaron tres operaciones críticas que representaban aproximadamente el 40-50\% del tiempo total de ejecución: (1) Clasificación No Dominada (20-30\% del tiempo), con operaciones O(n²) con bucles anidados en Python puro; (2) Filtro Epsilon (10-15\% del tiempo), con múltiples conversiones y cálculos repetitivos; y (3) Distancia Crowding (5-10\% del tiempo), con ordenamientos repetitivos costosos.
+Los resultados del estudio de ablación mostraron que las operaciones más costosas del algoritmo se podían optimizar con vectorización. Se identificaron tres operaciones críticas que consumían 40-50\% del tiempo total. La Clasificación No Dominada tomaba 20-30\% con operaciones O(n²) usando bucles anidados en Python puro. El Filtro Epsilon tomaba 10-15\% con muchas conversiones y cálculos repetitivos. La Distancia Crowding tomaba 5-10\% con ordenamientos repetitivos costosos.
 
-Para optimizar estas operaciones, se implementó una estrategia de vectorización utilizando NumPy en el archivo \texttt{tesis3/src/algorithms/nsga2.py}, reemplazando bucles anidados y list comprehensions por operaciones vectorizadas que aprovechan el broadcasting y la indexación avanzada de NumPy. Las tres funciones optimizadas son: \texttt{clasificacion\_no\_dominada}, \texttt{filtrar\_soluciones\_similares} y \texttt{distancia\_crowding}.
+Para optimizar estas operaciones se usó vectorización con NumPy en \texttt{tesis3/src/algorithms/nsga2.py}. Se reemplazaron bucles anidados y list comprehensions por operaciones vectorizadas que aprovechan broadcasting e indexación avanzada. Las tres funciones optimizadas son: \texttt{clasificacion\_no\_dominada}, \texttt{filtrar\_soluciones\_similares} y \texttt{distancia\_crowding}.
 
-\textbf{Importante}: Estas optimizaciones de vectorización trabajan exclusivamente sobre los valores de \textit{fitness} (objetivos a maximizar) y \textbf{no modifican la estructura del cromosoma}. El cromosoma mantiene su representación original como array de enteros que indica las asignaciones de máquinas por etapa para cada pedido. La vectorización solo acelera las operaciones de clasificación, filtrado y cálculo de distancias que procesan los valores de fitness, sin alterar la representación genética de las soluciones. Los resultados cuantitativos de estas optimizaciones se presentan en el Capítulo 4.
+Es importante recalcar que estas optimizaciones de vectorización trabajan exclusivamente sobre los valores de \textit{fitness} (objetivos a maximizar) y \textbf{no modifican la estructura del cromosoma}. El cromosoma mantiene su representación original como array de enteros que indica las asignaciones de máquinas por etapa para cada pedido. La vectorización solo acelera las operaciones de clasificación, filtrado y cálculo de distancias que procesan los valores de fitness, sin alterar la representación genética de las soluciones. Los resultados cuantitativos de estas optimizaciones se presentan en el Capítulo 4.
 
-\subsubsection{Criterios de Evaluación}
+\subsubsection{Criterios de evaluación}
 La selección de la configuración óptima considera los siguientes criterios:
 \begin{itemize}
     \item \textbf{Calidad del frente}: Medida mediante métricas como hipervolumen, distancia de convergencia o spread del frente.
@@ -412,11 +412,11 @@ La selección de la configuración óptima considera los siguientes criterios:
     \item \textbf{Eficiencia computacional}: Tiempo de ejecución requerido para alcanzar soluciones de calidad aceptable.
 \end{itemize}
 
-\subsubsection{Métrica de Comparación: Score Agregado}
+\subsubsection{Métrica de comparación: Score agregado}
 
 Para facilitar la comparación sistemática entre diferentes configuraciones durante el tunning de hiperparámetros y la comparación de operadores, se introduce una métrica agregada que permite ordenar las configuraciones según su desempeño global en los tres objetivos simultáneamente.
 
-\paragraph{Definición del Score Agregado}
+\paragraph{Definición del score agregado}
 
 Dada una configuración particular (conjunto de hiperparámetros u operadores), esta se ejecuta con $S$ semillas aleatorias independientes (típicamente $S=30$ para robustez estadística). Para cada ejecución con semilla $s$, se obtiene un frente de Pareto $\mathcal{F}_s$ con sus respectivos valores de fitness para los tres objetivos. 
 
@@ -468,7 +468,7 @@ se mantiene bajo cualquier transformación $(\text{ref}_{\text{mk}}', \text{ref}
 
 Por tanto, la selección específica de valores de referencia no compromete la identificación de la configuración óptima, que es el objetivo del proceso de tunning. Los valores elegidos deben ser \textbf{conservadores} (suficientemente grandes) para evitar que las métricas excedan los valores de referencia, pero su magnitud exacta no es crítica para la comparación.
 
-Este enfoque es estándar en optimización multiobjetivo: \textcite{Deb2002} emplean normalización basada en límites del espacio objetivo sin requerir calibración empírica precisa; estudios recientes \cite{NormalizationPBEMO2024, HypervolumeNormalization2022} han investigado diferentes métodos de normalización en algoritmos evolutivos multiobjetivo, demostrando que los valores de referencia para métricas de calidad (como hipervolumen) afectan magnitudes pero no rankings relativos. La práctica común en la literatura es establecer valores de referencia que sean "razonables" para el problema, no necesariamente "óptimos" u obtenidos empíricamente.
+Este enfoque es estándar en optimización multiobjetivo: \textcite{Deb2002} emplean normalización basada en límites del espacio objetivo sin requerir calibración empírica precisa; estudios recientes \cite{NormalizationPBEMO2024, HypervolumeNormalization2022} han investigado diferentes métodos de normalización en algoritmos evolutivos multiobjetivo, demostrando que los valores de referencia para métricas de calidad (como hipervolumen) afectan magnitudes pero no rankings relativos. La práctica común en la literatura es establecer valores de referencia que sean ``razonables'' para el problema, no necesariamente ``óptimos'' u obtenidos empíricamente.
 
 Los valores elegidos como límites conservadores cubren ampliamente el rango esperado de valores del sistema, asegurando que las métricas observadas típicamente se encuentren por debajo de estos límites, permitiendo así una normalización efectiva
 
@@ -484,7 +484,7 @@ Finalmente, el score agregado de la configuración se obtiene promediando sobre 
 \text{Score}_{\text{config}} = \frac{1}{S} \sum_{s=1}^{S} \text{score}_s
 \end{equation}
 
-\paragraph{Interpretación y Uso}
+\paragraph{Interpretación y uso}
 
 El score agregado es una métrica escalar adimensional donde \textbf{valores menores indican mejor desempeño}. Esta métrica tiene las siguientes características:
 
@@ -501,11 +501,11 @@ Esta métrica se utiliza exclusivamente durante la fase experimental de selecci�
 
 Es importante señalar que el score agregado es una métrica de utilidad experimental y no reemplaza el análisis completo del frente de Pareto. Configuraciones con scores similares pueden tener comportamientos muy diferentes en términos de diversidad, convergencia o distribución de soluciones. Por ello, el score agregado se complementa con el análisis visual del frente de Pareto y las métricas de calidad detalladas para validar la selección final.
 
-\subsection{Evaluación del Frente de Pareto}
+\subsection{Evaluación del frente de Pareto}
 
 En el contexto de optimización multiobjetivo con NSGA-II, la evaluación de la calidad de las soluciones difiere significativamente de los enfoques monoobjetivo. En lugar de identificar una única solución óptima, el objetivo es obtener un conjunto de soluciones que represente adecuadamente el frente de Pareto.
 
-\subsubsection{Métricas de Calidad del Frente}
+\subsubsection{Métricas de calidad del frente}
 
 Para evaluar la calidad del frente de Pareto obtenido, se consideran las siguientes métricas:
 
@@ -516,7 +516,7 @@ Para evaluar la calidad del frente de Pareto obtenido, se consideran las siguien
     \item \textbf{Rango del frente}: La variedad de valores alcanzados en cada dimensión del espacio objetivo.
 \end{itemize}
 
-\subsubsection{Visualización del Frente de Pareto}
+\subsubsection{Visualización del frente de Pareto}
 
 La visualización del frente de Pareto permite al decisor comprender los compromisos entre los objetivos. Para un problema con tres objetivos (makespan, balance de carga, consumo energético), se pueden generar visualizaciones 3D y proyecciones 2D que muestren la distribución de las soluciones en el espacio objetivo.
 
@@ -527,7 +527,7 @@ Las visualizaciones incluyen:
     \item Evolución del tamaño del frente a lo largo de las generaciones.
 \end{itemize}
 
-\subsubsection{Selección de la Solución Final}
+\subsubsection{Selección de la solución final}
 
 Una vez obtenido el frente de Pareto, el decisor puede elegir la solución final según sus preferencias:
 \begin{itemize}
@@ -603,21 +603,21 @@ En nuestros experimentos, con $M=3$ objetivos y los rangos $N\in\{100,200\}$, $G
 
 Para mejorar la eficiencia computacional y la calidad del frente de Pareto, se implementaron varias optimizaciones algorítmicas iniciales en el algoritmo NSGA-II memético después de la fase de tunning:
 
-\subsubsection{Filtrado de Soluciones Similares (Epsilon-Filter)}
+\subsubsection{Filtrado de soluciones similares (Epsilon-Filter)}
 
 Para mantener un frente de Pareto con soluciones únicas y evitar la acumulación de soluciones prácticamente idénticas, se implementó un mecanismo de filtrado basado en un umbral de similitud $\epsilon$. Este filtro elimina soluciones del frente de Pareto que son similares dentro de un radio $\epsilon$ en el espacio objetivo normalizado.
 
 El filtro se aplica periódicamente (cada $k_{filtro}$ generaciones) y utiliza una estructura de grilla espacial 3D para reducir la complejidad de las comparaciones de $\mathcal{O}(n^2)$ a $\mathcal{O}(n)$, donde $n$ es el tamaño del frente. El umbral $\epsilon = 0.01$ (1\%) permite eliminar soluciones redundantes mientras preserva la diversidad del frente.
 
-\subsubsection{Cache de Fitness}
+\subsubsection{Cache de fitness}
 
 Para evitar recálculos innecesarios del fitness, se implementó un sistema de caché que almacena los valores de fitness para cada configuración única de genes. Esto es particularmente efectivo cuando la búsqueda local genera soluciones que ya fueron evaluadas previamente, reduciendo significativamente el tiempo de ejecución.
 
-\subsubsection{Clasificación No Dominada Adaptativa}
+\subsubsection{Clasificación no dominada adaptativa}
 
 En generaciones avanzadas (después del 50\% y 75\% del total), se reduce la frecuencia de reclasificación no dominada, aplicándola solo cada 3 o 5 generaciones respectivamente, o cuando se detectan cambios significativos en la población. Esta optimización aprovecha que en fases avanzadas del algoritmo, la estructura de frentes cambia menos frecuentemente.
 
-\subsubsection{Búsqueda Local Selectiva}
+\subsubsection{Búsqueda local selectiva}
 
 La búsqueda local se aplica de forma adaptativa según la fase del algoritmo:
 \begin{itemize}
@@ -628,19 +628,19 @@ La búsqueda local se aplica de forma adaptativa según la fase del algoritmo:
 
 Además, se implementó un mecanismo de \textit{early exit} en la búsqueda local que detiene la exploración si no se encuentra mejora después de $\lfloor max\_iter/3 \rfloor$ iteraciones consecutivas.
 
-\subsubsection{Filtrado Post-Selección}
+\subsubsection{Filtrado post-selección}
 
 Después de cada operación de selección NSGA-II, se aplica un filtro adicional al frente de Pareto para eliminar soluciones similares que puedan haber sido reintroducidas durante el proceso de selección. Esto asegura que el historial del tamaño del frente refleje el número real de soluciones únicas.
 
-\subsection{Paralelización de Experimentos}
+\subsection{Paralelización de experimentos}
 
 Para realizar los experimentos de tunning multiobjetivo y comparación de operadores de manera eficiente, se implementó un sistema de paralelización real que ejecuta múltiples semillas independientes en paralelo utilizando múltiples núcleos del procesador.
 
-\subsubsection{Arquitectura de Paralelización}
+\subsubsection{Arquitectura de paralelización}
 
 Los scripts de experimentación (\texttt{tunning\_multimetrica.py} y \texttt{comparacion\_operadores.py}) utilizan el módulo \texttt{ProcessPoolExecutor} de Python para crear un pool de procesos que ejecutan semillas independientes en paralelo. Cada proceso ejecuta una instancia completa del algoritmo NSGA-II memético con una semilla aleatoria específica, garantizando reproducibilidad mediante la inicialización explícita de los generadores aleatorios de Python y NumPy.
 
-\subsubsection{Gestión de Resultados Parciales}
+\subsubsection{Gestión de resultados parciales}
 
 Para permitir la recuperación ante interrupciones y monitorear el progreso, el sistema implementa:
 
@@ -650,11 +650,11 @@ Para permitir la recuperación ante interrupciones y monitorear el progreso, el 
     \item \textbf{Guardado incremental}: Cada vez que se completa una configuración (todas sus semillas), se actualiza el archivo parcial automáticamente.
 \end{itemize}
 
-\subsubsection{Configuración de Paralelización}
+\subsubsection{Configuración de paralelización}
 
 El sistema detecta automáticamente las capacidades del hardware (núcleos físicos, lógicos y memoria RAM) y permite al usuario seleccionar el número de núcleos a utilizar. Se recomienda usar el número de núcleos físicos para evitar sobrecalentamiento, aunque se puede optar por usar todos los núcleos lógicos para máximo rendimiento.
 
-\subsubsection{Reproducibilidad y Semillas Centralizadas}
+\subsubsection{Reproducibilidad y semillas centralizadas}
 
 Para garantizar reproducibilidad entre diferentes ejecuciones, las semillas se cargan desde un archivo centralizado de configuración. Esto asegura que:
 \begin{itemize}
@@ -664,7 +664,7 @@ Para garantizar reproducibilidad entre diferentes ejecuciones, las semillas se c
 \end{itemize}
 
 \subsection{Flujo del pipeline}
-En la Figura \ref{fig:pipeline} se muestra el flujo de procesamiento de extremo a extremo del sistema implementado. El \textbf{inicio} del proceso es el bloque "\textit{Cargar config.yaml}", desde donde se construye la población inicial y se avanza por evaluación, ordenamiento por no-dominancia y operadores evolutivos. En este trabajo la \textbf{búsqueda local (memética) está activada} y forma parte del ciclo (no es opcional); se aplica con la frecuencia y límite configurados. El ciclo se repite por generaciones hasta que no queden generaciones restantes, desembocando en el \textbf{frente de Pareto final}. El paso "\textit{Combinar y seleccionar}" corresponde a la \textit{selección elitista} de NSGA-II: se combinan padres y descendencia, se reevalúa, se clasifica en frentes y se toma la nueva población por frentes y distancia de crowding.
+En la Figura \ref{fig:pipeline} se muestra el flujo de procesamiento de extremo a extremo del sistema implementado. El \textbf{inicio} del proceso es el bloque ``\textit{Cargar config.yaml}'', desde donde se construye la población inicial y se avanza por evaluación, ordenamiento por no-dominancia y operadores evolutivos. En este trabajo la \textbf{búsqueda local (memética) está activada} y forma parte del ciclo (no es opcional); se aplica con la frecuencia y límite configurados. El ciclo se repite por generaciones hasta que no queden generaciones restantes, desembocando en el \textbf{frente de Pareto final}. El paso \textit{Combinar y seleccionar}  corresponde a la \textit{selección elitista} de NSGA-II: se combinan padres y descendencia, se reevalúa, se clasifica en frentes y se toma la nueva población por frentes y distancia de crowding.
 
 \begin{figure}[H]
 \centering

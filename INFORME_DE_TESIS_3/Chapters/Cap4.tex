@@ -1,8 +1,10 @@
-\chapter{Resultados y Discusión}
+\chapter{Resultados y discusión}
 
 \section{Resultados}
 
-\subsection{Comparación de Operadores}
+Los experimentos se realizaron usando el Mostrito el cual contó con 32 núcleos físicos, 32 núcleos lógicos y 120 gb de RAM, haciendo uso de la paralelización. Se usaron 32 núcleos lógicos para maximizar el rendimiento.
+
+\subsection{Comparación de operadores}
 
 Se evaluaron sistemáticamente 6 combinaciones diferentes de operadores de cruce y mutación, cada una ejecutada con 30 semillas independientes. Las combinaciones evaluadas fueron:
 
@@ -15,7 +17,7 @@ Se evaluaron sistemáticamente 6 combinaciones diferentes de operadores de cruce
     \item Cruce un punto + Mutación invert
 \end{itemize}
 
-\subsubsection{Mejor Combinación de Operadores}
+\subsubsection{Mejor combinación de operadores}
 
 La mejor combinación identificada fue \textbf{Cruce Uniforme + Mutación Swap}, con las siguientes métricas promedio (sobre 30 semillas):
 
@@ -30,11 +32,11 @@ La mejor combinación identificada fue \textbf{Cruce Uniforme + Mutación Swap},
 
 Esta combinación demostró ser superior en términos de balance entre los tres objetivos, mostrando una buena convergencia y diversidad en el frente de Pareto. Esta configuración se utilizó como base para las siguientes fases de optimización.
 
-\subsection{Experimentos de Tunning Multiobjetivo}
+\subsection{Experimentos de tunning multiobjetivo}
 
 Se realizó un experimento exhaustivo de tunning de hiperparámetros para el algoritmo NSGA-II (estándar y memético), evaluando un espacio de búsqueda de 1,890 configuraciones diferentes. Cada configuración se ejecutó con 30 semillas independientes para garantizar robustez estadística, resultando en un total de 56,700 ejecuciones.
 
-\subsubsection{Espacio de Búsqueda Evaluado}
+\subsubsection{Espacio de búsqueda evaluado}
 
 El espacio de búsqueda consideró los siguientes rangos de hiperparámetros:
 
@@ -47,7 +49,7 @@ El espacio de búsqueda consideró los siguientes rangos de hiperparámetros:
     \item \textbf{Iteraciones de búsqueda local}: 3, 5 iteraciones
 \end{itemize}
 
-\subsubsection{Mejor Configuración Encontrada}
+\subsubsection{Mejor configuración encontrada}
 
 La mejor configuración identificada mediante el score balanceado (que considera tanto el score agregado como el tiempo de ejecución) fue:
 
@@ -71,7 +73,7 @@ Esta configuración obtuvo un score agregado promedio de 2.5997, con las siguien
 
 Esta configuración fue seleccionada considerando un balance entre la calidad de las soluciones (score agregado) y el tiempo de ejecución, proporcionando un rendimiento óptimo con un tiempo de ejecución significativamente menor (27.23 segundos vs. 73.88 segundos) comparado con configuraciones que priorizan únicamente el score agregado, manteniendo una calidad de soluciones comparable.
 
-\subsection{Optimizaciones Algorítmicas Iniciales}
+\subsection{Optimizaciones algorítmicas iniciales}
 
 Después de identificar la mejor configuración mediante comparación de operadores y tunning, se implementaron optimizaciones algorítmicas iniciales que lograron reducir el tiempo de ejecución de ~60 segundos a ~27 segundos:
 
@@ -81,11 +83,11 @@ Después de identificar la mejor configuración mediante comparación de operado
     \item \textbf{Búsqueda local selectiva}: Limita la aplicación de búsqueda local según la fase del algoritmo
 \end{itemize}
 
-\subsection{Comparación NSGA-II Estándar vs. Memético}
+\subsection{Comparación NSGA-II estándar vs. memético}
 
 Se realizó una comparación sistemática entre la versión estándar del NSGA-II y su variante memética, utilizando la mejor configuración de hiperparámetros y operadores identificada. Cada versión se ejecutó con 30 semillas independientes.
 
-\subsubsection{Resultados Comparativos}
+\subsubsection{Resultados comparativos}
 
 Los resultados promedio (sobre 30 semillas) muestran que, aunque la versión memética proporciona mejoras marginales en calidad, la versión estándar es significativamente más eficiente:
 
@@ -106,7 +108,7 @@ Tiempo (s) & 26.55 ± 2.38 & 30.88 ± 2.51 \\
 \end{tabular}
 \end{table}
 
-\subsubsection{Análisis de Eficiencia}
+\subsubsection{Análisis de eficiencia}
 
 Aunque la versión memética muestra mejoras marginales en todos los objetivos:
 
@@ -121,11 +123,11 @@ El overhead computacional de la versión memética es del 16.3\% (de 26.55s a 30
 
 \textbf{Conclusión}: La versión estándar es más eficiente para este problema específico, ya que proporciona calidad prácticamente idéntica (diferencia de score: -0.02\%) con un tiempo de ejecución 14.0\% menor. La versión estándar se recomienda para aplicaciones donde el balance entre calidad y tiempo de ejecución es prioritario.
 
-\subsection{Estudio de Ablación}
+\subsection{Estudio de ablación}
 
 Utilizando la mejor configuración identificada (NSGA-II estándar con cruce uniforme y mutación swap), se generó un frente de Pareto final con 51-82 soluciones únicas después de aplicar el filtro de similitud ($\epsilon = 1\%$).
 
-\subsubsection{Características del Frente}
+\subsubsection{Características del frente}
 
 El frente de Pareto obtenido presenta las siguientes características:
 
@@ -170,7 +172,7 @@ Para facilitar el análisis de las relaciones entre pares de objetivos, se gener
 \label{fig:frente_2d}
 \end{figure}
 
-\subsubsection{Evolución del Frente}
+\subsubsection{Evolución del frente}
 
 La evolución del tamaño del frente de Pareto a lo largo de las 400 generaciones muestra un patrón característico:
 
@@ -191,7 +193,7 @@ La evolución del tamaño del frente de Pareto a lo largo de las generaciones se
 \label{fig:evolucion_frente}
 \end{figure}
 
-\subsubsection{Análisis de Soluciones Extremas}
+\subsubsection{Análisis de soluciones extremas}
 
 Para facilitar la selección de soluciones según diferentes criterios, se identificaron las soluciones extremas del frente de Pareto que optimizan cada objetivo individualmente. La Figura \ref{fig:mejores_soluciones} muestra estas soluciones destacadas junto con sus valores en los tres objetivos, permitiendo al decisor visualizar rápidamente las opciones disponibles.
 
@@ -204,11 +206,11 @@ Para facilitar la selección de soluciones según diferentes criterios, se ident
 
 Estas visualizaciones facilitan la comprensión del frente de Pareto y ayudan al decisor a identificar rápidamente qué soluciones se alinean mejor con sus objetivos prioritarios, ya sea minimizar el tiempo de producción, equilibrar la carga de trabajo o reducir el consumo energético.
 
-\subsection{Estudio de Ablación}
+\subsection{Estudio de ablación}
 
 Para validar científicamente que cada componente del algoritmo es necesario y cuantificar su impacto individual, se realizó un estudio de ablación sistemático. Este estudio evaluó 6 variantes principales del algoritmo, cada una ejecutada con 30 semillas independientes, resultando en un total de 180 ejecuciones.
 
-\subsubsection{Variantes Evaluadas}
+\subsubsection{Variantes evaluadas}
 
 El estudio de ablación evaluó las siguientes variantes principales:
 
@@ -223,7 +225,7 @@ El estudio de ablación evaluó las siguientes variantes principales:
 
 Estas variantes permiten evaluar sistemáticamente el impacto de cada componente (filtro epsilon, búsqueda local) tanto en NSGA-II estándar como en su variante memética.
 
-\subsubsection{Impacto de Componentes}
+\subsubsection{Impacto de componentes}
 
 Los resultados del estudio de ablación permiten cuantificar el impacto de cada componente principal:
 
@@ -242,7 +244,7 @@ Búsqueda Local & Memético & +2.7\% & -0.02\% (mejora marginal) \\
 \end{tabular}
 \end{table}
 
-\paragraph{Impacto del Filtro Epsilon}
+\paragraph{Impacto del filtro epsilon}
 
 El filtro epsilon de similitud muestra un impacto positivo en la calidad de las soluciones con un costo computacional aceptable:
 \begin{itemize}
@@ -251,7 +253,7 @@ El filtro epsilon de similitud muestra un impacto positivo en la calidad de las 
     \item \textbf{Conclusión}: El filtro epsilon mejora significativamente la calidad (reduce soluciones redundantes) con un overhead computacional aceptable, justificando su inclusión en el algoritmo final.
 \end{itemize}
 
-\paragraph{Impacto de la Búsqueda Local}
+\paragraph{Impacto de la búsqueda local}
 
 La búsqueda local en la versión memética muestra un impacto marginal en la calidad pero con un overhead computacional:
 \begin{itemize}
@@ -259,7 +261,7 @@ La búsqueda local en la versión memética muestra un impacto marginal en la ca
     \item \textbf{Conclusión}: La búsqueda local tiene un impacto mínimo en la calidad, con un overhead del 2.7\%. Para este problema específico, el NSGA-II estándar es más eficiente que la versión memética.
 \end{itemize}
 
-\paragraph{Comparación NSGA-II Estándar vs. Memético}
+\paragraph{Comparación NSGA-II estándar vs. memético}
 
 El estudio de ablación reveló que:
 \begin{itemize}
@@ -269,11 +271,11 @@ El estudio de ablación reveló que:
     \item \textbf{Conclusión}: La versión estándar es más eficiente para este problema específico, ya que el overhead computacional de la búsqueda local (16.3\%) no se justifica por la mejora marginal en calidad (0.11\%).
 \end{itemize}
 
-\subsubsection{Optimizaciones de Vectorización con NumPy}
+\subsubsection{Optimizaciones de vectorización con NumPy}
 
 Basándose en los resultados del estudio de ablación, se implementaron optimizaciones de vectorización con NumPy en tres funciones críticas del algoritmo (metodología detallada en el Capítulo 3, Sección 3.3.4): \texttt{clasificacion\_no\_dominada}, \texttt{filtrar\_soluciones\_similares} y \texttt{distancia\_crowding}. Estas optimizaciones trabajan exclusivamente sobre los valores de \textit{fitness} y no modifican la estructura del cromosoma.
 
-\paragraph{Resultados de las Optimizaciones de Vectorización}
+\paragraph{Resultados de las optimizaciones de vectorización}
 
 Las optimizaciones de vectorización lograron una reducción significativa en el tiempo de ejecución:
 
@@ -286,7 +288,7 @@ Las optimizaciones de vectorización lograron una reducción significativa en el
     \item \textbf{Estabilidad}: No se observa degradación progresiva en ejecuciones consecutivas; de hecho, se observa un efecto de warm-up donde la primera ejecución es más lenta (~15s) y las siguientes se estabilizan alrededor de 10.7-11.0s
 \end{itemize}
 
-\subsubsection{Validación del Diseño y Optimizaciones}
+\subsubsection{Validación del diseño y optimizaciones}
 
 Los resultados del estudio de ablación validan científicamente el diseño del algoritmo y proporcionan evidencia para optimizaciones adicionales:
 
@@ -297,7 +299,7 @@ Los resultados del estudio de ablación validan científicamente el diseño del 
     \item \textbf{Operadores seleccionados}: La combinación uniforme + swap es óptima para el problema
 \end{itemize}
 
-\paragraph{Optimizaciones Basadas en Ablación}
+\paragraph{Optimizaciones basadas en ablación}
 
 El estudio de ablación identificó que las operaciones más costosas (clasificación no dominada, filtro epsilon, distancia crowding) eran susceptibles de optimización mediante vectorización con NumPy. Las optimizaciones implementadas (descritas metodológicamente en el Capítulo 3) lograron una reducción del 56.7\% en el tiempo de ejecución (de 26.55s a 11.5s promedio, estabilizado en ~10.7s), manteniendo la calidad del frente de Pareto con 51-82 soluciones únicas.
 
@@ -305,13 +307,13 @@ Esta validación científica mediante ablación proporciona evidencia empírica 
 
 \section{Discusión}
 
-\subsection{Interpretación de Resultados}
+\subsection{Interpretación de resultados}
 
 Los resultados obtenidos demuestran la efectividad del enfoque multiobjetivo para el problema de programación en líneas de ensamblaje. El algoritmo NSGA-II estándar (recomendado) logra encontrar un conjunto diverso de soluciones que representan diferentes compromisos entre los tres objetivos considerados.
 
 Aunque la versión memética muestra mejoras marginales (0.11\% en score agregado), el overhead computacional del 16.3\% no se justifica para este problema específico. El algoritmo NSGA-II estándar proporciona calidad prácticamente idéntica (diferencia de score: -0.02\%) con un tiempo de ejecución 14.0\% menor, siendo la opción más eficiente para aplicaciones donde el balance entre calidad y tiempo de ejecución es prioritario.
 
-\subsection{Comparación con Trabajos Relacionados}
+\subsection{Comparación con trabajos relacionados}
 
 Los resultados obtenidos contrastan favorablemente con trabajos previos en el área:
 
@@ -323,7 +325,7 @@ Los resultados obtenidos contrastan favorablemente con trabajos previos en el á
     \item \textbf{Enfoque multiobjetivo}: A diferencia de trabajos que se enfocan únicamente en minimizar makespan \cite{Mun_etal_2024}, el presente trabajo considera simultáneamente productividad, equidad operativa y sostenibilidad energética, proporcionando una visión más completa del problema.
 \end{itemize}
 
-\subsection{Limitaciones y Consideraciones}
+\subsection{Limitaciones y consideraciones}
 
 Es importante reconocer las siguientes limitaciones del trabajo:
 
@@ -335,7 +337,7 @@ Es importante reconocer las siguientes limitaciones del trabajo:
     \item \textbf{Valores de referencia}: El score agregado utiliza valores de referencia conservadores. Aunque esto no afecta las comparaciones relativas, los valores absolutos deben interpretarse con cautela.
 \end{itemize}
 
-\subsection{Contribuciones Principales}
+\subsection{Contribuciones principales}
 
 Este trabajo contribuye al área de optimización multiobjetivo en líneas de ensamblaje mediante:
 
