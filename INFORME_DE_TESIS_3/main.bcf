@@ -3126,8 +3126,7 @@
     <bcf:citekey order="51" intorder="1">EnhancingMOEAScheduling2024</bcf:citekey>
     <bcf:citekey order="52" intorder="1">OptimalAblation2024</bcf:citekey>
     <bcf:citekey order="53" intorder="1">AblationLLM2024</bcf:citekey>
-    <bcf:citekey order="53" intorder="2">AblationEvolutionaryAlgorithms2024</bcf:citekey>
-    <bcf:citekey order="53" intorder="3">AblationAttentionModules2024</bcf:citekey>
+    <bcf:citekey order="53" intorder="2">AblationAttentionModules2024</bcf:citekey>
     <bcf:citekey order="54" intorder="1">AblationLLM2024</bcf:citekey>
     <bcf:citekey order="55" intorder="1">Deb2002</bcf:citekey>
     <bcf:citekey order="56" intorder="1">Deb2002</bcf:citekey>
