@@ -6,9 +6,9 @@ Proyecto de tesis 3 (taller de investigación)
   - **Problema**: Cuando todas las configuraciones ya estaban completas, el script intentaba acceder a la variable `tareas` que no estaba definida, causando `UnboundLocalError`.
   - **Causa**: El bloque de ejecución (ProcessPoolExecutor) no estaba completamente dentro del `if not todo_completo:`, y había problemas de indentación.
   - **Solución**: 
-    1. ✅ Todo el bloque de ejecución (creación de tareas, ProcessPoolExecutor, procesamiento de resultados) ahora está correctamente dentro de `if not todo_completo:`
-    2. ✅ Corregida indentación de todo el bloque dentro del `with ProcessPoolExecutor`
-    3. ✅ Cuando todo está completo, el código salta directamente a la sección de análisis y generación de YAML
+    1.  Todo el bloque de ejecución (creación de tareas, ProcessPoolExecutor, procesamiento de resultados) ahora está correctamente dentro de `if not todo_completo:`
+    2.  Corregida indentación de todo el bloque dentro del `with ProcessPoolExecutor`
+    3.  Cuando todo está completo, el código salta directamente a la sección de análisis y generación de YAML
   - **Resultado**: El script ahora funciona correctamente tanto cuando hay configuraciones faltantes como cuando todo está completo.
   - **Archivos modificados**:
     - `tesis3/experiments/paralelizacion/tunning_multimetrica.py`: Líneas 420-483 (corrección de indentación y estructura del bloque de ejecución).
@@ -16,16 +16,16 @@ Proyecto de tesis 3 (taller de investigación)
 ## Version 1.1.3k:
 - **Corrección crítica: Preservación del formato original de config.yaml**:
   - **Problema detectado**: La actualización automática de `config.yaml` cambiaba completamente el formato:
-    - ❌ Convertía listas inline `[55, 53, ...]` a formato multilínea con guiones
-    - ❌ Eliminaba todos los comentarios importantes
-    - ❌ Cambiaba el estilo de números (1.30 → 1.3)
-    - ❌ Eliminaba comillas de strings ('uniforme' → uniforme)
-    - ❌ Reorganizaba la estructura del archivo
+    -  Convertía listas inline `[55, 53, ...]` a formato multilínea con guiones
+    -  Eliminaba todos los comentarios importantes
+    -  Cambiaba el estilo de números (1.30 → 1.3)
+    -  Eliminaba comillas de strings ('uniforme' → uniforme)
+    -  Reorganizaba la estructura del archivo
   - **Solución implementada**: 
-    - ✅ **NO se actualiza automáticamente** el `config.yaml` para preservar formato, comentarios y estilo original
-    - ✅ Se muestran **claramente los valores** que deben copiarse manualmente
-    - ✅ Se indica **exactamente qué líneas** editar en el archivo
-    - ✅ Se mantiene el YAML separado (`mejor_configuracion_tunning_XXXX.yaml`) con la mejor configuración completa
+    -  **NO se actualiza automáticamente** el `config.yaml` para preservar formato, comentarios y estilo original
+    -  Se muestran **claramente los valores** que deben copiarse manualmente
+    -  Se indica **exactamente qué líneas** editar en el archivo
+    -  Se mantiene el YAML separado (`mejor_configuracion_tunning_XXXX.yaml`) con la mejor configuración completa
   - **Beneficio**: El `config.yaml` mantiene su formato legible, comentarios y estructura original. El usuario actualiza manualmente solo los valores necesarios.
   - **Archivos modificados**:
     - `tesis3/experiments/paralelizacion/tunning_multimetrica.py`: Líneas 625-650 (eliminada actualización automática, agregada guía para actualización manual).
@@ -37,11 +37,11 @@ Proyecto de tesis 3 (taller de investigación)
 - **Mejora: Generación de YAML incluso si todo está completo**:
   - **Problema**: Si todas las configuraciones ya estaban completas, el script salía sin generar YAML.
   - **Solución**: Ahora, aunque todo esté completo, el script:
-    1. ✅ Detecta que todo está completo (no ejecuta configuraciones)
-    2. ✅ Carga TODOS los archivos finales previos
-    3. ✅ Analiza todas las configuraciones históricas
-    4. ✅ Genera YAML con la mejor configuración **global** (de todos los archivos)
-    5. ✅ NO genera archivo final nuevo (todo estaba completo)
+    1.  Detecta que todo está completo (no ejecuta configuraciones)
+    2.  Carga TODOS los archivos finales previos
+    3.  Analiza todas las configuraciones históricas
+    4.  Genera YAML con la mejor configuración **global** (de todos los archivos)
+    5.  NO genera archivo final nuevo (todo estaba completo)
   - **Beneficio**: Permite regenerar el YAML con la mejor configuración global después de ejecutar con código antiguo.
   - **Archivos modificados**:
     - `tesis3/experiments/paralelizacion/tunning_multimetrica.py`: Líneas 383-391 (no retorna si todo está completo), líneas 541-542 (mensaje de tiempo condicional), líneas 687-711 (archivo final solo si hubo ejecución).
@@ -61,8 +61,7 @@ Proyecto de tesis 3 (taller de investigación)
     ├─ Detecta: 90 configs del parcial (no re-ejecutar)
     ├─ Carga en memoria: 90 × 30 semillas = 2700 filas
     ├─ Ejecuta: 450 configs nuevas = 13500 filas
-    └─ Archivo final: 2700 + 13500 = 16200 filas totales ✅
-    ```
+    └─ Archivo final: 2700 + 13500 = 16200 filas totales     ```
   - **Impacto**: Ahora el archivo final es realmente completo y auto-contenido.
 
 - **Archivos modificados**:
@@ -83,9 +82,9 @@ Proyecto de tesis 3 (taller de investigación)
     ├─ Archivo parcial tiene 88 configs completas
     ├─ Archivo final NO existe (no llegó a generarse)
     └─ Al reiniciar:
-        ✅ Lee parcial: 88 configs completas
-        ✅ Solo ejecuta las 107 faltantes
-        ✅ NO pierde las 88 completadas (2640 ejecuciones guardadas)
+ Lee parcial: 88 configs completas
+ Solo ejecuta las 107 faltantes
+ NO pierde las 88 completadas (2640 ejecuciones guardadas)
     ```
   - **Archivos clave protegidos**: `tunning_multimetrica_parcial.csv` ahora es crítico para recuperación.
 
@@ -106,9 +105,9 @@ Proyecto de tesis 3 (taller de investigación)
     - CSV parcial se sobrescribe en cada ejecución (solo para monitoreo temporal).
     - YAML se genera con la mejor configuración global al final de cada ejecución.
   - **Beneficios**:
-    - ✅ Permite añadir configuraciones incrementalmente sin perder la mejor global.
-    - ✅ No necesita ejecutar `unir_resultados_parciales.py` manualmente.
-    - ✅ El YAML siempre contiene la mejor configuración histórica.
+    -  Permite añadir configuraciones incrementalmente sin perder la mejor global.
+    -  No necesita ejecutar `unir_resultados_parciales.py` manualmente.
+    -  El YAML siempre contiene la mejor configuración histórica.
 
 - **Archivos modificados**:
   - `tesis3/experiments/paralelizacion/tunning_multimetrica.py`: Líneas 455-507 (carga y combinación de resultados previos), línea 513 (usar `todos_resultados_global`).
