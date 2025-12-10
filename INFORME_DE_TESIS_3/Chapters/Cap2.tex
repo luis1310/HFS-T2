@@ -32,7 +32,30 @@ Investigaciones recientes han propuesto mejoras al algoritmo NSGA-II para proble
 
 Comparaciones sistemáticas entre NSGA-II y NSGA-III han confirmado que NSGA-II sigue siendo altamente efectivo para problemas con dos o tres objetivos \cite{NSGAIIvsIII2020}.
 
-\subsection{Problemas de programación de producción}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% SUBSECCIÓN AGREGADA PARA REVISIÓN: OVERHEAD COMPUTACIONAL
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsubsection{Eficiencia Computacional y Overhead en Algoritmos Evolutivos}
+
+La eficiencia computacional es un aspecto fundamental en el diseño y aplicación de algoritmos evolutivos, especialmente cuando se abordan problemas de optimización multiobjetivo complejos que requieren evaluaciones extensivas del espacio de soluciones. El concepto de \textit{overhead computacional} (sobrecarga computacional) se refiere al tiempo de procesamiento adicional que se introduce cuando se incorporan componentes o mecanismos específicos a un algoritmo base \cite{MetaheuristicSurvey2024}.
+
+El overhead computacional se mide típicamente como el incremento porcentual en el tiempo de ejecución respecto a la versión base del algoritmo. Por ejemplo, si un algoritmo base ejecuta en $T_{\text{base}}$ segundos y la versión mejorada ejecuta en $T_{\text{mejorado}}$ segundos, el overhead se calcula como:
+\begin{equation}
+\text{Overhead} = \frac{T_{\text{mejorado}} - T_{\text{base}}}{T_{\text{base}}} \times 100\%
+\end{equation}
+
+En el contexto de algoritmos evolutivos multiobjetivo, el overhead puede originarse de diversos componentes, como mecanismos de búsqueda local adicionales, operadores de refinamiento, estrategias adaptativas de parámetros, o procedimientos de filtrado de soluciones \cite{MemeticAlgorithmsGuide2025}. El desafío principal consiste en balancear el overhead introducido con la mejora en la calidad de las soluciones obtenidas \cite{FutureMemeticAlgorithms2025}.
+
+Las investigaciones recientes demuestran que la justificación del overhead depende del contexto de aplicación. En problemas donde la calidad de la solución es crítica, un overhead del 15-20\% puede ser aceptable si se traduce en mejoras significativas en los objetivos de optimización \cite{EnhancedNSGAII2023}. Inversamente, en entornos que requieren respuestas rápidas o procesan grandes volúmenes de instancias, la eficiencia computacional puede priorizar sobre mejoras marginales en calidad \cite{NSGAIIBakery2022}.
+
+La evaluación del overhead es particularmente relevante en algoritmos meméticos, donde la incorporación de búsqueda local puede mejorar la convergencia hacia el óptimo pero incrementa sustancialmente el costo computacional por generación. El análisis del trade-off entre calidad y overhead permite a los investigadores y profesionales seleccionar la configuración más apropiada según los requisitos específicos del problema y las restricciones de tiempo disponibles.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% FIN DE SUBSECCIÓN AGREGADA
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Problemas de Programación de Producción}
 
 En manufactura, programar la producción significa optimizar cómo se asignan tareas a las máquinas y en qué orden se ejecutan las operaciones. El Hybrid Flow Shop (HFS) extiende el concepto de flow shop clásico al incluir varias máquinas trabajando en paralelo dentro de cada etapa para hacer la misma operación \cite{HFSRL2025}.
 
